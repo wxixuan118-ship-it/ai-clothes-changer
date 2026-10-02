@@ -13,6 +13,16 @@ import {
 // timestamps and refs. `animated` staggers rows in (marketing hero art);
 // the effect is motion-safe and disabled under prefers-reduced-motion.
 
+// Human labels for ledger types (the raw enum stays in the database).
+const typeLabels: Record<string, string> = {
+  subscription_grant: "Credits added",
+  topup: "Top-up",
+  spend: "Outfit change",
+  refund: "Refund",
+  expiry: "Expired",
+  admin_adjust: "Adjustment",
+};
+
 export type LedgerEntry = {
   id: string;
   /** Preformatted, e.g. "2026-07-12 09:14". */
@@ -67,7 +77,9 @@ function LedgerTable({
             <TableCell className="font-mono text-xs text-muted-foreground">
               {entry.timestamp}
             </TableCell>
-            <TableCell className="font-mono text-xs">{entry.type}</TableCell>
+            <TableCell className="text-xs">
+              {typeLabels[entry.type] ?? entry.type}
+            </TableCell>
             <TableCell className="font-mono text-xs text-muted-foreground">
               {entry.ref}
             </TableCell>

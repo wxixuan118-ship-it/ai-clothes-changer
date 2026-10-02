@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { expect, test } from "@playwright/test";
 
 import { BASE_URL } from "../playwright.config";
@@ -12,11 +14,13 @@ test("image route: owner 200, anonymous 401, traversal 404", async ({
 }) => {
   await signUp(page, uniqueEmail("authz"));
   await page.goto("/generate");
-  await page.getByLabel("Prompt").fill("An authz probe image");
-  await page.getByRole("button", { name: /^Generate/ }).click();
-  // Target the API-served generation specifically — the empty-state mascot
-  // illustration is also a `section img` while the action is in flight.
-  const generated = page.locator('section img[src^="/api/images/"]').first();
+  await page
+    .locator("#person-photo")
+    .setInputFiles(path.join(__dirname, "fixtures", "person.jpg"));
+  await page.getByRole("tab", { name: "Describe it" }).click();
+  await page.getByLabel("Describe the outfit").fill("An authz probe outfit");
+  await page.getByRole("button", { name: /^Change outfit/ }).click();
+  const generated = page.locator('li img[src^="/api/images/"]').first();
   await expect(generated).toBeVisible();
   const src = await generated.getAttribute("src");
   expect(src).toMatch(/^\/api\/images\//);

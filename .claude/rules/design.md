@@ -5,6 +5,15 @@ paths:
   - "src/app/(app)/**"
 ---
 
+> **SUPERSEDED — Atelier theme (2026-10).** This product (AI Clothes
+> Changer) now uses a dark fashion-editorial skin: near-black canvas, soft
+> white ink, 1px hairline borders, pill buttons, arch-shaped portraits,
+> NO hard offset shadows, Familjen Grotesk for headings, gold sparkle
+> ornament. Tokens live in the "Atelier theme" block at the end of
+> `src/app/globals.css`; marketing components live in
+> `src/components/atelier/`. Where the rules below conflict with that,
+> the Atelier theme wins. The loud/ledger rules remain only as history.
+
 # Design rules — "The Ledger", LOUD MODE (v4)
 
 Full system in DESIGN.md. The hard rules, restated:

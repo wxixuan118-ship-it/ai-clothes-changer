@@ -1,11 +1,14 @@
+import path from "node:path";
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // The landing's code exhibit reads src/lib/credits/index.ts with fs at
-  // render time (the auth-aware nav makes marketing pages dynamic). Include
-  // the file in the traced output so the read works in production too.
-  outputFileTracingIncludes: {
-    "/": ["./src/lib/credits/index.ts"],
+  // A stray lockfile in the home directory confuses root inference.
+  turbopack: { root: path.join(__dirname) },
+  experimental: {
+    // Two downscaled photos (≤3.5MB each, typically ~1MB) plus form
+    // overhead; stays under the proxy's default 10MB body cap.
+    serverActions: { bodySizeLimit: "8mb" },
   },
 };
 

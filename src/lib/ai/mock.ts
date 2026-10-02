@@ -13,7 +13,7 @@ const placeholderDataUrl = `data:image/svg+xml;base64,${Buffer.from(placeholderS
 
 export const mockProvider: ImageProvider = {
   modelId: "mock/placeholder",
-  async generateImage({ prompt }) {
+  async generateImage({ prompt, personImage }) {
     // Failure switch: a prompt containing "FAIL" simulates a provider error,
     // making the spend → fail → refund path demoable in the browser and
     // testable end-to-end (documented in .env.example next to AI_MOCK).
@@ -21,6 +21,16 @@ export const mockProvider: ImageProvider = {
       throw new Error(
         "mock provider: simulated failure (prompt contains FAIL)",
       );
+    }
+    // Try-on runs echo the uploaded photo back, so the whole flow (upload →
+    // result → history) is clickable in dev without a real model.
+    if (personImage) {
+      return {
+        url: `data:${personImage.mediaType};base64,${personImage.bytes.toString("base64")}`,
+        width: WIDTH,
+        height: HEIGHT,
+        model: "mock/placeholder",
+      };
     }
     return {
       url: placeholderDataUrl,

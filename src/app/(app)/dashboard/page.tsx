@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { eq, sql } from "drizzle-orm";
 
@@ -12,6 +11,7 @@ import { getHistory } from "@/lib/credits";
 import { features } from "@/lib/env";
 import { CountUpDigits } from "@/components/count-up-digits";
 import { PageHeader } from "@/components/app/page-header";
+import { Sparkle } from "@/components/atelier/sparkle";
 import { LedgerTable, type LedgerEntry } from "@/components/ledger-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -72,22 +72,16 @@ export default async function DashboardPage() {
 
       {(generated?.count ?? 0) === 0 ? (
         <div className="flex max-w-2xl items-center gap-5 rounded-md border-2 border-l-[6px] border-l-pop-sky px-5 py-4">
-          <Image
-            src="/illustrations/mascot-hello.png"
-            alt="Gold coin mascot with sunglasses pushed up, waving hello"
-            width={96}
-            height={96}
-            className="illo size-24 shrink-0"
-          />
+          <Sparkle className="size-10 shrink-0" />
           <div>
             <p className="eyebrow">First steps</p>
             <p className="mt-1 text-sm">
-              Your welcome credits are on the books. Head to{" "}
+              Your free credits are ready. Open the{" "}
               <Link href="/generate" className="link-pop">
-                Generate
+                clothes changer
               </Link>{" "}
-              to spend the first one — each image costs 1 credit and failed
-              generations refund themselves. Plans and top-ups live in{" "}
+              to try your first outfit — each result costs 1 credit and failed
+              runs are refunded automatically. Plans and top-ups live in{" "}
               <Link href="/billing" className="link-pop">
                 Billing
               </Link>
@@ -113,7 +107,7 @@ export default async function DashboardPage() {
             </Link>{" "}
             or{" "}
             <Link href="/generate" className="link-pop">
-              generate an image
+              change an outfit
             </Link>
             .
           </CardContent>
@@ -144,12 +138,12 @@ export default async function DashboardPage() {
       </div>
 
       <section className="max-w-2xl">
-        <p className="eyebrow mb-3">credit_transactions</p>
+        <p className="eyebrow mb-3">Credit history</p>
         {entries.length > 0 ? (
           <LedgerTable entries={entries} />
         ) : (
           <p className="border-t-2 border-rule pt-3 text-sm">
-            No ledger entries yet.
+            No credit activity yet.
           </p>
         )}
       </section>

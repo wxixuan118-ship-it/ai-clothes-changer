@@ -1,13 +1,8 @@
-// Site-wide constants. The GitHub link renders without a live star count
-// until the repo is public — fetching the real count is an M7 README-polish
-// task.
+// Site-wide constants, safe for client components. The canonical origin is
+// env-driven and server-only: see src/lib/site-url.ts.
 export const siteConfig = {
-  name: "ai-saas-starter",
+  name: "AI Clothes Changer",
+  title: "AI Clothes Changer — Try On Any Outfit in Seconds",
   description:
-    "Open-source SaaS foundation: auth, Stripe subscriptions, and a credits ledger that survives webhook retries.",
-  /** Canonical production URL — set to your deployment before launch. */
-  url: "https://ai-saas-starter-six.vercel.app",
-  github: "https://github.com/nikandr-surkov/ai-saas-starter",
-  /** The paid multi-provider version. One link, no upsell copy. */
-  pro: "https://nikandr.com",
+    "Upload a photo and change clothes with AI. Try on any outfit from a garment image, a text prompt, or a curated style — realistic, private, no photoshoot.",
 } as const;

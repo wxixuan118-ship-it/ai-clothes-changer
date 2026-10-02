@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 
-import { siteConfig } from "@/config/site";
+import { absoluteUrl } from "@/lib/site-url";
 
-// Public pages only — the (app) group is session-gated and noindexed.
+// Indexable public pages only — auth pages are noindexed, the (app) group is
+// session-gated.
 export default function sitemap(): MetadataRoute.Sitemap {
-  return ["/", "/pricing", "/login", "/signup"].map((path) => ({
-    url: `${siteConfig.url}${path === "/" ? "" : path}`,
+  return ["/", "/pricing", "/privacy", "/terms"].map((path) => ({
+    url: absoluteUrl(path),
     changeFrequency: "weekly",
-    priority: path === "/" ? 1 : 0.6,
+    priority: path === "/" ? 1 : path === "/pricing" ? 0.8 : 0.3,
   }));
 }

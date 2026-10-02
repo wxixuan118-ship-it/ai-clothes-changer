@@ -20,9 +20,12 @@ const loginSchema = z.object({
 export function LoginForm({
   magicLink,
   next,
+  onSuccess,
 }: {
   magicLink: boolean;
   next: string;
+  /** Stay on the page instead of navigating to `next` (home studio). */
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
   const [pending, setPending] = React.useState(false);
@@ -51,6 +54,10 @@ export function LoginForm({
           : message || "Sign-in failed — try again in a moment.",
       );
       setPending(false);
+      return;
+    }
+    if (onSuccess) {
+      onSuccess();
       return;
     }
     router.push(next as Parameters<typeof router.push>[0]);
@@ -94,6 +101,8 @@ export function LoginForm({
           <Label htmlFor="login-email">Email</Label>
           <Input
             id="login-email"
+            aria-describedby={error ? "login-error" : undefined}
+            aria-invalid={error ? true : undefined}
             name="email"
             type="email"
             autoComplete="email"
@@ -109,13 +118,19 @@ export function LoginForm({
           </div>
           <Input
             id="login-password"
+            aria-describedby={error ? "login-error" : undefined}
+            aria-invalid={error ? true : undefined}
             name="password"
             type="password"
             autoComplete="current-password"
             required
           />
         </div>
-        {error ? <p className="text-sm text-debit-text">{error}</p> : null}
+        {error ? (
+          <p id="login-error" role="alert" className="text-sm text-debit-text">
+            {error}
+          </p>
+        ) : null}
         <Button type="submit" disabled={pending}>
           {pending ? "Signing in…" : "Sign in"}
         </Button>

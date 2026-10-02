@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   CreditCardIcon,
-  ImageIcon,
+  ShirtIcon,
   LayoutDashboardIcon,
   SettingsIcon,
 } from "lucide-react";
@@ -13,16 +13,29 @@ import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
-  { href: "/generate", label: "Generate", icon: ImageIcon },
+  { href: "/generate", label: "Clothes changer", icon: ShirtIcon },
   { href: "/billing", label: "Billing", icon: CreditCardIcon },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
-export function SidebarNav() {
+export function SidebarNav({
+  orientation = "vertical",
+}: {
+  /** "horizontal" = the scrollable bar shown under the header on phones. */
+  orientation?: "vertical" | "horizontal";
+}) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav
+      aria-label="App"
+      className={cn(
+        "flex gap-1",
+        orientation === "vertical"
+          ? "flex-col"
+          : "overflow-x-auto [scrollbar-width:none]",
+      )}
+    >
       {items.map((item) => {
         const active =
           pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -32,10 +45,9 @@ export function SidebarNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-2.5 rounded-full px-3 py-1.5 text-sm transition-colors",
-              // Active nav gets the marker treatment (DESIGN.md v3).
+              "flex shrink-0 items-center gap-2.5 rounded-full px-4 py-2 text-sm whitespace-nowrap transition-colors",
               active
-                ? "border-2 bg-pop-yellow-bold font-semibold text-ink-deep"
+                ? "bg-[var(--brand)] font-medium text-[var(--ink-deep)]"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground",
             )}
           >

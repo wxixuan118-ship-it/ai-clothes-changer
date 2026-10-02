@@ -5,6 +5,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
+import { WELCOME_CREDITS } from "@/config/plans";
 import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +19,14 @@ const signupSchema = z.object({
 
 export function SignupForm({
   requiresVerification,
+  onSuccess,
+  next = "/generate",
 }: {
   requiresVerification: boolean;
+  /** Stay on the page instead of navigating (home studio dialog). */
+  onSuccess?: () => void;
+  /** Where to go after sign-up — already validated by the page. */
+  next?: string;
 }) {
   const router = useRouter();
   const [pending, setPending] = React.useState(false);
@@ -57,15 +64,51 @@ export function SignupForm({
       setVerifyNotice(true);
       return;
     }
-    router.push("/dashboard");
+    if (onSuccess) {
+      onSuccess();
+      return;
+    }
+    router.push(next as Parameters<typeof router.push>[0]);
     router.refresh();
   }
+
+  // Verification gate + in-place flow: once the visitor clicks the link
+  // (auto sign-in), this tab sees a session on its next focus/poll and the
+  // run continues with the photo still in memory.
+  React.useEffect(() => {
+    if (!verifyNotice || !onSuccess) return;
+    let done = false;
+    const check = async () => {
+      if (done) return;
+      const { data } = await authClient.getSession();
+      if (data?.session && !done) {
+        done = true;
+        onSuccess();
+      }
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void check();
+    };
+    window.addEventListener("focus", onVisible);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = window.setInterval(check, 5000);
+    return () => {
+      done = true;
+      window.removeEventListener("focus", onVisible);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.clearInterval(timer);
+    };
+  }, [verifyNotice, onSuccess]);
 
   if (verifyNotice) {
     return (
       <p className="text-sm text-muted-foreground">
         Almost there — check your inbox and click the verification link to
-        activate your account. Your 10 welcome credits are already waiting.
+        activate your account. Your {WELCOME_CREDITS} welcome credits are
+        already waiting.
+        {onSuccess
+          ? " Keep this tab open — your outfit change starts as soon as you're verified."
+          : null}
       </p>
     );
   }
@@ -74,12 +117,21 @@ export function SignupForm({
     <form onSubmit={onSubmit} className="grid gap-4">
       <div className="grid gap-1.5">
         <Label htmlFor="signup-name">Name</Label>
-        <Input id="signup-name" name="name" autoComplete="name" required />
+        <Input
+          id="signup-name"
+          aria-describedby={error ? "signup-error" : undefined}
+          aria-invalid={error ? true : undefined}
+          name="name"
+          autoComplete="name"
+          required
+        />
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="signup-email">Email</Label>
         <Input
           id="signup-email"
+          aria-describedby={error ? "signup-error" : undefined}
+          aria-invalid={error ? true : undefined}
           name="email"
           type="email"
           autoComplete="email"
@@ -90,13 +142,19 @@ export function SignupForm({
         <Label htmlFor="signup-password">Password</Label>
         <Input
           id="signup-password"
+          aria-describedby={error ? "signup-error" : undefined}
+          aria-invalid={error ? true : undefined}
           name="password"
           type="password"
           autoComplete="new-password"
           required
         />
       </div>
-      {error ? <p className="text-sm text-debit-text">{error}</p> : null}
+      {error ? (
+        <p id="signup-error" role="alert" className="text-sm text-debit-text">
+          {error}
+        </p>
+      ) : null}
       <Button type="submit" disabled={pending}>
         {pending ? "Creating account…" : "Create account"}
       </Button>

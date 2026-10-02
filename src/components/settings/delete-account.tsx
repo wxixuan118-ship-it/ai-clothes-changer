@@ -34,7 +34,7 @@ export function DeleteAccount({
     event.preventDefault();
     const password = new FormData(event.currentTarget).get("password");
     setPending(true);
-    const { error } = await authClient.deleteUser(
+    const { data, error } = await authClient.deleteUser(
       hasPassword && typeof password === "string" && password.length > 0
         ? { password }
         : { callbackURL: "/" },
@@ -44,8 +44,10 @@ export function DeleteAccount({
       toast.error(error.message ?? "Could not delete the account");
       return;
     }
-    if (hasPassword) {
-      // Deleted immediately. Subscription cancellation runs in beforeDelete (M3).
+    // Branch on what the server did, not on what we expect it to do: with
+    // email configured it sends a confirmation link instead of deleting.
+    if (data?.message === "User deleted") {
+      toast.success("Your account was deleted.");
       router.push("/");
       router.refresh();
       return;
@@ -53,7 +55,7 @@ export function DeleteAccount({
     toast.success(
       canSendEmail
         ? "Check your inbox to confirm deletion"
-        : "Deletion requested",
+        : "Sign in again, then retry — deletion needs a fresh session.",
     );
   }
 

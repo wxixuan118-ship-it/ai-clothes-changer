@@ -3,6 +3,14 @@
 import * as React from "react";
 
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  ImageUpIcon,
+  ShirtIcon,
+  SparklesIcon,
+  TypeIcon,
+  XIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -10,87 +18,704 @@ import {
   type GenerateResult,
 } from "@/app/(app)/generate/actions";
 import { BusyButton } from "@/components/busy-button";
-import { Label } from "@/components/ui/label";
+import {
+  AuthDialog,
+  type AuthOptions,
+} from "@/components/generate/auth-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { getStylePreset, styleCategories, stylePresets } from "@/config/styles";
+import { cn } from "@/lib/utils";
 
 const initialState: GenerateResult = { ok: true };
 
+/** Formats the browser can decode and the server accepts. */
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+/** Original-file cap before downscaling (phone photos run 3–15MB). */
+const MAX_ORIGINAL_BYTES = 25 * 1024 * 1024;
+
 const errorMessages: Record<NonNullable<GenerateResult["error"]>, string> = {
-  invalid_prompt: "Prompts need 3–1000 characters — one sentence works",
+  invalid_photo: "Use a JPG, PNG, or WebP photo of yourself (up to 25 MB).",
+  invalid_garment: "Use a JPG, PNG, or WebP photo of the garment.",
+  invalid_prompt: "Describe the outfit in 3–1000 characters.",
+  invalid_style: "Pick a style first.",
+  unauthenticated: "Please sign in again to continue.",
   rate_limited: "Slow down — 10 per minute. Try again in a moment.",
   insufficient_credits:
     "You're out of credits — top up in Billing and try again.",
-  generation_failed: "Generation failed — credit refunded",
+  generation_failed: "Outfit change failed — credit refunded.",
 };
+
+type Mode = "garment" | "prompt" | "style";
+
+const modes: {
+  id: Mode;
+  /** Accessible name. */
+  label: string;
+  /** Visible label — short enough to fit three tabs at any width. */
+  short: string;
+  icon: typeof ShirtIcon;
+}[] = [
+  { id: "garment", label: "Garment photo", short: "Garment", icon: ShirtIcon },
+  { id: "prompt", label: "Describe it", short: "Describe", icon: TypeIcon },
+  { id: "style", label: "Styles", short: "Styles", icon: SparklesIcon },
+];
+
+const garmentTypes = [
+  { id: "top", label: "Top" },
+  { id: "bottom", label: "Bottom" },
+  { id: "dress", label: "Dress" },
+  { id: "full", label: "Full outfit" },
+] as const;
+
+const promptIdeas = [
+  "Navy tailored suit with a white shirt",
+  "Red satin evening gown",
+  "Oversized beige trench coat",
+  "Black leather biker jacket",
+];
+
+const MAX_EDGE = 1600;
+
+/** Downscale to ≤1600px JPEG so uploads stay well under platform limits. */
+async function downscale(file: File): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("canvas unavailable");
+  // Transparent PNGs (product cut-outs) land on white, not black.
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("encode failed"))),
+      "image/jpeg",
+      0.9,
+    ),
+  );
+}
+
+/** Same-origin dev images and Blob URLs both download via ?download=1. */
+function downloadHref(url: string): string {
+  return `${url}${url.includes("?") ? "&" : "?"}download=1`;
+}
+
+function usePhoto() {
+  const [photo, setPhoto] = React.useState<{
+    file: File;
+    preview: string;
+  } | null>(null);
+  // Tracks the live object URL outside React state so it is revoked exactly
+  // once — on replacement and on unmount.
+  const urlRef = React.useRef<string | null>(null);
+
+  const setFile = React.useCallback((file: File | null) => {
+    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+    const next = file ? { file, preview: URL.createObjectURL(file) } : null;
+    urlRef.current = next?.preview ?? null;
+    setPhoto(next);
+  }, []);
+
+  React.useEffect(
+    () => () => {
+      if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+      urlRef.current = null;
+    },
+    [],
+  );
+
+  return {
+    file: photo?.file ?? null,
+    preview: photo?.preview ?? null,
+    setFile,
+  };
+}
+
+function PhotoDrop({
+  id,
+  title,
+  hint,
+  preview,
+  onFile,
+  invalidMessage,
+  disabled,
+  className,
+}: {
+  id: string;
+  title: string;
+  hint: string;
+  preview: string | null;
+  onFile: (file: File | null) => void;
+  invalidMessage: string;
+  disabled?: boolean;
+  className?: string;
+}) {
+  const [dragging, setDragging] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  // Drag-and-drop bypasses the input's accept= filter, so every path
+  // through here checks the type and size itself.
+  const accept = React.useCallback(
+    (file: File | undefined) => {
+      if (!file) return;
+      if (
+        !ACCEPTED_TYPES.includes(file.type) ||
+        file.size > MAX_ORIGINAL_BYTES
+      ) {
+        toast.error(invalidMessage);
+        return;
+      }
+      onFile(file);
+    },
+    [invalidMessage, onFile],
+  );
+
+  // A file picked before hydration never fired React's onChange — adopt
+  // whatever the native input already holds once we mount.
+  React.useEffect(() => {
+    const input = inputRef.current;
+    const pending = input?.files?.[0];
+    if (input && pending) {
+      accept(pending);
+      input.value = "";
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+  }, []);
+
+  return (
+    <div className={cn("relative", className)}>
+      {/* Input first so the label can show its keyboard focus via peer-*. */}
+      <input
+        ref={inputRef}
+        id={id}
+        type="file"
+        accept={ACCEPTED_TYPES.join(",")}
+        className="peer sr-only"
+        disabled={disabled}
+        onChange={(event) => {
+          accept(event.target.files?.[0]);
+          // Clear so picking the same file again still fires onChange.
+          event.target.value = "";
+        }}
+      />
+      <label
+        htmlFor={id}
+        onDragOver={(event) => {
+          // Always claim the drop — otherwise the browser opens the image
+          // and navigates away mid-run.
+          event.preventDefault();
+          if (!disabled) setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragging(false);
+          if (disabled) return;
+          accept(event.dataTransfer.files[0]);
+        }}
+        className={cn(
+          "relative flex h-full min-h-48 cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-[24px] border border-dashed border-[var(--brand-line)] bg-[var(--canvas)] p-6 text-center transition-colors hover:bg-[color-mix(in_oklch,var(--ink),transparent_95%)]",
+          "peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--ring)]",
+          dragging && "border-[var(--brand)] bg-[var(--brand-soft)]",
+          preview && "border-solid p-0",
+          disabled && "cursor-default",
+        )}
+      >
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element -- local blob preview
+          <img
+            src={preview}
+            alt={title}
+            className="absolute inset-0 size-full object-contain"
+          />
+        ) : (
+          <>
+            <span className="flex size-12 items-center justify-center rounded-full border border-[var(--brand-line)] bg-[var(--brand-soft)] text-[var(--brand)]">
+              <ImageUpIcon className="size-5" aria-hidden />
+            </span>
+            <span className="font-medium">{title}</span>
+            <span className="max-w-[28ch] text-sm text-[var(--muted-ink)]">
+              {hint}
+            </span>
+          </>
+        )}
+      </label>
+      {preview ? (
+        <button
+          type="button"
+          onClick={() => {
+            onFile(null);
+            // The button unmounts with the preview — keep keyboard focus
+            // on the (now empty) drop zone instead of dropping to <body>.
+            inputRef.current?.focus();
+          }}
+          disabled={disabled}
+          aria-label={`Remove ${title.toLowerCase()}`}
+          className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--ink-deep)]"
+        >
+          <XIcon className="size-4" aria-hidden />
+        </button>
+      ) : null}
+    </div>
+  );
+}
 
 export function GenerateForm({
   balance,
   cost,
   mock,
+  signedIn,
+  auth,
+  showHistoryLink = false,
 }: {
   balance: number;
   cost: number;
-  /** AI_MOCK is on — surface the "FAIL" failure switch in the placeholder. */
+  /** AI_MOCK is on — results echo the uploaded photo. */
   mock: boolean;
+  /** Signed-out visitors (home page) authenticate in a dialog on submit. */
+  signedIn: boolean;
+  auth?: AuthOptions;
+  /** Home page: point at the studio's full history after a run. */
+  showHistoryLink?: boolean;
 }) {
-  const formRef = React.useRef<HTMLFormElement>(null);
-  // The server action goes to useActionState directly, keeping the form
-  // functional before hydration. Every invocation returns a fresh object,
-  // so the effect below fires once per submission.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const formId = React.useId();
+  const submitRef = React.useRef<HTMLButtonElement>(null);
+  const resultRef = React.useRef<HTMLHeadingElement>(null);
+  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+  const [authOpen, setAuthOpen] = React.useState(false);
   const [state, formAction, pending] = React.useActionState(
     generateImageAction,
     initialState,
   );
+  const [isPreparing, startPreparing] = React.useTransition();
+  const person = usePhoto();
+  const garment = usePhoto();
+  const [mode, setMode] = React.useState<Mode>("garment");
+  const [garmentType, setGarmentType] =
+    React.useState<(typeof garmentTypes)[number]["id"]>("full");
+  const [prompt, setPrompt] = React.useState("");
+  const [styleId, setStyleId] = React.useState<string>(
+    stylePresets[0]?.id ?? "",
+  );
+
+  // "?style=<id>" (the home page style cards) preselects that style. Applied
+  // during render whenever the param changes, so a second card click on the
+  // same page also takes effect.
+  const styleParam = searchParams.get("style");
+  const [appliedStyleParam, setAppliedStyleParam] = React.useState<
+    string | null
+  >(null);
+  if (styleParam !== appliedStyleParam) {
+    setAppliedStyleParam(styleParam);
+    if (styleParam && getStylePreset(styleParam)) {
+      setMode("style");
+      setStyleId(styleParam);
+    }
+  }
+
+  // The result panel belongs to the run that produced it; picking a new
+  // photo dismisses it until the next success.
+  const [dismissedFor, setDismissedFor] = React.useState<GenerateResult | null>(
+    null,
+  );
+  const showResult =
+    state !== initialState && state.ok && dismissedFor !== state;
 
   React.useEffect(() => {
     if (state === initialState) return;
+    if (state.error === "unauthenticated") {
+      // Session expired mid-visit. On the home page reopen the dialog so the
+      // photo and outfit survive; elsewhere go through login and come back.
+      if (auth) {
+        router.refresh();
+      } else {
+        router.push(`/login?next=${encodeURIComponent(pathname)}`);
+      }
+      toast.error(errorMessages.unauthenticated);
+      return;
+    }
     if (state.error) {
       toast.error(errorMessages[state.error]);
       return;
     }
-    toast.success(`Image generated! ${cost} credit spent.`);
-    formRef.current?.reset();
-  }, [state, cost]);
+    toast.success(`New look ready! ${cost} credit spent.`);
+    resultRef.current?.focus();
+  }, [state, cost, auth, pathname, router]);
 
-  const outOfCredits = balance < cost;
+  // An expired session on the home page reopens the sign-in dialog (derived,
+  // so it shows once per failed run and stays closed after dismissal).
+  const [authDismissedFor, setAuthDismissedFor] =
+    React.useState<GenerateResult | null>(null);
+  const dialogOpen =
+    authOpen ||
+    (Boolean(auth) &&
+      state.error === "unauthenticated" &&
+      authDismissedFor !== state);
+  const closeDialog = () => {
+    setAuthOpen(false);
+    setAuthDismissedFor(state);
+  };
+
+  const busy = pending || isPreparing;
+  const outOfCredits = signedIn && balance < cost;
+  const latest = showResult ? (state.result ?? null) : null;
+  const ready =
+    Boolean(person.file) &&
+    (mode === "garment"
+      ? Boolean(garment.file)
+      : mode === "prompt"
+        ? prompt.trim().length >= 3
+        : Boolean(styleId));
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!signedIn && auth) {
+      setAuthOpen(true);
+      return;
+    }
+    submit();
+  }
+
+  function submit() {
+    if (!person.file) {
+      toast.error(errorMessages.invalid_photo);
+      return;
+    }
+    const personFile = person.file;
+    const garmentFile = mode === "garment" ? garment.file : null;
+    startPreparing(async () => {
+      const formData = new FormData();
+      formData.set("mode", mode);
+      // A file can pass the type check and still be undecodable (corrupt,
+      // mislabeled). Report it on the right photo instead of crashing.
+      try {
+        formData.set("personImage", await downscale(personFile), "person.jpg");
+      } catch {
+        person.setFile(null);
+        toast.error(errorMessages.invalid_photo);
+        return;
+      }
+      if (garmentFile) {
+        try {
+          formData.set(
+            "garmentImage",
+            await downscale(garmentFile),
+            "garment.jpg",
+          );
+        } catch {
+          garment.setFile(null);
+          toast.error(errorMessages.invalid_garment);
+          return;
+        }
+        formData.set("garmentType", garmentType);
+      }
+      if (mode === "prompt") formData.set("prompt", prompt);
+      if (mode === "style") formData.set("styleId", styleId);
+      React.startTransition(() => formAction(formData));
+    });
+  }
+
+  function onTabKeyDown(event: React.KeyboardEvent, index: number) {
+    const last = modes.length - 1;
+    const next =
+      event.key === "ArrowRight"
+        ? index === last
+          ? 0
+          : index + 1
+        : event.key === "ArrowLeft"
+          ? index === 0
+            ? last
+            : index - 1
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? last
+              : null;
+    if (next === null) return;
+    event.preventDefault();
+    const target = modes[next];
+    if (!target) return;
+    setMode(target.id);
+    tabRefs.current[next]?.focus();
+  }
 
   return (
-    <form ref={formRef} action={formAction} className="grid max-w-xl gap-3">
-      <div className="grid gap-1.5">
-        <Label htmlFor="generate-prompt">Prompt</Label>
-        <Textarea
-          id="generate-prompt"
-          name="prompt"
-          placeholder={
-            mock
-              ? 'A ledger book on a desk, studio light — mock mode: "FAIL" in the prompt simulates a provider error and refunds the credit'
-              : "A ledger book on a desk, studio light"
-          }
-          minLength={3}
-          maxLength={1000}
-          required
-          disabled={pending}
-        />
+    <form
+      onSubmit={handleSubmit}
+      className="grid grid-cols-[minmax(0,1fr)] gap-6"
+    >
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <section className="flex min-w-0 flex-col gap-3">
+          <p className="text-sm font-medium">
+            <span className="mr-2 text-[var(--muted-ink)]">01</span>Your photo
+          </p>
+          <PhotoDrop
+            id="person-photo"
+            title="Upload your photo"
+            hint="One person, facing the camera, half or full body. Drag & drop or click."
+            preview={person.preview}
+            invalidMessage={errorMessages.invalid_photo}
+            onFile={(file) => {
+              person.setFile(file);
+              setDismissedFor(state);
+            }}
+            disabled={busy}
+            className="aspect-square min-h-0 sm:aspect-[4/5] lg:aspect-auto lg:flex-1"
+          />
+        </section>
+
+        <section className="flex min-w-0 flex-col gap-3">
+          <p className="text-sm font-medium">
+            <span className="mr-2 text-[var(--muted-ink)]">02</span>Choose the
+            outfit
+          </p>
+          <div className="flex flex-1 flex-col rounded-[24px] border bg-[var(--paper-2)] p-3 sm:p-5">
+            <div
+              role="tablist"
+              aria-label="Outfit source"
+              className="grid grid-cols-3 gap-1 rounded-full bg-[var(--canvas)] p-1"
+            >
+              {modes.map((item, index) => (
+                <button
+                  key={item.id}
+                  ref={(node) => {
+                    tabRefs.current[index] = node;
+                  }}
+                  id={`${formId}-tab-${item.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === item.id}
+                  aria-controls={`${formId}-panel`}
+                  aria-label={item.label}
+                  tabIndex={mode === item.id ? 0 : -1}
+                  onClick={() => setMode(item.id)}
+                  onKeyDown={(event) => onTabKeyDown(event, index)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 rounded-full px-1.5 py-2 text-[13px] transition-colors sm:px-3 sm:text-sm",
+                    mode === item.id
+                      ? "bg-[var(--brand)] font-medium text-[var(--ink-deep)]"
+                      : "text-[var(--muted-ink)] hover:text-[var(--ink)]",
+                  )}
+                >
+                  <item.icon
+                    className="hidden size-4 shrink-0 sm:block"
+                    aria-hidden
+                  />
+                  <span className="truncate">{item.short}</span>
+                </button>
+              ))}
+            </div>
+
+            <div
+              id={`${formId}-panel`}
+              role="tabpanel"
+              aria-labelledby={`${formId}-tab-${mode}`}
+              className="mt-5 flex-1"
+            >
+              {mode === "garment" ? (
+                <div className="grid h-full gap-4">
+                  <PhotoDrop
+                    id="garment-photo"
+                    title="Upload a garment"
+                    hint="Product shot, flat lay, or someone wearing it. Clean backgrounds work best."
+                    preview={garment.preview}
+                    invalidMessage={errorMessages.invalid_garment}
+                    onFile={garment.setFile}
+                    disabled={busy}
+                    className="min-h-48"
+                  />
+                  <div>
+                    <p className="mb-2 text-sm text-[var(--muted-ink)]">
+                      Replace my
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {garmentTypes.map((type) => (
+                        <button
+                          key={type.id}
+                          type="button"
+                          aria-pressed={garmentType === type.id}
+                          onClick={() => setGarmentType(type.id)}
+                          className={cn(
+                            "rounded-full border px-4 py-1.5 text-sm transition-colors",
+                            garmentType === type.id
+                              ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--ink-deep)]"
+                              : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_92%)]",
+                          )}
+                        >
+                          {type.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {mode === "prompt" ? (
+                <div className="grid gap-4">
+                  <Textarea
+                    aria-label="Describe the outfit"
+                    value={prompt}
+                    onChange={(event) => setPrompt(event.target.value)}
+                    placeholder={
+                      mock
+                        ? 'e.g. "light blue linen suit" — mock mode: include FAIL to simulate an error and refund'
+                        : 'e.g. "light blue linen suit with a white tee"'
+                    }
+                    maxLength={1000}
+                    disabled={busy}
+                    className="min-h-36 rounded-[18px] bg-[var(--canvas)]"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {promptIdeas.map((idea) => (
+                      <button
+                        key={idea}
+                        type="button"
+                        onClick={() => setPrompt(idea)}
+                        className="rounded-full border px-3.5 py-1.5 text-sm text-[var(--muted-ink)] transition-colors hover:text-[var(--ink)]"
+                      >
+                        {idea}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {mode === "style" ? (
+                <div className="grid max-h-[26rem] gap-5 overflow-y-auto pr-1">
+                  {styleCategories.map((category) => (
+                    <div key={category}>
+                      <p className="mb-2 text-sm text-[var(--muted-ink)]">
+                        {category}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {stylePresets
+                          .filter((preset) => preset.category === category)
+                          .map((preset) => (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              aria-pressed={styleId === preset.id}
+                              onClick={() => setStyleId(preset.id)}
+                              className={cn(
+                                "flex items-center gap-3 rounded-[14px] border p-2 text-left text-sm transition-colors",
+                                styleId === preset.id
+                                  ? "border-[var(--brand)] bg-[var(--brand-soft)]"
+                                  : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_95%)]",
+                              )}
+                            >
+                              <span
+                                aria-hidden
+                                className="h-10 w-7 shrink-0 rounded-t-full rounded-b-sm"
+                                style={{ background: preset.tint }}
+                              />
+                              {preset.name}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </section>
       </div>
-      <div className="flex items-center gap-3">
+
+      <div className="flex flex-wrap items-center gap-4">
         <BusyButton
+          ref={submitRef}
           type="submit"
-          busy={pending}
-          busyLabel="Generating…"
-          disabled={outOfCredits}
+          busy={busy}
+          busyLabel="Changing outfit…"
+          disabled={outOfCredits || !ready}
+          className="h-auto min-h-12 w-full rounded-full px-6 py-2 text-base whitespace-normal sm:w-auto sm:px-8"
         >
-          {`Generate — ${cost} credit`}
+          {`Change outfit — ${cost} credit`}
         </BusyButton>
         {outOfCredits ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[var(--muted-ink)]">
             You&apos;re out of credits —{" "}
-            <Link href="/billing" className="link-pop">
+            <Link href="/billing" className="underline underline-offset-4">
               top up in Billing
-            </Link>{" "}
-            and the balance updates the moment payment lands.
+            </Link>
+            .
           </p>
-        ) : null}
+        ) : (
+          <p className="text-sm text-[var(--muted-ink)]">
+            Takes about 10–20 seconds. Failed runs are refunded automatically.
+          </p>
+        )}
       </div>
+
+      {auth ? (
+        <AuthDialog
+          open={dialogOpen}
+          onOpenChange={(open) => (open ? setAuthOpen(true) : closeDialog())}
+          options={auth}
+          returnFocusRef={submitRef}
+          onAuthenticated={() => {
+            closeDialog();
+            submit();
+            router.refresh();
+          }}
+        />
+      ) : null}
+
+      {latest && person.preview ? (
+        <section className="max-w-3xl rounded-[24px] border bg-[var(--paper-2)] p-4 sm:p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2
+              ref={resultRef}
+              tabIndex={-1}
+              className="font-sans text-base font-medium tracking-normal outline-none"
+            >
+              Your new look
+            </h2>
+            {showHistoryLink ? (
+              <Link
+                href="/generate"
+                className="mr-auto text-sm text-[var(--muted-ink)] underline underline-offset-4 hover:text-[var(--ink)]"
+              >
+                All my looks
+              </Link>
+            ) : null}
+            <a
+              href={downloadHref(latest.imageUrl)}
+              download
+              className="pill pill-brand px-5 py-2 text-sm"
+            >
+              Download
+            </a>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { src: person.preview, caption: "Before" },
+              { src: latest.imageUrl, caption: latest.label },
+            ].map((item) => (
+              <figure key={item.caption} className="grid min-w-0 gap-2">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--canvas)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- blob + API-served images */}
+                  <img
+                    src={item.src}
+                    alt={item.caption}
+                    className="absolute inset-0 size-full object-contain"
+                  />
+                </div>
+                <figcaption className="truncate text-sm text-[var(--muted-ink)]">
+                  {item.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </form>
   );
 }

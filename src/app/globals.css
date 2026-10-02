@@ -12,8 +12,8 @@
   /* v4 four faces, four jobs: Archivo Black = display (H1 + section
      titles ONLY), Bricolage = subheads/cards, Instrument = body,
      Martian Mono = data. */
-  --font-display: var(--font-archivo);
-  --font-heading: var(--font-bricolage);
+  --font-display: var(--font-familjen);
+  --font-heading: var(--font-familjen);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -822,5 +822,233 @@
   ::before,
   ::after {
     animation: none !important;
+  }
+}
+
+/* ══ Atelier theme — AI Clothes Changer ═══════════════════════════════════
+   Dark fashion-editorial skin layered over the starter's token system.
+   Night-only: near-black canvas, soft white ink, hairline borders, pill
+   buttons, NO hard offset shadows, and a fashion palette (teal, rose,
+   emerald, mustard, peach) for arch portraits and accents. Unlayered, so
+   it wins over the starter's tokens and @utility definitions. */
+:root,
+.dark,
+.loud {
+  color-scheme: dark;
+  --canvas: oklch(0.13 0.004 60);
+  --ink: oklch(0.97 0.004 90);
+  --ink-deep: oklch(0.15 0.004 60);
+  --paper-2: oklch(0.19 0.005 60);
+  --pop-yellow-bold: oklch(0.8 0.14 75);
+  --pop-mint-bold: oklch(0.45 0.08 170);
+  --pop-sky-bold: oklch(0.78 0.06 205);
+  --pop-pink-bold: oklch(0.72 0.12 5);
+  --pop-orange-bold: oklch(0.86 0.06 60);
+  --pop-yellow: color-mix(in oklch, var(--canvas), var(--pop-yellow-bold) 10%);
+  --pop-mint: color-mix(in oklch, var(--canvas), var(--pop-mint-bold) 18%);
+  --pop-sky: color-mix(in oklch, var(--canvas), var(--pop-sky-bold) 12%);
+  --pop-pink: color-mix(in oklch, var(--canvas), var(--pop-pink-bold) 12%);
+  --pop-orange: color-mix(in oklch, var(--canvas), var(--pop-orange-bold) 10%);
+  /* Brand accent: electric lime. ALWAYS paired with --ink-deep text when
+     used as a fill; on the dark canvas it works as text/icon color too. */
+  --brand: oklch(0.91 0.2 124);
+  --brand-soft: color-mix(in oklch, var(--brand), transparent 88%);
+  --brand-line: color-mix(in oklch, var(--brand), transparent 55%);
+  --credit: oklch(0.8 0.15 150);
+  --debit: oklch(0.72 0.19 27);
+  --credit-text: var(--credit);
+  --debit-text: var(--debit);
+  --muted-ink: color-mix(in oklch, var(--ink), var(--canvas) 38%);
+  --radius: 18px;
+  --border-w: 1px;
+  --border-w-emph: 1px;
+  --shadow-hard-sm: none;
+  --shadow-hard-md: none;
+  --shadow-hard-lg: 0 24px 60px -20px oklch(0 0 0 / 0.7);
+  --shadow-hover: none;
+  --title-shadow: transparent;
+  --action: var(--brand);
+  --on-accent: var(--ink-deep);
+  --primary: var(--brand);
+  --primary-foreground: var(--ink-deep);
+  --primary-text: var(--ink);
+  --border: color-mix(in oklch, var(--ink), transparent 84%);
+  --input: color-mix(in oklch, var(--ink), transparent 80%);
+  --ring: var(--brand);
+  --hairline: var(--border);
+  --rule: var(--border);
+  --card: var(--paper-2);
+  --popover: var(--paper-2);
+  --secondary: var(--paper-2);
+  --muted: var(--paper-2);
+  --sidebar: var(--canvas);
+  --sidebar-border: var(--border);
+  --sidebar-primary: var(--brand);
+  --sidebar-ring: var(--brand);
+  --band-bg: var(--paper-2);
+  --band-fg: var(--ink);
+  --band-muted: var(--muted-ink);
+  --accent-soft: color-mix(in oklch, var(--ink), transparent 94%);
+}
+.loud {
+  font-size: 1rem;
+  font-weight: 400;
+}
+::selection {
+  background-color: var(--brand);
+  color: var(--ink-deep);
+}
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+}
+/* Starter display utilities, retuned: no uppercase, no offset shadow. */
+.text-display,
+.text-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: none;
+  text-shadow: none;
+  letter-spacing: -0.03em;
+}
+.text-display {
+  font-size: clamp(2.4rem, 1.2rem + 4.2vw, 4.25rem);
+  line-height: 1.04;
+}
+.text-title {
+  font-size: clamp(2rem, 1.3rem + 2vw, 3.1rem);
+  line-height: 1.08;
+}
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.chip-mono {
+  border-width: 1px;
+  border-color: var(--border);
+  background: transparent;
+  font-family: var(--font-sans);
+}
+/* Component classes live in the components layer so Tailwind utilities on
+   the same element (hidden, sm:inline-flex, rounded-*, …) still win. */
+@layer components {
+  /* Calm press physics: no lift, a soft brighten instead. */
+  .press:hover,
+  .press-calm:hover {
+    translate: 0 0;
+    filter: brightness(1.08);
+  }
+  .press:active,
+  .press-calm:active {
+    translate: 0 1px;
+  }
+  .chip,
+  .footer-chip {
+    border-width: 1px !important;
+    background: transparent;
+  }
+  .chip:hover,
+  .footer-chip:hover {
+    translate: 0 0;
+    background: color-mix(in oklch, var(--ink), transparent 90%);
+    color: var(--ink);
+    box-shadow: none;
+  }
+  .illo {
+    filter: none !important;
+  }
+
+  /* ── Atelier marketing primitives ── */
+  .atelier-frame {
+    border: 1px solid color-mix(in oklch, var(--ink), transparent 70%);
+    border-radius: 28px;
+  }
+  .pill {
+    display: inline-flex;
+    white-space: nowrap;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      filter 160ms ease;
+  }
+  .pill-light {
+    background: var(--ink);
+    color: var(--ink-deep);
+  }
+  .pill-light:hover {
+    filter: brightness(0.92);
+  }
+  .pill-brand {
+    background: var(--brand);
+    color: var(--ink-deep);
+    font-weight: 600;
+  }
+  .pill-brand:hover {
+    filter: brightness(0.94);
+  }
+  /* Outlined lime badge — hero proof chips, section labels. */
+  .badge-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--brand-line);
+    border-radius: 9999px;
+    background: var(--brand-soft);
+    color: var(--brand);
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+  .pill-dark {
+    background: color-mix(in oklch, var(--ink), transparent 92%);
+    color: var(--ink);
+  }
+  .pill-dark:hover {
+    background: color-mix(in oklch, var(--ink), transparent 84%);
+  }
+  .pill-outline {
+    border: 1px solid color-mix(in oklch, var(--ink), transparent 65%);
+    color: var(--ink);
+  }
+  .arch {
+    border-radius: 9999px 9999px 6px 6px;
+    overflow: hidden;
+  }
+  .arch-soft {
+    border-radius: 9999px 9999px 24px 24px;
+    overflow: hidden;
+  }
+}
+
+/* Overrides the eyebrow @utility, so it must stay unlayered. */
+.loud .eyebrow {
+  color: var(--brand);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+@keyframes arch-rise {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .arch-rise {
+    animation: arch-rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 }

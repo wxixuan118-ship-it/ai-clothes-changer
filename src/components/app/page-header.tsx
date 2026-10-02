@@ -13,7 +13,7 @@ export function PageHeader({
     <div className="flex items-end justify-between gap-4">
       <div>
         <p className="eyebrow">{eyebrow}</p>
-        <h2 className="mt-1 font-heading text-2xl font-extrabold">{title}</h2>
+        <h1 className="mt-1 font-heading text-3xl font-semibold">{title}</h1>
       </div>
       {action}
     </div>

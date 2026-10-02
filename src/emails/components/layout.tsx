@@ -8,6 +8,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { siteConfig } from "@/config/site";
 
 // Shared chrome for every transactional email: mono wordmark header, ink
 // text on paper, one green accent (DESIGN.md, translated to email-safe hex —
@@ -21,7 +22,7 @@ export const emailTheme = {
   ink: "#26241d",
   muted: "#6e6a5c",
   hairline: "#cfc8b2",
-  accent: "#f3d84a",
+  accent: "#c6f648",
   accentInk: "#26241d",
   credit: "#27a562",
   mono: "'Courier New', Courier, monospace",
@@ -67,7 +68,7 @@ export function EmailLayout({
               }}
             >
               <span style={{ color: emailTheme.accent }}>▮</span>{" "}
-              ai-saas-starter
+              {siteConfig.name}
             </Text>
           </Section>
           {children}
@@ -86,7 +87,8 @@ export function EmailLayout({
               margin: 0,
             }}
           >
-            ai-saas-starter · open source · MIT
+            {siteConfig.name} · You get this email because you have an account
+            with us.
           </Text>
         </Container>
       </Body>

@@ -1,28 +1,31 @@
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+import { Sparkle } from "@/components/atelier/sparkle";
+
+export const metadata: Metadata = {
+  title: "Page not found",
+  robots: { index: false },
+};
 
 export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-5 px-6 text-center">
-      <Image
-        src="/illustrations/mascot-lost.png"
-        alt="Gold coin mascot shrugging beside a question mark"
-        width={140}
-        height={140}
-        className="illo"
-      />
-      <p className="eyebrow">Entry not found</p>
-      <h1 className="text-display">404</h1>
-      <p className="max-w-md text-muted-foreground">
-        This page is not in the ledger — the address may have moved or never
-        existed. Your account and credits are unaffected.
+      <Sparkle className="size-10" />
+      <p className="eyebrow text-[var(--brand)]">404</p>
+      <h1 className="text-title">This page doesn&apos;t exist</h1>
+      <p className="max-w-md text-[var(--muted-ink)]">
+        The link may be old or mistyped. Your account and credits are
+        unaffected.
       </p>
-      <Link
-        href="/"
-        className="press inline-flex items-center rounded-md border-2 bg-primary px-5 py-3 text-[15px] font-semibold text-primary-foreground"
-      >
-        Back to safety
-      </Link>
+      <div className="flex flex-wrap justify-center gap-3">
+        <Link href="/" className="pill pill-brand px-6 py-3">
+          Go to the clothes changer
+        </Link>
+        <Link href="/pricing" className="pill pill-dark px-6 py-3">
+          See pricing
+        </Link>
+      </div>
     </div>
   );
 }

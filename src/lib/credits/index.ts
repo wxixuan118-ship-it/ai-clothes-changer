@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 
 import { WELCOME_CREDITS } from "@/config/plans";
 import { db } from "@/db";
@@ -251,4 +251,29 @@ export async function getHistory(
       .orderBy(desc(creditTransactions.createdAt), desc(creditTransactions.id))
       .limit(limit)
   );
+}
+
+/**
+ * Which of these generations actually received their refund. A failed run
+ * whose refund write failed has a spend and no refund_{id} row — the UI must
+ * not claim "refunded" for it.
+ */
+export async function getRefundedGenerationIds(
+  userId: string,
+  generationIds: string[],
+): Promise<Set<string>> {
+  if (generationIds.length === 0) return new Set();
+  const rows = await db
+    .select({ key: creditTransactions.idempotencyKey })
+    .from(creditTransactions)
+    .where(
+      and(
+        eq(creditTransactions.userId, userId),
+        inArray(
+          creditTransactions.idempotencyKey,
+          generationIds.map((id) => `refund_${id}`),
+        ),
+      ),
+    );
+  return new Set(rows.map((row) => row.key.slice("refund_".length)));
 }

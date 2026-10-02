@@ -1,5 +1,14 @@
 # DESIGN.md — "The Ledger", LOUD MODE (v4)
 
+> **SUPERSEDED — Atelier theme (2026-10).** This product (AI Clothes
+> Changer) now uses a dark fashion-editorial skin: near-black canvas, soft
+> white ink, 1px hairline borders, pill buttons, arch-shaped portraits,
+> NO hard offset shadows, Familjen Grotesk for headings, gold sparkle
+> ornament. Tokens live in the "Atelier theme" block at the end of
+> `src/app/globals.css`; marketing components live in
+> `src/components/atelier/`. Where the rules below conflict with that,
+> the Atelier theme wins. The loud/ledger rules remain only as history.
+
 An accountant's ledger repainted as a poster wall. v4 keeps the v3.1
 grammar — ink borders, hard offset shadows, press physics, the pastel-pop
 palette, the coin mascot — and drops the restraint DNA on marketing

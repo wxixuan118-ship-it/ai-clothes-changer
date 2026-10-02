@@ -39,6 +39,9 @@ const schema = z
       .string()
       .min(32, "min 32 chars — generate with `openssl rand -base64 32`"),
     BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
+    /** Public canonical origin (sitemap, OG, canonical tags). Defaults to
+     *  BETTER_AUTH_URL — set it when the two differ (e.g. www vs apex). */
+    SITE_URL: z.url().optional(),
 
     // ── OAuth (optional — a missing pair hides that login button) ─────────
     GOOGLE_CLIENT_ID: z.string().optional(),
@@ -48,7 +51,9 @@ const schema = z
 
     // ── Email via Resend (optional — emails no-op without it) ─────────────
     RESEND_API_KEY: z.string().optional(),
-    EMAIL_FROM: z.string().default("AI SaaS Starter <onboarding@resend.dev>"),
+    EMAIL_FROM: z
+      .string()
+      .default("AI Clothes Changer <onboarding@resend.dev>"),
 
     // ── Stripe ────────────────────────────────────────────────────────────
     // Optional in development so a fresh clone boots without a Stripe

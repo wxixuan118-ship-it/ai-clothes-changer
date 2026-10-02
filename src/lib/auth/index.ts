@@ -12,6 +12,7 @@ import {
   cancelSubscriptionsForUser,
   ensureStripeCustomer,
 } from "@/lib/billing/customer";
+import { deleteStoredImagesForUser } from "@/lib/ai/storage";
 import { grantWelcomeCredits } from "@/lib/credits";
 import { sendEmail } from "@/lib/email";
 import { env, features } from "@/lib/env";
@@ -58,6 +59,9 @@ export const auth = betterAuth({
     },
     changeEmail: {
       enabled: true,
+      // Keyless setups can't deliver the approval email, so unverified
+      // accounts (all of them without Resend) change email directly.
+      updateEmailWithoutVerification: !features.email,
       sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
         await sendEmail({
           to: user.email, // current address must approve the change
@@ -68,14 +72,28 @@ export const auth = betterAuth({
     },
     deleteUser: {
       enabled: true,
-      sendDeleteAccountVerification: async ({ user, url }) => {
-        await sendEmail({
-          to: user.email,
-          subject: "Confirm account deletion",
-          text: `This permanently deletes your account and data:\n\n${url}\n\nIf you didn't request this, ignore this email.`,
-        });
-      },
+      // Email confirmation only when email can actually be delivered —
+      // otherwise the token is never seen and deletion can never finish.
+      ...(features.email
+        ? {
+            sendDeleteAccountVerification: async ({
+              user,
+              url,
+            }: {
+              user: { email: string };
+              url: string;
+            }) => {
+              await sendEmail({
+                to: user.email,
+                subject: "Confirm account deletion",
+                text: `This permanently deletes your account and data:\n\n${url}\n\nIf you didn't request this, ignore this email.`,
+              });
+            },
+          }
+        : {}),
       beforeDelete: async (user) => {
+        // Stored result images outlive the DB cascade — remove them first.
+        await deleteStoredImagesForUser(user.id);
         // Cancel Stripe subscriptions before the DB rows cascade away —
         // afterwards there is no record left to find the customer by.
         if (features.billing) {

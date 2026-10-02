@@ -33,7 +33,15 @@ test("visiting /dashboard signed out bounces through login and back", async ({
   expect(page.url()).toBe(`${BASE_URL}/dashboard`);
 });
 
-for (const evil of ["//evil.com", "https://evil.com", "%2F%2Fevil.com"]) {
+// Browsers normalise "/\\host" and "/<TAB>/host" into "//host" — the
+// bypasses a plain startsWith("//") check missed.
+for (const evil of [
+  "//evil.com",
+  "https://evil.com",
+  "%2F%2Fevil.com",
+  "/%5Cevil.com/phish",
+  "/%09/evil.com/phish",
+]) {
   test(`next=${evil} lands on /dashboard, never leaves the origin`, async ({
     page,
   }) => {

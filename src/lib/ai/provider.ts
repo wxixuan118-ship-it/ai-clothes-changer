@@ -11,9 +11,24 @@ import { mockProvider } from "./mock";
 // version, where multi-provider image/video/audio with job queues and
 // auto-refunds is done: https://nikandr.com
 
+export type InputImage = {
+  bytes: Buffer;
+  /** image/jpeg | image/png | image/webp */
+  mediaType: string;
+};
+
+/** Which part of the outfit the garment replaces. */
+export type GarmentType = "top" | "bottom" | "dress" | "full";
+
 export type GenerateImageInput = {
+  /** Instruction for the model (preset template or the user's words). */
   prompt: string;
   userId: string;
+  /** The photo of the person to dress. Clothes-changer runs always set it. */
+  personImage?: InputImage;
+  /** Garment reference photo — set in "garment" mode only. */
+  garmentImage?: InputImage;
+  garmentType?: GarmentType;
 };
 
 export type GeneratedImage = {

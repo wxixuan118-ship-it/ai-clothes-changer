@@ -34,8 +34,8 @@ export const plans: Record<PlanId, Plan> = {
     priceEnvKey: null,
     features: [
       `${WELCOME_CREDITS} welcome credits`,
-      `${GENERATION_COST_CREDITS} credit per image generation`,
-      "Full source code, MIT",
+      `${GENERATION_COST_CREDITS} credit per outfit change`,
+      "Personal use, watermarked downloads",
     ],
   },
   pro: {
@@ -45,9 +45,9 @@ export const plans: Record<PlanId, Plan> = {
     monthlyCredits: 200,
     priceEnvKey: "STRIPE_PRICE_PRO_MONTHLY",
     features: [
-      "200 credits every month",
-      "Credits accumulate — no expiry",
-      "Cancel anytime in the portal",
+      "200 outfit changes every month",
+      "No watermark, commercial use",
+      "Unused credits roll over",
     ],
   },
   ultra: {
@@ -57,9 +57,9 @@ export const plans: Record<PlanId, Plan> = {
     monthlyCredits: 1000,
     priceEnvKey: "STRIPE_PRICE_ULTRA_MONTHLY",
     features: [
-      "1,000 credits every month",
-      "Credits accumulate — no expiry",
-      "Cancel anytime in the portal",
+      "1,000 outfit changes every month",
+      "No watermark, commercial use",
+      "Cancel anytime",
     ],
   },
 };

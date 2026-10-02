@@ -62,8 +62,8 @@ export function ConnectedAccounts({
   if (available.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No OAuth providers are configured. Add Google or GitHub keys to .env to
-        enable provider sign-in.
+        You sign in with email and password. There are no other sign-in methods
+        to connect.
       </p>
     );
   }

@@ -15,7 +15,7 @@ const FILE_PATTERN =
   /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.([a-z]{3,4})$/;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ file: string }> },
 ): Promise<Response> {
   const { file } = await params;
@@ -45,10 +45,18 @@ export async function GET(
 
   try {
     const bytes = await readFile(generatedFilePath(file));
+    const download = new URL(request.url).searchParams.has("download");
     return new Response(new Uint8Array(bytes), {
       headers: {
         "Content-Type": mediaType,
         "Cache-Control": "private, max-age=31536000, immutable",
+        // Never let a browser sniff a stored file into something executable.
+        "X-Content-Type-Options": "nosniff",
+        ...(download
+          ? {
+              "Content-Disposition": `attachment; filename="ai-clothes-changer-${match[1]}.${match[2]}"`,
+            }
+          : {}),
       },
     });
   } catch {

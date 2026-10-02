@@ -1,49 +1,92 @@
 import { expect, test } from "@playwright/test";
 
-test("landing renders the ledger sections with signed-out auth CTAs", async ({
+// Turbopack's first compile of the home page (the hero embeds the whole
+// studio) can race a second request in dev and 500 once. Warm it until two
+// loads in a row succeed so the assertions test the page, not the bundler.
+test.beforeAll(async ({ request }) => {
+  let streak = 0;
+  for (let attempt = 0; attempt < 10 && streak < 2; attempt++) {
+    streak = (await request.get("/")).ok() ? streak + 1 : 0;
+  }
+});
+
+test("landing renders the clothes-changer sections with signed-out CTAs", async ({
   page,
 }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "A complete AI SaaS. Free.",
+    "AI Clothes Changer",
   );
-  // Signed-out nav: Sign in + Get started; hero CTA goes to signup.
+  // Signed-out nav: Log In + Sign Up; the hero CTA opens the studio.
   await expect(
-    page.getByRole("banner").getByRole("link", { name: "Get started" }),
+    page.getByRole("banner").getByRole("link", { name: "Sign Up" }),
   ).toHaveAttribute("href", "/signup");
   await expect(
-    page.getByRole("banner").getByRole("link", { name: "Sign in" }),
+    page.getByRole("banner").getByRole("link", { name: "Log In" }),
   ).toBeVisible();
+  // The tool sits in the hero — usable before signing up.
+  await expect(page.locator("#studio #person-photo")).toBeAttached();
   await expect(
-    page.getByRole("link", { name: "Start free — 10 credits" }),
-  ).toHaveAttribute("href", "/signup");
-  await expect(page.locator("#features")).toBeVisible();
-  // Pricing section reads from config/plans.ts.
-  await expect(page.locator("#pricing")).toBeVisible();
-  await expect(page.locator("#pricing")).toContainText("$9/mo");
-  // The clarity block states the product in plain words.
-  await expect(page.locator("#what")).toContainText(
-    "This website is the demo.",
+    page.locator("#studio").getByRole("tab", { name: "Styles" }),
+  ).toBeVisible();
+  await expect(page.locator("#how-it-works")).toContainText(
+    "Upload your photo",
   );
-  await expect(page.locator("#how")).toContainText("Clone it");
-  // The gallery renders all six generated posters with caption chips.
-  await expect(page.locator("#gallery img")).toHaveCount(6);
-  await expect(page.locator("#gallery")).toContainText("sunset over mountains");
+  await expect(page.locator("#styles img")).toHaveCount(4);
+  // Pricing reads from config/plans.ts.
+  await expect(page.locator("#pricing")).toContainText("$9");
   await expect(page.locator('details[name="faq"]').first()).toBeVisible();
 });
 
-test("theme toggle flips to dark, renders, and persists across reloads", async ({
+test("the site is night-only: dark theme without a toggle", async ({
   page,
 }) => {
   await page.goto("/");
-  const html = page.locator("html");
-  await expect(html).not.toHaveClass(/dark/);
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await expect(page.getByRole("button", { name: "Toggle theme" })).toHaveCount(
+    0,
+  );
+});
 
-  await page.getByRole("button", { name: "Toggle theme" }).click();
-  await expect(html).toHaveClass(/dark/);
-  // Dark theme actually renders the page (not just a class flip).
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+test("a style card preselects that style in the hero tool", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page
+    .locator("#styles")
+    .getByRole("link", { name: /Evening glam/ })
+    .click();
+  await expect(page).toHaveURL(/style=evening-glam/);
+  const studio = page.locator("#studio");
+  await expect(studio.getByRole("tab", { name: "Styles" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect(
+    studio.getByRole("button", { name: "Evening glam" }),
+  ).toHaveAttribute("aria-pressed", "true");
+});
 
-  await page.reload();
-  await expect(html).toHaveClass(/dark/);
+test("nav marks the current page and pricing CTAs send visitors to sign up", async ({
+  page,
+}) => {
+  await page.goto("/pricing");
+  const nav = page
+    .getByRole("banner")
+    .getByRole("navigation", { name: "Main" });
+  await expect(nav.getByRole("link", { name: "Pricing" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(nav.getByRole("link", { name: "Home" })).not.toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "credit-based pricing",
+  );
+  await expect(page.getByRole("link", { name: "Get Pro" })).toHaveAttribute(
+    "href",
+    "/signup?next=%2Fbilling",
+  );
 });

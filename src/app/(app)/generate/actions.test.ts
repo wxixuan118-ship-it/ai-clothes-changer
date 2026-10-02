@@ -16,14 +16,17 @@ import {
 // image provider, and Next's cache revalidation are mocked.
 
 let currentUserId = "unset";
+let signedOut = false;
+const fakeSession = () => ({
+  user: {
+    id: currentUserId,
+    name: "Gen Test",
+    email: `${currentUserId}@test.local`,
+  },
+});
 vi.mock("@/lib/auth/session", () => ({
-  requireSession: vi.fn(async () => ({
-    user: {
-      id: currentUserId,
-      name: "Gen Test",
-      email: `${currentUserId}@test.local`,
-    },
-  })),
+  getSession: vi.fn(async () => (signedOut ? null : fakeSession())),
+  requireSession: vi.fn(async () => fakeSession()),
 }));
 
 const providerGenerate = vi.fn();
@@ -49,7 +52,11 @@ import * as credits from "@/lib/credits";
 import { grantCredits } from "@/lib/credits";
 import { closeDb, ensureTestDatabase } from "@/test/db";
 
-import { generateImageAction, type GenerateResult } from "./actions";
+import {
+  deleteGenerationAction,
+  generateImageAction,
+  type GenerateResult,
+} from "./actions";
 
 const initialState: GenerateResult = { ok: true };
 const runAction = (form: FormData) => generateImageAction(initialState, form);
@@ -63,6 +70,7 @@ afterAll(async () => {
 });
 
 beforeEach(() => {
+  signedOut = false;
   providerGenerate.mockReset();
   providerGenerate.mockResolvedValue({
     url: `data:image/svg+xml;base64,${Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'/>").toString("base64")}`,
@@ -92,10 +100,18 @@ async function createUser(startingCredits: number): Promise<string> {
   return id;
 }
 
-function promptForm(
-  prompt = "A ledger book on a desk, studio light",
-): FormData {
+// 1x1 PNG — enough to pass the type/size checks.
+const PNG_BYTES = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+  "base64",
+);
+const photo = (name = "person.png") =>
+  new File([PNG_BYTES], name, { type: "image/png" });
+
+function promptForm(prompt = "a navy tailored suit"): FormData {
   const form = new FormData();
+  form.set("mode", "prompt");
+  form.set("personImage", photo());
   form.set("prompt", prompt);
   return form;
 }
@@ -143,7 +159,7 @@ describe("generateImageAction", () => {
 
     const result = await runAction(promptForm());
 
-    expect(result).toEqual({ ok: true });
+    expect(result).toMatchObject({ ok: true });
     expect(await balanceOf(userId)).toBe(4);
     const { generations: rows, spends } = await rowsFor(userId);
     expect(rows).toHaveLength(1);
@@ -210,9 +226,7 @@ describe("generateImageAction", () => {
       mockProvider.generateImage(input),
     );
 
-    const result = await runAction(
-      promptForm("A ledger book, but make it FAIL"),
-    );
+    const result = await runAction(promptForm("a suit, but make it FAIL"));
 
     expect(result).toEqual({ ok: false, error: "generation_failed" });
     expect(await balanceOf(userId)).toBe(5); // round-trip: unchanged
@@ -252,5 +266,173 @@ describe("generateImageAction", () => {
     const { generations: rows, spends } = await rowsFor(userId);
     expect(rows).toHaveLength(0);
     expect(spends).toHaveLength(0);
+  });
+});
+
+describe("generateImageAction — clothes changer inputs", () => {
+  it("passes the person photo and the instruction to the provider", async () => {
+    await createUser(2);
+
+    const result = await runAction(promptForm("a red satin gown"));
+
+    expect(result).toMatchObject({ ok: true });
+    const input = providerGenerate.mock.calls[0]?.[0];
+    expect(input.personImage.mediaType).toBe("image/png");
+    expect(input.personImage.bytes.equals(PNG_BYTES)).toBe(true);
+    expect(input.prompt).toContain("a red satin gown");
+  });
+
+  it("garment mode sends the garment photo and records a readable label", async () => {
+    const userId = await createUser(2);
+    const form = new FormData();
+    form.set("mode", "garment");
+    form.set("personImage", photo());
+    form.set("garmentImage", photo("garment.png"));
+    form.set("garmentType", "top");
+
+    const result = await runAction(form);
+
+    expect(result).toMatchObject({ ok: true });
+    const input = providerGenerate.mock.calls[0]?.[0];
+    expect(input.garmentImage.mediaType).toBe("image/png");
+    expect(input.garmentType).toBe("top");
+    const { generations: rows } = await rowsFor(userId);
+    expect(rows[0]?.prompt).toBe("Garment photo · top");
+  });
+
+  it("style mode expands the preset into the instruction", async () => {
+    const userId = await createUser(2);
+    const form = new FormData();
+    form.set("mode", "style");
+    form.set("personImage", photo());
+    form.set("styleId", "navy-suit");
+
+    const result = await runAction(form);
+
+    expect(result).toMatchObject({ ok: true });
+    expect(providerGenerate.mock.calls[0]?.[0].prompt).toContain(
+      "navy two-piece business suit",
+    );
+    const { generations: rows } = await rowsFor(userId);
+    expect(rows[0]?.prompt).toBe("Style · Navy business suit");
+  });
+
+  it.each([
+    ["no person photo", { mode: "prompt", prompt: "a suit" }, "invalid_photo"],
+    [
+      "a non-image person file",
+      { mode: "prompt", prompt: "a suit", personText: true },
+      "invalid_photo",
+    ],
+    ["garment mode without a garment", { mode: "garment" }, "invalid_garment"],
+    ["an unknown style", { mode: "style", styleId: "nope" }, "invalid_style"],
+  ] as const)(
+    "rejects %s before any side effect",
+    async (_name, fields, error) => {
+      const userId = await createUser(2);
+      const form = new FormData();
+      form.set("mode", fields.mode);
+      if ("prompt" in fields) form.set("prompt", fields.prompt);
+      if ("styleId" in fields) form.set("styleId", fields.styleId);
+      if (fields.mode !== "prompt") form.set("personImage", photo());
+      if ("personText" in fields) {
+        form.set(
+          "personImage",
+          new File(["hello"], "notes.txt", { type: "text/plain" }),
+        );
+      }
+
+      const result = await runAction(form);
+
+      expect(result).toEqual({ ok: false, error });
+      const { generations: rows, spends } = await rowsFor(userId);
+      expect(rows).toHaveLength(0);
+      expect(spends).toHaveLength(0);
+      expect(providerGenerate).not.toHaveBeenCalled();
+    },
+  );
+});
+
+describe("generateImageAction — hardening", () => {
+  it("returns unauthenticated (no redirect, no side effects) without a session", async () => {
+    const userId = await createUser(2);
+    signedOut = true;
+
+    const result = await runAction(promptForm());
+
+    expect(result).toEqual({ ok: false, error: "unauthenticated" });
+    const { generations: rows, spends } = await rowsFor(userId);
+    expect(rows).toHaveLength(0);
+    expect(spends).toHaveLength(0);
+    expect(providerGenerate).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-image bytes even when declared image/jpeg", async () => {
+    const userId = await createUser(2);
+    const form = new FormData();
+    form.set("mode", "prompt");
+    form.set("prompt", "a navy suit");
+    form.set(
+      "personImage",
+      new File(["<html><script>alert(1)</script></html>"], "x.jpg", {
+        type: "image/jpeg",
+      }),
+    );
+
+    const result = await runAction(form);
+
+    expect(result).toEqual({ ok: false, error: "invalid_photo" });
+    const { spends } = await rowsFor(userId);
+    expect(spends).toHaveLength(0);
+  });
+
+  it("derives the media type from the bytes, not the declared type", async () => {
+    await createUser(2);
+    const form = promptForm();
+    form.set(
+      "personImage",
+      new File([PNG_BYTES], "x.jpg", { type: "image/jpeg" }),
+    );
+
+    await runAction(form);
+
+    expect(providerGenerate.mock.calls[0]?.[0].personImage.mediaType).toBe(
+      "image/png",
+    );
+  });
+});
+
+describe("deleteGenerationAction", () => {
+  it("deletes the owner's finished result and leaves the ledger untouched", async () => {
+    const userId = await createUser(2);
+    await runAction(promptForm());
+    const { generations: before, spends } = await rowsFor(userId);
+    const id = before[0]?.id as string;
+
+    expect(await deleteGenerationAction(id)).toEqual({ ok: true });
+
+    const after = await rowsFor(userId);
+    expect(after.generations).toHaveLength(0);
+    expect(after.spends).toHaveLength(spends.length); // append-only ledger
+    await expectInvariant(userId);
+  });
+
+  it("refuses another user's result and pending rows", async () => {
+    const owner = await createUser(2);
+    await runAction(promptForm());
+    const { generations: rows } = await rowsFor(owner);
+    const id = rows[0]?.id as string;
+
+    await createUser(0); // switch the session to someone else
+    expect(await deleteGenerationAction(id)).toEqual({ ok: false });
+    expect((await rowsFor(owner)).generations).toHaveLength(1);
+
+    currentUserId = owner;
+    await db
+      .update(generations)
+      .set({ status: "pending" })
+      .where(eq(generations.id, id));
+    expect(await deleteGenerationAction(id)).toEqual({ ok: false });
+    expect(await deleteGenerationAction("not-a-uuid")).toEqual({ ok: false });
   });
 });

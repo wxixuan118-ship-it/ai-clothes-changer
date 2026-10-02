@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -17,6 +18,7 @@ export function EmailForm({
   email: string;
   canSendEmail: boolean;
 }) {
+  const router = useRouter();
   const [pending, setPending] = React.useState(false);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -47,6 +49,7 @@ export function EmailForm({
         ? "Check your current inbox to approve the change"
         : "Email updated",
     );
+    router.refresh();
   }
 
   return (
