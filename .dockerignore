@@ -1,0 +1,12 @@
+# Keep secrets, host binaries and build output out of the image context.
+.git
+node_modules
+.next
+.generated
+.env
+.env.*
+!.env.example
+test-results
+playwright-report
+coverage
+*.log

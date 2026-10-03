@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveFeatures, missingBillingEnv, parseEnv } from "./env";
+import {
+  deriveFeatures,
+  missingBillingEnv,
+  parseEnv,
+  parseEnvForBuild,
+} from "./env";
 
 const validEnv = {
   DATABASE_URL: "postgres://postgres:postgres@localhost:5432/ai_saas_starter",
@@ -182,5 +187,26 @@ describe("deriveFeatures", () => {
     expect(features.blobStorage).toBe(true);
     expect(features.googleOAuth).toBe(false);
     expect(features.redisRateLimit).toBe(false);
+  });
+});
+
+describe("parseEnvForBuild", () => {
+  it("lets a container build pass with no runtime env at all", () => {
+    const env = parseEnvForBuild({ NODE_ENV: "production" });
+    expect(env.NODE_ENV).toBe("production");
+    expect(env.DATABASE_URL).toMatch(/^postgres:\/\//);
+    expect(env.BETTER_AUTH_SECRET.length).toBeGreaterThanOrEqual(32);
+  });
+
+  it("uses the real values whenever they are present", () => {
+    const env = parseEnvForBuild({ ...validEnv, NODE_ENV: "production" });
+    expect(env.DATABASE_URL).toBe(validEnv.DATABASE_URL);
+    expect(env.STRIPE_SECRET_KEY).toBe("sk_test_123");
+  });
+
+  it("keeps the runtime parse strict — the build fallback is build-only", () => {
+    expect(() => parseEnv({ NODE_ENV: "production" })).toThrowError(
+      /DATABASE_URL/,
+    );
   });
 });

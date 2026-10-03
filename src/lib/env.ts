@@ -167,7 +167,43 @@ export function parseEnv(raw: Record<string, string | undefined>): Env {
   return parsed.data;
 }
 
-export const env: Env = parseEnv(process.env);
+// `next build` imports server modules to collect page data, but container
+// builds (e.g. AnySites' Docker build) don't receive runtime secrets. During
+// the build only, fall back to inert placeholders instead of failing. The
+// real values are validated strictly when the server starts: production
+// boot runs src/instrumentation.ts, which loads this module before the first
+// request — a missing variable stops the server with this file's message.
+const BUILD_PLACEHOLDERS = {
+  DATABASE_URL: "postgres://build:build@127.0.0.1:5432/build",
+  BETTER_AUTH_SECRET: "build-time-placeholder-never-used-at-runtime",
+} as const;
+
+/** Exported for tests. */
+export function parseEnvForBuild(raw: Record<string, string | undefined>): Env {
+  try {
+    return parseEnv(raw);
+  } catch {
+    console.warn(
+      "[env] building without runtime environment variables — using placeholders; they are validated when the server starts",
+    );
+    const set = Object.fromEntries(
+      Object.entries(raw).filter(([, value]) => value),
+    );
+    // "test" skips the production-only requirements (Stripe keys) for the
+    // build pass; NODE_ENV itself is restored below.
+    const parsed = parseEnv({
+      ...BUILD_PLACEHOLDERS,
+      ...set,
+      NODE_ENV: "test",
+    });
+    return { ...parsed, NODE_ENV: "production" };
+  }
+}
+
+export const env: Env =
+  process.env.NEXT_PHASE === "phase-production-build"
+    ? parseEnvForBuild(process.env)
+    : parseEnv(process.env);
 
 /** Exported for tests. App code uses the `features` singleton below. */
 export function deriveFeatures(e: Env) {
