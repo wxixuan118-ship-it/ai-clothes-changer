@@ -8,7 +8,7 @@ const fixture = (name: string) => path.join(__dirname, "fixtures", name);
 
 test.beforeEach(async ({ page }) => {
   await signUp(page, uniqueEmail("gen"));
-  await page.goto("/generate");
+  await page.goto("/generate?tool=clothes");
   await page.locator("#person-photo").setInputFiles(fixture("person.jpg"));
 });
 
@@ -111,4 +111,18 @@ test("a result can be deleted from history", async ({ page }) => {
   await expect(page.getByText("Look deleted.")).toBeVisible();
   await expect(page.locator("li img")).toHaveCount(0);
   await expect(creditBalance(page)).toHaveText("9"); // spend stays on the ledger
+});
+
+test("the studio defaults to the hairstyle changer", async ({ page }) => {
+  await page.goto("/generate");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "AI Hairstyle Changer",
+  );
+  await page.locator("#person-photo").setInputFiles(fixture("person.jpg"));
+  await page.locator("#hair-photo").setInputFiles(fixture("garment.jpg"));
+  await page.getByRole("button", { name: /^Change hairstyle/ }).click();
+  await expect(page.getByText("New look ready! 1 credit spent.")).toBeVisible();
+  await expect(
+    page.locator('li img[alt="Hairstyle photo"]').first(),
+  ).toBeVisible();
 });

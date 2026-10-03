@@ -294,7 +294,7 @@ describe("generateImageAction — clothes changer inputs", () => {
 
     expect(result).toMatchObject({ ok: true });
     const input = providerGenerate.mock.calls[0]?.[0];
-    expect(input.garmentImage.mediaType).toBe("image/png");
+    expect(input.referenceImage.mediaType).toBe("image/png");
     expect(input.garmentType).toBe("top");
     const { generations: rows } = await rowsFor(userId);
     expect(rows[0]?.prompt).toBe("Garment photo · top");
@@ -434,5 +434,79 @@ describe("deleteGenerationAction", () => {
       .where(eq(generations.id, id));
     expect(await deleteGenerationAction(id)).toEqual({ ok: false });
     expect(await deleteGenerationAction("not-a-uuid")).toEqual({ ok: false });
+  });
+});
+
+describe("generateImageAction — hairstyle changer", () => {
+  const hairForm = (fields: Record<string, string>, reference = false) => {
+    const form = new FormData();
+    form.set("tool", "hair");
+    form.set("personImage", photo());
+    for (const [key, value] of Object.entries(fields)) form.set(key, value);
+    if (reference) form.set("referenceImage", photo("hair.png"));
+    return form;
+  };
+
+  it("preset: hair-only instruction, hair task, readable label", async () => {
+    const userId = await createUser(2);
+
+    const result = await runAction(
+      hairForm({ mode: "style", styleId: "pixie-cut" }),
+    );
+
+    expect(result).toMatchObject({ ok: true });
+    const input = providerGenerate.mock.calls[0]?.[0];
+    expect(input.task).toBe("hair");
+    expect(input.prompt).toContain("pixie cut");
+    expect(input.prompt).toContain("Keep the face");
+    const { generations: rows } = await rowsFor(userId);
+    expect(rows[0]?.prompt).toBe("Hairstyle · Pixie cut");
+  });
+
+  it("reference photo: sends it as the reference image", async () => {
+    const userId = await createUser(2);
+
+    const result = await runAction(hairForm({ mode: "reference" }, true));
+
+    expect(result).toMatchObject({ ok: true });
+    expect(providerGenerate.mock.calls[0]?.[0].referenceImage.mediaType).toBe(
+      "image/png",
+    );
+    const { generations: rows } = await rowsFor(userId);
+    expect(rows[0]?.prompt).toBe("Hairstyle photo");
+  });
+
+  it("text: wraps the description in the hair-only instruction", async () => {
+    await createUser(2);
+
+    await runAction(
+      hairForm({ mode: "prompt", prompt: "long beach waves, honey blonde" }),
+    );
+
+    expect(providerGenerate.mock.calls[0]?.[0].prompt).toMatch(
+      /^Change only the person's hair to: long beach waves, honey blonde/,
+    );
+  });
+
+  it.each([
+    [
+      "a clothes preset id",
+      { mode: "style", styleId: "navy-suit" },
+      false,
+      "invalid_style",
+    ],
+    [
+      "reference mode without a photo",
+      { mode: "reference" },
+      false,
+      "invalid_garment",
+    ],
+  ] as const)("rejects %s", async (_name, fields, reference, error) => {
+    const userId = await createUser(2);
+
+    const result = await runAction(hairForm(fields, reference));
+
+    expect(result).toEqual({ ok: false, error });
+    expect((await rowsFor(userId)).spends).toHaveLength(0);
   });
 });

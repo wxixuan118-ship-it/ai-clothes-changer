@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { desc, eq } from "drizzle-orm";
 
+import Link from "next/link";
+
 import { GENERATION_COST_CREDITS } from "@/config/plans";
+import { parseTool, tools, type ToolId } from "@/config/tools";
 import { db } from "@/db";
 import { generations } from "@/db/schema";
 import { requireSession } from "@/lib/auth/session";
@@ -12,14 +15,19 @@ import { GenerateForm } from "@/components/generate/generate-form";
 import { PageHeader } from "@/components/app/page-header";
 import { SparkleSpinner } from "@/components/sparkle-spinner";
 
-export const metadata: Metadata = { title: "Clothes changer" };
+export const metadata: Metadata = { title: "Studio" };
 
 function formatTimestamp(date: Date): string {
   return date.toISOString().slice(0, 16).replace("T", " ");
 }
 
-export default async function GeneratePage() {
+export default async function GeneratePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tool?: string }>;
+}) {
   const session = await requireSession();
+  const tool = parseTool((await searchParams).tool);
 
   const history = await db
     .select()
@@ -37,7 +45,7 @@ export default async function GeneratePage() {
     <div className="mx-auto max-w-6xl space-y-10">
       <PageHeader
         eyebrow="Studio"
-        title="AI Clothes Changer"
+        title={tools[tool].name}
         action={
           <span className="chip-mono">
             {session.user.creditBalance ?? 0} credits
@@ -45,7 +53,30 @@ export default async function GeneratePage() {
         }
       />
 
+      <nav
+        aria-label="Generator"
+        className="flex w-fit gap-1 rounded-full border bg-[var(--paper-2)] p-1"
+      >
+        {(["hair", "clothes"] as ToolId[]).map((id) => (
+          <Link
+            key={id}
+            href={tools[id].studio}
+            aria-current={id === tool ? "page" : undefined}
+            className={
+              "rounded-full px-4 py-2 text-sm transition-colors " +
+              (id === tool
+                ? "bg-[var(--brand)] font-medium text-[var(--ink-deep)]"
+                : "text-[var(--muted-ink)] hover:text-[var(--ink)]")
+            }
+          >
+            {id === "hair" ? "Hairstyle" : "Clothes"}
+          </Link>
+        ))}
+      </nav>
+
       <GenerateForm
+        key={tool}
+        tool={tool}
         balance={session.user.creditBalance ?? 0}
         cost={GENERATION_COST_CREDITS}
         mock={env.AI_MOCK}

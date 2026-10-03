@@ -78,9 +78,9 @@ export default async function DashboardPage() {
             <p className="mt-1 text-sm">
               Your free credits are ready. Open the{" "}
               <Link href="/generate" className="link-pop">
-                clothes changer
+                studio
               </Link>{" "}
-              to try your first outfit — each result costs 1 credit and failed
+              to try your first new look — each result costs 1 credit and failed
               runs are refunded automatically. Plans and top-ups live in{" "}
               <Link href="/billing" className="link-pop">
                 Billing
@@ -107,7 +107,7 @@ export default async function DashboardPage() {
             </Link>{" "}
             or{" "}
             <Link href="/generate" className="link-pop">
-              change an outfit
+              try a new look
             </Link>
             .
           </CardContent>

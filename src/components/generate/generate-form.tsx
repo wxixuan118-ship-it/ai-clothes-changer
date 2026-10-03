@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ImageUpIcon,
+  ScissorsIcon,
   ShirtIcon,
   SparklesIcon,
   TypeIcon,
@@ -23,7 +24,13 @@ import {
   type AuthOptions,
 } from "@/components/generate/auth-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  getHairPreset,
+  hairCategories,
+  hairPresets,
+} from "@/config/hairstyles";
 import { getStylePreset, styleCategories, stylePresets } from "@/config/styles";
+import { tools, type ToolId } from "@/config/tools";
 import { cn } from "@/lib/utils";
 
 const initialState: GenerateResult = { ok: true };
@@ -35,7 +42,7 @@ const MAX_ORIGINAL_BYTES = 25 * 1024 * 1024;
 
 const errorMessages: Record<NonNullable<GenerateResult["error"]>, string> = {
   invalid_photo: "Use a JPG, PNG, or WebP photo of yourself (up to 25 MB).",
-  invalid_garment: "Use a JPG, PNG, or WebP photo of the garment.",
+  invalid_garment: "Use a JPG, PNG, or WebP reference photo.",
   invalid_prompt: "Describe the outfit in 3–1000 characters.",
   invalid_style: "Pick a style first.",
   unauthenticated: "Please sign in again to continue.",
@@ -45,20 +52,9 @@ const errorMessages: Record<NonNullable<GenerateResult["error"]>, string> = {
   generation_failed: "Outfit change failed — credit refunded.",
 };
 
-type Mode = "garment" | "prompt" | "style";
+type Mode = "reference" | "prompt" | "style";
 
-const modes: {
-  id: Mode;
-  /** Accessible name. */
-  label: string;
-  /** Visible label — short enough to fit three tabs at any width. */
-  short: string;
-  icon: typeof ShirtIcon;
-}[] = [
-  { id: "garment", label: "Garment photo", short: "Garment", icon: ShirtIcon },
-  { id: "prompt", label: "Describe it", short: "Describe", icon: TypeIcon },
-  { id: "style", label: "Styles", short: "Styles", icon: SparklesIcon },
-];
+type Preset = { id: string; name: string; category: string; tint: string };
 
 const garmentTypes = [
   { id: "top", label: "Top" },
@@ -67,12 +63,73 @@ const garmentTypes = [
   { id: "full", label: "Full outfit" },
 ] as const;
 
-const promptIdeas = [
-  "Navy tailored suit with a white shirt",
-  "Red satin evening gown",
-  "Oversized beige trench coat",
-  "Black leather biker jacket",
-];
+// Everything that differs between the two generators. The clothes copy and
+// field names are unchanged from the original clothes-only form.
+const toolCopy = {
+  clothes: {
+    referenceMode: "garment",
+    referenceField: "garmentImage",
+    referenceId: "garment-photo",
+    referenceTitle: "Upload a garment",
+    referenceHint:
+      "Product shot, flat lay, or someone wearing it. Clean backgrounds work best.",
+    personHint:
+      "One person, facing the camera, half or full body. Drag & drop or click.",
+    step2: "Choose the outfit",
+    modeLabels: {
+      reference: { label: "Garment photo", short: "Garment" },
+      prompt: { label: "Describe it", short: "Describe" },
+      style: { label: "Styles", short: "Styles" },
+    },
+    promptLabel: "Describe the outfit",
+    promptExample: "light blue linen suit with a white tee",
+    promptIdeas: [
+      "Navy tailored suit with a white shirt",
+      "Red satin evening gown",
+      "Oversized beige trench coat",
+      "Black leather biker jacket",
+    ],
+    categories: styleCategories as readonly string[],
+    presets: stylePresets as readonly Preset[],
+    getPreset: getStylePreset as (id: string) => Preset | undefined,
+    busyLabel: "Changing outfit…",
+  },
+  hair: {
+    referenceMode: "reference",
+    referenceField: "referenceImage",
+    referenceId: "hair-photo",
+    referenceTitle: "Upload a hairstyle",
+    referenceHint:
+      "A clear photo of the haircut you want — a celebrity, a salon photo, anyone.",
+    personHint:
+      "A clear photo of your face with your hair visible. Drag & drop or click.",
+    step2: "Choose the hairstyle",
+    modeLabels: {
+      reference: { label: "Hairstyle photo", short: "Photo" },
+      prompt: { label: "Describe it", short: "Describe" },
+      style: { label: "Hairstyles", short: "Styles" },
+    },
+    promptLabel: "Describe the hairstyle",
+    promptExample: "short curly bob, copper red",
+    promptIdeas: [
+      "Short pixie cut with side bangs",
+      "Long beach waves, honey blonde",
+      "Textured crop with a low fade",
+      "Shoulder-length bob, jet black",
+    ],
+    categories: hairCategories as readonly string[],
+    presets: hairPresets as readonly Preset[],
+    getPreset: getHairPreset as (id: string) => Preset | undefined,
+    busyLabel: "Changing hairstyle…",
+  },
+} as const;
+
+const modeIcons: Record<Mode, typeof ShirtIcon> = {
+  reference: ShirtIcon,
+  prompt: TypeIcon,
+  style: SparklesIcon,
+};
+const modeOrder: Mode[] = ["reference", "prompt", "style"];
 
 const MAX_EDGE = 1600;
 
@@ -271,6 +328,7 @@ export function GenerateForm({
   signedIn,
   auth,
   showHistoryLink = false,
+  tool = "clothes",
 }: {
   balance: number;
   cost: number;
@@ -281,7 +339,10 @@ export function GenerateForm({
   auth?: AuthOptions;
   /** Home page: point at the studio's full history after a run. */
   showHistoryLink?: boolean;
+  /** Which generator this form drives. */
+  tool?: ToolId;
 }) {
+  const copy = toolCopy[tool];
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -297,12 +358,12 @@ export function GenerateForm({
   const [isPreparing, startPreparing] = React.useTransition();
   const person = usePhoto();
   const garment = usePhoto();
-  const [mode, setMode] = React.useState<Mode>("garment");
+  const [mode, setMode] = React.useState<Mode>("reference");
   const [garmentType, setGarmentType] =
     React.useState<(typeof garmentTypes)[number]["id"]>("full");
   const [prompt, setPrompt] = React.useState("");
   const [styleId, setStyleId] = React.useState<string>(
-    stylePresets[0]?.id ?? "",
+    copy.presets[0]?.id ?? "",
   );
 
   // "?style=<id>" (the home page style cards) preselects that style. Applied
@@ -314,7 +375,7 @@ export function GenerateForm({
   >(null);
   if (styleParam !== appliedStyleParam) {
     setAppliedStyleParam(styleParam);
-    if (styleParam && getStylePreset(styleParam)) {
+    if (styleParam && copy.getPreset(styleParam)) {
       setMode("style");
       setStyleId(styleParam);
     }
@@ -368,7 +429,7 @@ export function GenerateForm({
   const latest = showResult ? (state.result ?? null) : null;
   const ready =
     Boolean(person.file) &&
-    (mode === "garment"
+    (mode === "reference"
       ? Boolean(garment.file)
       : mode === "prompt"
         ? prompt.trim().length >= 3
@@ -389,10 +450,11 @@ export function GenerateForm({
       return;
     }
     const personFile = person.file;
-    const garmentFile = mode === "garment" ? garment.file : null;
+    const garmentFile = mode === "reference" ? garment.file : null;
     startPreparing(async () => {
       const formData = new FormData();
-      formData.set("mode", mode);
+      formData.set("tool", tool);
+      formData.set("mode", mode === "reference" ? copy.referenceMode : mode);
       // A file can pass the type check and still be undecodable (corrupt,
       // mislabeled). Report it on the right photo instead of crashing.
       try {
@@ -405,16 +467,16 @@ export function GenerateForm({
       if (garmentFile) {
         try {
           formData.set(
-            "garmentImage",
+            copy.referenceField,
             await downscale(garmentFile),
-            "garment.jpg",
+            "reference.jpg",
           );
         } catch {
           garment.setFile(null);
           toast.error(errorMessages.invalid_garment);
           return;
         }
-        formData.set("garmentType", garmentType);
+        if (tool === "clothes") formData.set("garmentType", garmentType);
       }
       if (mode === "prompt") formData.set("prompt", prompt);
       if (mode === "style") formData.set("styleId", styleId);
@@ -423,7 +485,7 @@ export function GenerateForm({
   }
 
   function onTabKeyDown(event: React.KeyboardEvent, index: number) {
-    const last = modes.length - 1;
+    const last = modeOrder.length - 1;
     const next =
       event.key === "ArrowRight"
         ? index === last
@@ -440,9 +502,9 @@ export function GenerateForm({
               : null;
     if (next === null) return;
     event.preventDefault();
-    const target = modes[next];
+    const target = modeOrder[next];
     if (!target) return;
-    setMode(target.id);
+    setMode(target);
     tabRefs.current[next]?.focus();
   }
 
@@ -459,7 +521,7 @@ export function GenerateForm({
           <PhotoDrop
             id="person-photo"
             title="Upload your photo"
-            hint="One person, facing the camera, half or full body. Drag & drop or click."
+            hint={copy.personHint}
             preview={person.preview}
             invalidMessage={errorMessages.invalid_photo}
             onFile={(file) => {
@@ -473,44 +535,56 @@ export function GenerateForm({
 
         <section className="flex min-w-0 flex-col gap-3">
           <p className="text-sm font-medium">
-            <span className="mr-2 text-[var(--muted-ink)]">02</span>Choose the
-            outfit
+            <span className="mr-2 text-[var(--muted-ink)]">02</span>
+            {copy.step2}
           </p>
           <div className="flex flex-1 flex-col rounded-[24px] border bg-[var(--paper-2)] p-3 sm:p-5">
             <div
               role="tablist"
-              aria-label="Outfit source"
+              aria-label={
+                tool === "hair" ? "Hairstyle source" : "Outfit source"
+              }
               className="grid grid-cols-3 gap-1 rounded-full bg-[var(--canvas)] p-1"
             >
-              {modes.map((item, index) => (
-                <button
-                  key={item.id}
-                  ref={(node) => {
-                    tabRefs.current[index] = node;
-                  }}
-                  id={`${formId}-tab-${item.id}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={mode === item.id}
-                  aria-controls={`${formId}-panel`}
-                  aria-label={item.label}
-                  tabIndex={mode === item.id ? 0 : -1}
-                  onClick={() => setMode(item.id)}
-                  onKeyDown={(event) => onTabKeyDown(event, index)}
-                  className={cn(
-                    "flex items-center justify-center gap-2 rounded-full px-1.5 py-2 text-[13px] transition-colors sm:px-3 sm:text-sm",
-                    mode === item.id
-                      ? "bg-[var(--brand)] font-medium text-[var(--ink-deep)]"
-                      : "text-[var(--muted-ink)] hover:text-[var(--ink)]",
-                  )}
-                >
-                  <item.icon
-                    className="hidden size-4 shrink-0 sm:block"
-                    aria-hidden
-                  />
-                  <span className="truncate">{item.short}</span>
-                </button>
-              ))}
+              {modeOrder.map((id, index) => {
+                const item = {
+                  id,
+                  icon:
+                    id === "reference" && tool === "hair"
+                      ? ScissorsIcon
+                      : modeIcons[id],
+                  ...copy.modeLabels[id],
+                };
+                return (
+                  <button
+                    key={item.id}
+                    ref={(node) => {
+                      tabRefs.current[index] = node;
+                    }}
+                    id={`${formId}-tab-${item.id}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={mode === item.id}
+                    aria-controls={`${formId}-panel`}
+                    aria-label={item.label}
+                    tabIndex={mode === item.id ? 0 : -1}
+                    onClick={() => setMode(item.id)}
+                    onKeyDown={(event) => onTabKeyDown(event, index)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 rounded-full px-1.5 py-2 text-[13px] transition-colors sm:px-3 sm:text-sm",
+                      mode === item.id
+                        ? "bg-[var(--brand)] font-medium text-[var(--ink-deep)]"
+                        : "text-[var(--muted-ink)] hover:text-[var(--ink)]",
+                    )}
+                  >
+                    <item.icon
+                      className="hidden size-4 shrink-0 sm:block"
+                      aria-hidden
+                    />
+                    <span className="truncate">{item.short}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <div
@@ -519,61 +593,64 @@ export function GenerateForm({
               aria-labelledby={`${formId}-tab-${mode}`}
               className="mt-5 flex-1"
             >
-              {mode === "garment" ? (
+              {mode === "reference" ? (
                 <div className="grid h-full gap-4">
                   <PhotoDrop
-                    id="garment-photo"
-                    title="Upload a garment"
-                    hint="Product shot, flat lay, or someone wearing it. Clean backgrounds work best."
+                    key={copy.referenceId}
+                    id={copy.referenceId}
+                    title={copy.referenceTitle}
+                    hint={copy.referenceHint}
                     preview={garment.preview}
                     invalidMessage={errorMessages.invalid_garment}
                     onFile={garment.setFile}
                     disabled={busy}
                     className="min-h-48"
                   />
-                  <div>
-                    <p className="mb-2 text-sm text-[var(--muted-ink)]">
-                      Replace my
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {garmentTypes.map((type) => (
-                        <button
-                          key={type.id}
-                          type="button"
-                          aria-pressed={garmentType === type.id}
-                          onClick={() => setGarmentType(type.id)}
-                          className={cn(
-                            "rounded-full border px-4 py-1.5 text-sm transition-colors",
-                            garmentType === type.id
-                              ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--ink-deep)]"
-                              : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_92%)]",
-                          )}
-                        >
-                          {type.label}
-                        </button>
-                      ))}
+                  {tool === "clothes" ? (
+                    <div>
+                      <p className="mb-2 text-sm text-[var(--muted-ink)]">
+                        Replace my
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {garmentTypes.map((type) => (
+                          <button
+                            key={type.id}
+                            type="button"
+                            aria-pressed={garmentType === type.id}
+                            onClick={() => setGarmentType(type.id)}
+                            className={cn(
+                              "rounded-full border px-4 py-1.5 text-sm transition-colors",
+                              garmentType === type.id
+                                ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--ink-deep)]"
+                                : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_92%)]",
+                            )}
+                          >
+                            {type.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
                 </div>
               ) : null}
 
               {mode === "prompt" ? (
                 <div className="grid gap-4">
                   <Textarea
-                    aria-label="Describe the outfit"
+                    aria-label={copy.promptLabel}
                     value={prompt}
                     onChange={(event) => setPrompt(event.target.value)}
                     placeholder={
                       mock
-                        ? 'e.g. "light blue linen suit" — mock mode: include FAIL to simulate an error and refund'
-                        : 'e.g. "light blue linen suit with a white tee"'
+                        ? `e.g. "${copy.promptExample}" — mock mode: include FAIL to simulate an error and refund`
+                        : `e.g. "${copy.promptExample}"`
                     }
                     maxLength={1000}
                     disabled={busy}
                     className="min-h-36 rounded-[18px] bg-[var(--canvas)]"
                   />
                   <div className="flex flex-wrap gap-2">
-                    {promptIdeas.map((idea) => (
+                    {copy.promptIdeas.map((idea) => (
                       <button
                         key={idea}
                         type="button"
@@ -589,13 +666,13 @@ export function GenerateForm({
 
               {mode === "style" ? (
                 <div className="grid max-h-[26rem] gap-5 overflow-y-auto pr-1">
-                  {styleCategories.map((category) => (
+                  {copy.categories.map((category) => (
                     <div key={category}>
                       <p className="mb-2 text-sm text-[var(--muted-ink)]">
                         {category}
                       </p>
                       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {stylePresets
+                        {copy.presets
                           .filter((preset) => preset.category === category)
                           .map((preset) => (
                             <button
@@ -633,11 +710,11 @@ export function GenerateForm({
           ref={submitRef}
           type="submit"
           busy={busy}
-          busyLabel="Changing outfit…"
+          busyLabel={copy.busyLabel}
           disabled={outOfCredits || !ready}
           className="h-auto min-h-12 w-full rounded-full px-6 py-2 text-base whitespace-normal sm:w-auto sm:px-8"
         >
-          {`Change outfit — ${cost} credit`}
+          {`${tools[tool].action} — ${cost} credit`}
         </BusyButton>
         {outOfCredits ? (
           <p className="text-sm text-[var(--muted-ink)]">
@@ -680,7 +757,7 @@ export function GenerateForm({
             </h2>
             {showHistoryLink ? (
               <Link
-                href="/generate"
+                href={tools[tool].studio}
                 className="mr-auto text-sm text-[var(--muted-ink)] underline underline-offset-4 hover:text-[var(--ink)]"
               >
                 All my looks

@@ -1,4 +1,5 @@
 import { render } from "@react-email/render";
+import { siteConfig } from "@/config/site";
 import { describe, expect, it } from "vitest";
 
 import { WELCOME_CREDITS } from "@/config/plans";
@@ -20,7 +21,7 @@ describe("email templates", () => {
     const text = await render(email, { plainText: true });
     const html = await render(email);
     expect(text).toContain(`${WELCOME_CREDITS} welcome credits`);
-    expect(text).toContain("AI Clothes Changer");
+    expect(text).toContain(siteConfig.name);
     expect(html).toContain("https://example.test/generate");
   });
 

@@ -9,8 +9,9 @@ const columns = [
   {
     title: "Product",
     links: [
-      { href: "/#studio", label: "Clothes changer" },
-      { href: "/#styles", label: "Styles" },
+      { href: "/", label: "AI hairstyle changer" },
+      { href: "/ai-clothes-changer", label: "AI clothes changer" },
+      { href: "/#styles", label: "Hairstyles" },
       { href: "/pricing", label: "Pricing" },
     ],
   },
@@ -29,7 +30,7 @@ export function AtelierFooter() {
       <div className="atelier-frame relative overflow-hidden px-6 py-16 text-center sm:px-10">
         <Sparkle className="mx-auto mb-6 size-8" />
         <h2 className="text-title mx-auto max-w-2xl">
-          Your next outfit is one photo away
+          Your new look is one photo away
         </h2>
         <Link
           href="/#studio"
@@ -47,7 +48,7 @@ export function AtelierFooter() {
             {siteConfig.name}
           </p>
           <p className="mt-2 text-sm text-[var(--muted-ink)]">
-            Change clothes in any photo with AI. Realistic, private, fast.
+            Try new hairstyles and outfits on your own photo with AI.
           </p>
         </div>
         <div className="flex gap-16">

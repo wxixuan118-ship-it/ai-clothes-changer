@@ -6,9 +6,9 @@ import { MobileNav, NavLinks } from "./nav-links";
 import { Sparkle } from "./sparkle";
 
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#styles", label: "Styles" },
+  { href: "/", label: "Hairstyle changer" },
+  { href: "/ai-clothes-changer", label: "Clothes changer" },
+  { href: "/#styles", label: "Hairstyles" },
   { href: "/pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" },
 ] as const;

@@ -16,8 +16,8 @@ export default function PrivacyPage() {
         <h2>The short version</h2>
         <ul>
           <li>
-            We use the photos you upload only to create the outfit change you
-            asked for. We don&apos;t keep the uploaded photos afterwards.
+            We use the photos you upload only to create the result you asked
+            for. We don&apos;t keep the uploaded photos afterwards.
           </li>
           <li>
             Results are saved to your account history until you delete them or
@@ -35,13 +35,14 @@ export default function PrivacyPage() {
             hashed password (or the identity provider you sign in with).
           </li>
           <li>
-            <strong>Photos you upload:</strong> the person photo and, if you use
-            one, the garment photo. They are resized in your browser, sent to
-            our AI image provider to create the result, and not stored by us.
+            <strong>Photos you upload:</strong> the photo of you and, if you use
+            one, the hairstyle or garment reference photo. They are resized in
+            your browser, sent to our AI image provider to create the result,
+            and not stored by us.
           </li>
           <li>
-            <strong>Results:</strong> each generated image, the outfit
-            description or style you chose, and when it was created.
+            <strong>Results:</strong> each generated image, the description or
+            style you chose, and when it was created.
           </li>
           <li>
             <strong>Credits and billing:</strong> your credit balance and its

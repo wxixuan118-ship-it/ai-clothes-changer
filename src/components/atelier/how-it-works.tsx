@@ -1,36 +1,81 @@
 import Image from "next/image";
-import { ImageUpIcon, ShirtIcon, SparklesIcon } from "lucide-react";
+import {
+  ImageUpIcon,
+  ScissorsIcon,
+  ShirtIcon,
+  SparklesIcon,
+} from "lucide-react";
+
+import type { ToolId } from "@/config/tools";
 
 import { portraitSrc } from "./portraits";
 
-const steps = [
-  {
-    n: "01",
-    icon: ImageUpIcon,
-    title: "Upload your photo",
-    body: "A clear, front-facing photo works best. One person, full or half body.",
-    image: "1784708232475-0215c4d67e69",
-    alt: "Front-facing portrait of a person in a denim shirt",
-  },
-  {
-    n: "02",
-    icon: ShirtIcon,
-    title: "Choose the outfit",
-    body: "Upload a garment photo, describe the look in words, or pick a curated style.",
-    image: "1490481651871-ab68de25d43d",
-    alt: "Neutral-toned clothes hanging on a rail",
-  },
-  {
-    n: "03",
-    icon: SparklesIcon,
-    title: "Get your new look",
-    body: "A realistic result in seconds. Download it in high resolution, or run it again.",
-    image: null,
-    alt: "",
-  },
-] as const;
+type Step = {
+  n: string;
+  icon: typeof ImageUpIcon;
+  title: string;
+  body: string;
+  image: string | null;
+  alt: string;
+};
 
-export function AtelierHowItWorks() {
+const stepsByTool: Record<ToolId, Step[]> = {
+  hair: [
+    {
+      n: "01",
+      icon: ImageUpIcon,
+      title: "Upload a selfie",
+      body: "A clear, front-facing photo with your hair visible works best.",
+      image: "1605124305733-fe7ecf960b0e",
+      alt: "Front-facing portrait of a woman with her hair pinned up",
+    },
+    {
+      n: "02",
+      icon: ScissorsIcon,
+      title: "Pick a hairstyle",
+      body: "Upload a hairstyle photo, describe the cut and color, or choose a curated style.",
+      image: "1648157963892-fa90a04e278b",
+      alt: "Side view of a textured blonde shag haircut",
+    },
+    {
+      n: "03",
+      icon: SparklesIcon,
+      title: "See your new hair",
+      body: "A realistic result in seconds — same face, new hair. Download it or try another.",
+      image: null,
+      alt: "",
+    },
+  ],
+  clothes: [
+    {
+      n: "01",
+      icon: ImageUpIcon,
+      title: "Upload your photo",
+      body: "A clear, front-facing photo works best. One person, full or half body.",
+      image: "1784708232475-0215c4d67e69",
+      alt: "Front-facing portrait of a person in a denim shirt",
+    },
+    {
+      n: "02",
+      icon: ShirtIcon,
+      title: "Choose the outfit",
+      body: "Upload a garment photo, describe the look in words, or pick a curated style.",
+      image: "1490481651871-ab68de25d43d",
+      alt: "Neutral-toned clothes hanging on a rail",
+    },
+    {
+      n: "03",
+      icon: SparklesIcon,
+      title: "Get your new look",
+      body: "A realistic result in seconds. Download it in high resolution, or run it again.",
+      image: null,
+      alt: "",
+    },
+  ],
+};
+
+export function AtelierHowItWorks({ tool }: { tool: ToolId }) {
+  const steps = stepsByTool[tool];
   return (
     <section
       id="how-it-works"
@@ -39,10 +84,14 @@ export function AtelierHowItWorks() {
       <div className="mb-12 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="eyebrow">How it works</p>
-          <h2 className="text-title mt-3">Three steps to a new outfit</h2>
+          <h2 className="text-title mt-3">
+            Three steps to {tool === "hair" ? "new hair" : "a new outfit"}
+          </h2>
         </div>
         <p className="max-w-sm text-[var(--muted-ink)]">
-          No editing skills, no photoshoot. The AI redraws only the clothes.
+          {tool === "hair"
+            ? "No salon visit, no regrets. The AI redraws only your hair."
+            : "No editing skills, no photoshoot. The AI redraws only the clothes."}
         </p>
       </div>
       <ol className="grid gap-5 md:grid-cols-3">

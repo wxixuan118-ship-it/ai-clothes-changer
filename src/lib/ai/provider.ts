@@ -26,8 +26,10 @@ export type GenerateImageInput = {
   userId: string;
   /** The photo of the person to dress. Clothes-changer runs always set it. */
   personImage?: InputImage;
-  /** Garment reference photo — set in "garment" mode only. */
-  garmentImage?: InputImage;
+  /** What to change: the outfit or the hairstyle. */
+  task?: "clothes" | "hair";
+  /** Reference photo — a garment (clothes) or a hairstyle (hair). */
+  referenceImage?: InputImage;
   garmentType?: GarmentType;
 };
 

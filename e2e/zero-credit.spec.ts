@@ -8,7 +8,7 @@ test("draining to 0 credits blocks the form with a Billing link and no spend", a
   page,
 }) => {
   await signUp(page, uniqueEmail("drain"));
-  await page.goto("/generate");
+  await page.goto("/generate?tool=clothes");
   await page
     .locator("#person-photo")
     .setInputFiles(path.join(__dirname, "fixtures", "person.jpg"));

@@ -9,10 +9,8 @@ test("billing renders plan cards from the plans config", async ({ page }) => {
   await signUp(page, uniqueEmail("billing"));
   await page.goto("/billing");
 
-  await expect(page.getByText("200 outfit changes every month")).toBeVisible();
-  await expect(
-    page.getByText("1,000 outfit changes every month"),
-  ).toBeVisible();
+  await expect(page.getByText("200 images every month")).toBeVisible();
+  await expect(page.getByText("1,000 images every month")).toBeVisible();
   await expect(page.getByText("100 credits, one time")).toBeVisible();
 
   // Sibling upgrade actions, identical style; top-up shares the anatomy.

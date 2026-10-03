@@ -10,12 +10,10 @@ test.beforeAll(async ({ request }) => {
   }
 });
 
-test("landing renders the clothes-changer sections with signed-out CTAs", async ({
-  page,
-}) => {
+test("home is the hairstyle changer with signed-out CTAs", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "AI Clothes Changer",
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "AI Hairstyle Changer",
   );
   // Signed-out nav: Log In + Sign Up; the hero CTA opens the studio.
   await expect(
@@ -29,9 +27,7 @@ test("landing renders the clothes-changer sections with signed-out CTAs", async 
   await expect(
     page.locator("#studio").getByRole("tab", { name: "Styles" }),
   ).toBeVisible();
-  await expect(page.locator("#how-it-works")).toContainText(
-    "Upload your photo",
-  );
+  await expect(page.locator("#how-it-works")).toContainText("Upload a selfie");
   await expect(page.locator("#styles img")).toHaveCount(4);
   // Pricing reads from config/plans.ts.
   await expect(page.locator("#pricing")).toContainText("$9");
@@ -48,22 +44,22 @@ test("the site is night-only: dark theme without a toggle", async ({
   );
 });
 
-test("a style card preselects that style in the hero tool", async ({
+test("a hairstyle card preselects that style in the hero tool", async ({
   page,
 }) => {
   await page.goto("/");
   await page
     .locator("#styles")
-    .getByRole("link", { name: /Evening glam/ })
+    .getByRole("link", { name: /Copper bob/ })
     .click();
-  await expect(page).toHaveURL(/style=evening-glam/);
+  await expect(page).toHaveURL(/style=copper-bob/);
   const studio = page.locator("#studio");
-  await expect(studio.getByRole("tab", { name: "Styles" })).toHaveAttribute(
+  await expect(studio.getByRole("tab", { name: "Hairstyles" })).toHaveAttribute(
     "aria-selected",
     "true",
   );
   await expect(
-    studio.getByRole("button", { name: "Evening glam" }),
+    studio.getByRole("button", { name: "Copper bob" }),
   ).toHaveAttribute("aria-pressed", "true");
 });
 
@@ -78,10 +74,9 @@ test("nav marks the current page and pricing CTAs send visitors to sign up", asy
     "aria-current",
     "page",
   );
-  await expect(nav.getByRole("link", { name: "Home" })).not.toHaveAttribute(
-    "aria-current",
-    "page",
-  );
+  await expect(
+    nav.getByRole("link", { name: "Hairstyle changer" }),
+  ).not.toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "credit-based pricing",
   );

@@ -13,7 +13,7 @@ test("image route: owner 200, anonymous 401, traversal 404", async ({
   browser,
 }) => {
   await signUp(page, uniqueEmail("authz"));
-  await page.goto("/generate");
+  await page.goto("/generate?tool=clothes");
   await page
     .locator("#person-photo")
     .setInputFiles(path.join(__dirname, "fixtures", "person.jpg"));

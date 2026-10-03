@@ -24,11 +24,11 @@ export default function WelcomeEmail({
         <span style={{ color: emailTheme.credit, fontWeight: 600 }}>
           {WELCOME_CREDITS} welcome credits
         </span>{" "}
-        are already on it — enough to try your first outfits. Each outfit change
+        are already on it — enough to try your first new looks. Each result
         costs 1 credit; failed runs are refunded automatically.
       </EmailText>
       <EmailButton href={`${appUrl}/generate`}>
-        Try your first outfit
+        Try your first new look
       </EmailButton>
       <EmailMuted>
         Credits never expire. When you run out, plans and top-ups live under

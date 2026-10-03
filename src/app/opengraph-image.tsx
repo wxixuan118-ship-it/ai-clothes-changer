@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 import { siteConfig } from "@/config/site";
 
-export const alt = `${siteConfig.name} — try on any outfit in seconds`;
+export const alt = `${siteConfig.name} — try new hairstyles and outfits on your photo`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -40,10 +40,10 @@ export default function OpengraphImage() {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <div style={{ fontSize: 76, fontWeight: 700, letterSpacing: -2 }}>
-          Try on any outfit in seconds
+          Try new hairstyles on your photo
         </div>
         <div style={{ display: "flex", gap: 14 }}>
-          {["Garment photo", "Text prompt", "Curated styles"].map((label) => (
+          {["Haircuts", "Hair colors", "Outfits"].map((label) => (
             <div
               key={label}
               style={{

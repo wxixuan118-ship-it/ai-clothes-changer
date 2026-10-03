@@ -27,7 +27,7 @@ export default function PricingPage() {
   return (
     <>
       <AtelierPricing headingLevel="h1" />
-      <AtelierFaq />
+      <AtelierFaq tool="hair" />
     </>
   );
 }

@@ -16,8 +16,9 @@ export default function TermsPage() {
       <section>
         <h2>Using the service</h2>
         <p>
-          {siteConfig.name} changes the outfit in photos with AI. You must be 18
-          or older to use it. By creating an account you agree to these terms.
+          {siteConfig.name} changes hairstyles and outfits in photos with AI.
+          You must be 18 or older to use it. By creating an account you agree to
+          these terms.
         </p>
       </section>
       <section>

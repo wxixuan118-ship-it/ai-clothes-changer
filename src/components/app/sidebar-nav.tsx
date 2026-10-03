@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   CreditCardIcon,
+  ScissorsIcon,
   ShirtIcon,
   LayoutDashboardIcon,
   SettingsIcon,
@@ -13,7 +14,12 @@ import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
-  { href: "/generate", label: "Clothes changer", icon: ShirtIcon },
+  { href: "/generate", label: "Hairstyle changer", icon: ScissorsIcon },
+  {
+    href: "/generate?tool=clothes",
+    label: "Clothes changer",
+    icon: ShirtIcon,
+  },
   { href: "/billing", label: "Billing", icon: CreditCardIcon },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
@@ -25,6 +31,7 @@ export function SidebarNav({
   orientation?: "vertical" | "horizontal";
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   return (
     <nav
@@ -37,8 +44,16 @@ export function SidebarNav({
       )}
     >
       {items.map((item) => {
-        const active =
-          pathname === item.href || pathname.startsWith(`${item.href}/`);
+        // Hairstyle (/generate) and Clothes (/generate?tool=clothes) share a
+        // path; the tool query decides which one is current.
+        const [itemPath, itemQuery] = item.href.split("?");
+        const active = itemQuery
+          ? pathname === itemPath && searchParams.toString() === itemQuery
+          : (pathname === item.href || pathname.startsWith(`${item.href}/`)) &&
+            !(
+              item.href === "/generate" &&
+              searchParams.get("tool") === "clothes"
+            );
         return (
           <Link
             key={item.href}

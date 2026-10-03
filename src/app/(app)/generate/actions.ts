@@ -5,6 +5,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 
 import { GENERATION_COST_CREDITS } from "@/config/plans";
+import { getHairPreset } from "@/config/hairstyles";
 import { getStylePreset } from "@/config/styles";
 import { db } from "@/db";
 import { generations } from "@/db/schema";
@@ -28,7 +29,14 @@ const promptSchema = z
   .min(3, "Prompt must be at least 3 characters")
   .max(1000, "Prompt must be at most 1000 characters");
 
-const modeSchema = z.enum(["garment", "prompt", "style"]);
+// "garment" (clothes) and "reference" (hair) both mean "use the uploaded
+// reference photo".
+const modeSchema = z.enum(["garment", "reference", "prompt", "style"]);
+const toolSchema = z.enum(["clothes", "hair"]);
+
+// Only the hair may change; everything else is the user's.
+const KEEP_FOR_HAIR =
+  "Keep the face, facial features, skin, makeup, expression, head shape, clothing, background, and lighting unchanged. Make the hairline and hair texture look natural.";
 const garmentTypeSchema = z.enum(["top", "bottom", "dress", "full"]);
 
 /**
@@ -103,10 +111,47 @@ type ChangeRequest = {
   label: string;
   /** What the model receives. */
   instruction: string;
+  task: "clothes" | "hair";
   personImage: InputImage;
-  garmentImage?: InputImage;
+  referenceImage?: InputImage;
   garmentType?: GarmentType;
 };
+
+async function parseHairRequest(
+  formData: FormData,
+  mode: z.infer<typeof modeSchema>,
+  personImage: InputImage,
+): Promise<ChangeRequest | NonNullable<GenerateResult["error"]>> {
+  if (mode === "reference" || mode === "garment") {
+    const referenceImage = await readPhoto(formData.get("referenceImage"));
+    if (!referenceImage) return "invalid_garment";
+    return {
+      task: "hair",
+      label: "Hairstyle photo",
+      instruction: `Give the person the hairstyle shown in the reference photo — same cut, length, texture, and color. ${KEEP_FOR_HAIR}`,
+      personImage,
+      referenceImage,
+    };
+  }
+  if (mode === "style") {
+    const preset = getHairPreset(String(formData.get("styleId") ?? ""));
+    if (!preset) return "invalid_style";
+    return {
+      task: "hair",
+      label: `Hairstyle · ${preset.name}`,
+      instruction: `Change only the person's hair to ${preset.prompt}. ${KEEP_FOR_HAIR}`,
+      personImage,
+    };
+  }
+  const prompt = promptSchema.safeParse(formData.get("prompt"));
+  if (!prompt.success) return "invalid_prompt";
+  return {
+    task: "hair",
+    label: prompt.data,
+    instruction: `Change only the person's hair to: ${prompt.data}. ${KEEP_FOR_HAIR}`,
+    personImage,
+  };
+}
 
 async function parseChangeRequest(
   formData: FormData,
@@ -116,8 +161,14 @@ async function parseChangeRequest(
 
   const mode = modeSchema.safeParse(formData.get("mode") ?? "prompt");
   if (!mode.success) return "invalid_prompt";
+  const tool = toolSchema.safeParse(formData.get("tool") ?? "clothes");
+  if (!tool.success) return "invalid_prompt";
 
-  if (mode.data === "garment") {
+  if (tool.data === "hair") {
+    return parseHairRequest(formData, mode.data, personImage);
+  }
+
+  if (mode.data === "garment" || mode.data === "reference") {
     const garmentImage = await readPhoto(formData.get("garmentImage"));
     if (!garmentImage) return "invalid_garment";
     const type = garmentTypeSchema.safeParse(
@@ -125,10 +176,11 @@ async function parseChangeRequest(
     );
     const garmentType = type.success ? type.data : "full";
     return {
+      task: "clothes",
       label: `Garment photo · ${garmentLabels[garmentType]}`,
       instruction: `Dress the person in the ${garmentLabels[garmentType]} shown in the garment reference photo. Keep face, hair, pose, body shape, background, and lighting unchanged.`,
       personImage,
-      garmentImage,
+      referenceImage: garmentImage,
       garmentType,
     };
   }
@@ -137,6 +189,7 @@ async function parseChangeRequest(
     const preset = getStylePreset(String(formData.get("styleId") ?? ""));
     if (!preset) return "invalid_style";
     return {
+      task: "clothes",
       label: `Style · ${preset.name}`,
       instruction: `Change the person's outfit to ${preset.prompt}. Keep face, hair, pose, body shape, background, and lighting unchanged.`,
       personImage,
@@ -146,6 +199,7 @@ async function parseChangeRequest(
   const prompt = promptSchema.safeParse(formData.get("prompt"));
   if (!prompt.success) return "invalid_prompt";
   return {
+    task: "clothes",
     label: prompt.data,
     instruction: `Change the person's outfit to: ${prompt.data}. Keep face, hair, pose, body shape, background, and lighting unchanged.`,
     personImage,
@@ -222,8 +276,9 @@ export async function generateImageAction(
     const image = await provider.generateImage({
       prompt: request.instruction,
       userId: session.user.id,
+      task: request.task,
       personImage: request.personImage,
-      garmentImage: request.garmentImage,
+      referenceImage: request.referenceImage,
       garmentType: request.garmentType,
     });
     storedUrl = await storeGeneratedImage({

@@ -42,6 +42,40 @@ export const portraits: Portrait[] = [
   },
 ];
 
+/** Hero arches on the hairstyle home page — adults, distinct cuts/colors. */
+export const hairPortraits: Portrait[] = [
+  {
+    id: "1586266195531-76cfa365cb43",
+    alt: "Woman with a glossy red bob and blunt bangs",
+    tint: "var(--pop-pink-bold)",
+  },
+  {
+    id: "1666980226747-bf29624ae485",
+    alt: "Woman with a pastel mint pixie cut against a teal wall",
+    tint: "var(--pop-sky-bold)",
+  },
+  {
+    id: "1632984814154-6e07a671ae58",
+    alt: "Smiling woman with long, voluminous dark curls",
+    tint: "var(--pop-orange-bold)",
+  },
+  {
+    id: "1582415892501-9d50fafdbd9f",
+    alt: "Man with a short fade haircut against a red backdrop",
+    tint: "var(--pop-pink-bold)",
+  },
+  {
+    id: "1648157963892-fa90a04e278b",
+    alt: "Woman with a textured blonde shag haircut",
+    tint: "var(--pop-yellow-bold)",
+  },
+  {
+    id: "1602580404246-225af00637ac",
+    alt: "Woman with a short natural afro and hoop earrings",
+    tint: "var(--pop-mint-bold)",
+  },
+];
+
 export function portraitSrc(id: string, width = 600): string {
   return `https://images.unsplash.com/photo-${id}?w=${width}&q=80&auto=format&fit=crop`;
 }

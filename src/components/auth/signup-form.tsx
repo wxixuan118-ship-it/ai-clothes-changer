@@ -107,7 +107,7 @@ export function SignupForm({
         activate your account. Your {WELCOME_CREDITS} welcome credits are
         already waiting.
         {onSuccess
-          ? " Keep this tab open — your outfit change starts as soon as you're verified."
+          ? " Keep this tab open — your result starts as soon as you're verified."
           : null}
       </p>
     );

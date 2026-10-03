@@ -4,8 +4,9 @@ import { GENERATION_COST_CREDITS, WELCOME_CREDITS } from "@/config/plans";
 import { getSession } from "@/lib/auth/session";
 import { env, features } from "@/lib/env";
 import { GenerateForm } from "@/components/generate/generate-form";
+import { tools, type ToolId } from "@/config/tools";
 
-import { portraits, portraitSrc } from "./portraits";
+import { hairPortraits, portraits, portraitSrc } from "./portraits";
 import { Crown, Sparkle } from "./sparkle";
 
 // Arch heights step like the reference composition: low, high, mid, low...
@@ -18,27 +19,43 @@ const archOffsets = [
   "mt-0",
 ] as const;
 
-// The tool IS the hero: visitors upload and pick an outfit right here;
-// signing up happens in a dialog only when they press "Change outfit".
-export async function AtelierHero() {
+const heroCopy: Record<ToolId, { sub: string; badges: string[] }> = {
+  hair: {
+    sub: "Upload a selfie and try any haircut or color in seconds — from a hairstyle photo, a few words, or a curated style.",
+    badges: [
+      `${WELCOME_CREDITS} free credits`,
+      "No credit card",
+      "Face stays yours",
+    ],
+  },
+  clothes: {
+    sub: "Upload your photo and try on any outfit in seconds — from a garment photo, a few words, or a curated style.",
+    badges: [
+      `${WELCOME_CREDITS} free credits`,
+      "No credit card",
+      "Face & pose preserved",
+    ],
+  },
+};
+
+// The tool IS the hero: visitors upload and pick a look right here; signing
+// up happens in a dialog only when they press the action button.
+export async function AtelierHero({ tool }: { tool: ToolId }) {
   const session = await getSession();
+  const copy = heroCopy[tool];
+  const arches = tool === "hair" ? hairPortraits : portraits;
 
   return (
     <section className="mx-auto w-full max-w-[1240px] px-4 sm:px-6">
       <div className="atelier-frame relative overflow-hidden px-3 pt-8 sm:px-10 sm:pt-10">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <Sparkle className="mb-3 size-7" />
-          <h1 className="text-display">AI Clothes Changer</h1>
+          <h1 className="text-display">{tools[tool].name}</h1>
           <p className="mt-4 max-w-[52ch] text-base text-[var(--muted-ink)] sm:text-lg">
-            Upload your photo and try on any outfit in seconds — from a garment
-            photo, a few words, or a curated style.
+            {copy.sub}
           </p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2">
-            {[
-              `${WELCOME_CREDITS} free credits`,
-              "No credit card",
-              "Face & pose preserved",
-            ].map((badge) => (
+            {copy.badges.map((badge) => (
               <li key={badge} className="badge-brand">
                 {badge}
               </li>
@@ -56,6 +73,7 @@ export async function AtelierHero() {
             mock={env.AI_MOCK}
             signedIn={Boolean(session)}
             showHistoryLink
+            tool={tool}
             auth={{
               google: features.googleOAuth,
               github: features.githubOAuth,
@@ -67,7 +85,7 @@ export async function AtelierHero() {
         </div>
 
         <div className="mt-16 grid grid-cols-3 items-start gap-3 sm:mt-20 sm:grid-cols-6 sm:gap-5">
-          {portraits.map((portrait, i) => (
+          {arches.map((portrait, i) => (
             <div
               key={portrait.id}
               className={`arch-rise relative ${archOffsets[i]} ${i >= 3 ? "hidden sm:block" : ""}`}
