@@ -26,10 +26,7 @@ export default async function SettingsPage() {
   const hasPassword = accounts.some(
     (account) => account.providerId === "credential",
   );
-  const availableProviders = [
-    ...(features.googleOAuth ? (["google"] as const) : []),
-    ...(features.githubOAuth ? (["github"] as const) : []),
-  ];
+  const availableProviders = features.socialProviders;
 
   return (
     <div className="space-y-6">

@@ -8,12 +8,10 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
 
-type Provider = "google" | "github";
-
-const labels: Record<Provider, string> = {
-  google: "Google",
-  github: "GitHub",
-};
+import {
+  socialLabels as labels,
+  type SocialProvider as Provider,
+} from "@/config/social";
 
 export function ConnectedAccounts({
   available,
@@ -21,7 +19,7 @@ export function ConnectedAccounts({
   hasPassword,
 }: {
   /** Providers configured via env on the server. */
-  available: Provider[];
+  available: readonly Provider[];
   /** providerIds of the user's linked accounts. */
   linked: string[];
   /** Whether a credential (password) account exists — last sign-in method must stay. */

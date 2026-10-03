@@ -31,6 +31,16 @@ if (features.googleOAuth && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
     clientSecret: env.GOOGLE_CLIENT_SECRET,
   };
 }
+if (
+  features.facebookOAuth &&
+  env.FACEBOOK_CLIENT_ID &&
+  env.FACEBOOK_CLIENT_SECRET
+) {
+  socialProviders.facebook = {
+    clientId: env.FACEBOOK_CLIENT_ID,
+    clientSecret: env.FACEBOOK_CLIENT_SECRET,
+  };
+}
 if (features.githubOAuth && env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
   socialProviders.github = {
     clientId: env.GITHUB_CLIENT_ID,

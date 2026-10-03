@@ -75,8 +75,7 @@ export async function AtelierHero({ tool }: { tool: ToolId }) {
             showHistoryLink
             tool={tool}
             auth={{
-              google: features.googleOAuth,
-              github: features.githubOAuth,
+              providers: features.socialProviders,
               requiresVerification: features.email,
               magicLink: features.email,
               welcomeCredits: WELCOME_CREDITS,

@@ -18,7 +18,7 @@ continues with the visitor's photo still selected.
 - Real image editing with Alibaba Cloud Model Studio (Qwen image edit),
   content moderation before any credit is spent (plus the provider's own
   checks), and a watermark on free-plan results.
-- Email + password and Google/GitHub sign-in (Better Auth), 10 free credits
+- Email + password and Google / Facebook sign-in (Better Auth), 10 free credits
   on sign-up.
 - Credits: 1 credit per image, failed runs refunded automatically. An
   append-only ledger with idempotency keys keeps balances correct under
@@ -87,7 +87,7 @@ Next.js standalone output, non-root runtime on port 3000). It is used on
   "not switched on yet" and spend nothing. `DASHSCOPE_BASE_URL` must match
   the key's region (default: Singapore/international); `AI_EDIT_MODEL` picks
   the model.
-- **Optional:** `S3_*` (private image storage), `RESEND_API_KEY`, OAuth
+- **Optional:** `S3_*` (private image storage), `RESEND_API_KEY`, Google / Facebook / GitHub OAuth
   keys, `SITE_URL`.
 - **Stripe webhook:** `https://<your-domain>/api/stripe/webhook` with the
   events `checkout.session.completed`, `invoice.paid`,

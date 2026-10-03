@@ -165,6 +165,8 @@ describe("deriveFeatures", () => {
       redisRateLimit: false,
       blobStorage: false,
       s3Storage: false,
+      facebookOAuth: false,
+      socialProviders: [],
       dashscope: false,
       imageEditing: false,
     });

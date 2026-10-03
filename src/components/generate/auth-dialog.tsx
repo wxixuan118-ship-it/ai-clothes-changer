@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import type { SocialProvider } from "@/config/social";
 import { LoginForm } from "@/components/auth/login-form";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { SignupForm } from "@/components/auth/signup-form";
@@ -14,8 +15,8 @@ import {
 } from "@/components/ui/dialog";
 
 export type AuthOptions = {
-  google: boolean;
-  github: boolean;
+  /** Configured social sign-in providers (features.socialProviders). */
+  providers: readonly SocialProvider[];
   /** Resend configured → email verification gates sign-up. */
   requiresVerification: boolean;
   magicLink: boolean;
@@ -65,13 +66,9 @@ export function AuthDialog({
         <div className="grid gap-5">
           {/* OAuth leaves the page, so the visitor re-picks their photo
               after returning — say so instead of promising otherwise. */}
-          {options.google || options.github ? (
+          {options.providers.length > 0 ? (
             <div className="grid gap-2">
-              <OAuthButtons
-                google={options.google}
-                github={options.github}
-                next="/#studio"
-              />
+              <OAuthButtons providers={options.providers} next="/#studio" />
               <p className="text-xs text-[var(--muted-ink)]">
                 Continuing with a provider reloads the page — you&apos;ll re-add
                 your photo.

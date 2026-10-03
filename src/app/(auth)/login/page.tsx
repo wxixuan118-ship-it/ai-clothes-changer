@@ -28,11 +28,7 @@ export default async function LoginPage({
         <p className="eyebrow">Sign in</p>
         <h1 className="mt-2 text-2xl">Welcome back</h1>
       </div>
-      <OAuthButtons
-        google={features.googleOAuth}
-        github={features.githubOAuth}
-        next={safeNext}
-      />
+      <OAuthButtons providers={features.socialProviders} next={safeNext} />
       <LoginForm magicLink={features.email} next={safeNext} />
       <p className="text-sm text-muted-foreground">
         No account?{" "}

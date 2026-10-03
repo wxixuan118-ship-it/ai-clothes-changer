@@ -29,11 +29,7 @@ export default async function SignupPage({
           Start with {WELCOME_CREDITS} free credits
         </h1>
       </div>
-      <OAuthButtons
-        google={features.googleOAuth}
-        github={features.githubOAuth}
-        next={next}
-      />
+      <OAuthButtons providers={features.socialProviders} next={next} />
       <SignupForm requiresVerification={features.email} next={next} />
       <p className="text-sm text-muted-foreground">
         Already registered?{" "}

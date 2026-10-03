@@ -56,6 +56,10 @@ const schema = z
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     GITHUB_CLIENT_ID: z.string().optional(),
     GITHUB_CLIENT_SECRET: z.string().optional(),
+    // Facebook Login: https://developers.facebook.com/apps
+    //   Valid OAuth Redirect URI: {BETTER_AUTH_URL}/api/auth/callback/facebook
+    FACEBOOK_CLIENT_ID: z.string().optional(),
+    FACEBOOK_CLIENT_SECRET: z.string().optional(),
 
     // ── Email via Resend (optional — emails no-op without it) ─────────────
     RESEND_API_KEY: z.string().optional(),
@@ -119,6 +123,7 @@ const schema = z
     const pairs = [
       ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
       ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET"],
+      ["FACEBOOK_CLIENT_ID", "FACEBOOK_CLIENT_SECRET"],
       ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
     ] as const;
     for (const [a, b] of pairs) {
@@ -253,6 +258,18 @@ export function deriveFeatures(e: Env) {
     googleOAuth: Boolean(e.GOOGLE_CLIENT_ID),
     /** Show the "Continue with GitHub" button. */
     githubOAuth: Boolean(e.GITHUB_CLIENT_ID),
+    /** Show the "Continue with Facebook" button. */
+    facebookOAuth: Boolean(e.FACEBOOK_CLIENT_ID),
+    /** Configured social sign-in providers, in display order. */
+    socialProviders: (
+      [
+        ["google", e.GOOGLE_CLIENT_ID],
+        ["facebook", e.FACEBOOK_CLIENT_ID],
+        ["github", e.GITHUB_CLIENT_ID],
+      ] as const
+    )
+      .filter(([, id]) => Boolean(id))
+      .map(([provider]) => provider),
     /** Send real emails (magic links require this). */
     email: Boolean(e.RESEND_API_KEY),
     /** Distributed rate limiting; otherwise per-instance in-memory. */
