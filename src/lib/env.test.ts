@@ -164,6 +164,7 @@ describe("deriveFeatures", () => {
       email: false,
       redisRateLimit: false,
       blobStorage: false,
+      s3Storage: false,
     });
   });
 

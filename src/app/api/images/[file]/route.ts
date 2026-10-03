@@ -1,14 +1,12 @@
-import { readFile } from "node:fs/promises";
-
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { generations } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
-import { generatedFilePath, mediaTypeByExtension } from "@/lib/ai/storage";
+import { mediaTypeByExtension, readStoredImage } from "@/lib/ai/storage";
 
-// Serves ./.generated images in dev (production uses public Blob URLs and
-// never hits this route). Strictly validated: uuid.ext filenames only — no
+// Serves stored results (private S3 objects, or ./.generated in dev) to
+// their owner. Vercel Blob URLs are public and never hit this route. Strictly validated: uuid.ext filenames only — no
 // traversal — and only the generation's owner may read it.
 
 const FILE_PATTERN =
@@ -43,23 +41,22 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  try {
-    const bytes = await readFile(generatedFilePath(file));
-    const download = new URL(request.url).searchParams.has("download");
-    return new Response(new Uint8Array(bytes), {
-      headers: {
-        "Content-Type": mediaType,
-        "Cache-Control": "private, max-age=31536000, immutable",
-        // Never let a browser sniff a stored file into something executable.
-        "X-Content-Type-Options": "nosniff",
-        ...(download
-          ? {
-              "Content-Disposition": `attachment; filename="ai-clothes-changer-${match[1]}.${match[2]}"`,
-            }
-          : {}),
-      },
-    });
-  } catch {
+  const bytes = await readStoredImage(file);
+  if (!bytes) {
     return new Response("Not found", { status: 404 });
   }
+  const download = new URL(request.url).searchParams.has("download");
+  return new Response(new Uint8Array(bytes), {
+    headers: {
+      "Content-Type": mediaType,
+      "Cache-Control": "private, max-age=31536000, immutable",
+      // Never let a browser sniff a stored file into something executable.
+      "X-Content-Type-Options": "nosniff",
+      ...(download
+        ? {
+            "Content-Disposition": `attachment; filename="ai-clothes-changer-${match[1]}.${match[2]}"`,
+          }
+        : {}),
+    },
+  });
 }

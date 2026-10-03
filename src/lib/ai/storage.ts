@@ -1,6 +1,12 @@
-import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { del, put } from "@vercel/blob";
 
 import { eq } from "drizzle-orm";
@@ -10,11 +16,25 @@ import { generations } from "@/db/schema";
 import { env, features } from "@/lib/env";
 
 // Persists a generated image and returns the durable URL for the
-// generations record. Vercel Blob in production; without a token, files go
-// to ./.generated and are served by /api/images/[id] — dev only (AGENTS.md
-// gotchas).
+// generations record. Backends, in order: S3-compatible object storage
+// (private objects, served to their owner by /api/images), Vercel Blob,
+// then ./.generated on local disk (dev only — containers lose it).
 
 const GENERATED_DIR = path.join(process.cwd(), ".generated");
+const S3_PREFIX = "generations/";
+
+let s3Client: S3Client | null = null;
+function s3(): S3Client {
+  s3Client ??= new S3Client({
+    endpoint: env.S3_ENDPOINT,
+    region: env.S3_REGION,
+    credentials: {
+      accessKeyId: env.S3_ACCESS_KEY_ID ?? "",
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY ?? "",
+    },
+  });
+  return s3Client;
+}
 
 const extensionByMediaType: Record<string, string> = {
   "image/png": "png",
@@ -55,6 +75,20 @@ export async function storeGeneratedImage({
   const { bytes, mediaType } = await decodeImageUrl(url);
   const extension = extensionByMediaType[mediaType] ?? "png";
 
+  if (features.s3Storage) {
+    const fileName = `${generationId}.${extension}`;
+    // No ACL: objects stay private; the owner-checked route streams them.
+    await s3().send(
+      new PutObjectCommand({
+        Bucket: env.S3_BUCKET,
+        Key: `${S3_PREFIX}${fileName}`,
+        Body: bytes,
+        ContentType: mediaType,
+      }),
+    );
+    return `/api/images/${fileName}`;
+  }
+
   if (features.blobStorage) {
     const blob = await put(`generations/${generationId}.${extension}`, bytes, {
       access: "public",
@@ -79,6 +113,14 @@ export async function storeGeneratedImage({
 export async function deleteStoredImage(url: string): Promise<void> {
   const local = /^\/api\/images\/([0-9a-f-]{36}\.[a-z]{3,4})$/.exec(url);
   if (local?.[1]) {
+    if (features.s3Storage) {
+      await s3().send(
+        new DeleteObjectCommand({
+          Bucket: env.S3_BUCKET,
+          Key: `${S3_PREFIX}${local[1]}`,
+        }),
+      );
+    }
     await unlink(generatedFilePath(local[1])).catch(() => undefined);
     return;
   }
@@ -95,6 +137,34 @@ export async function deleteStoredImagesForUser(userId: string): Promise<void> {
     .where(eq(generations.userId, userId));
   for (const row of rows) {
     if (row.imageUrl) await deleteStoredImage(row.imageUrl);
+  }
+}
+
+/**
+ * Bytes of a stored result for /api/images (caller has checked ownership
+ * and validated `fileName`). Null when the object doesn't exist.
+ */
+export async function readStoredImage(
+  fileName: string,
+): Promise<Uint8Array | null> {
+  if (features.s3Storage) {
+    try {
+      const object = await s3().send(
+        new GetObjectCommand({
+          Bucket: env.S3_BUCKET,
+          Key: `${S3_PREFIX}${fileName}`,
+        }),
+      );
+      return object.Body ? await object.Body.transformToByteArray() : null;
+    } catch (error) {
+      if ((error as { name?: string }).name === "NoSuchKey") return null;
+      throw error;
+    }
+  }
+  try {
+    return new Uint8Array(await readFile(generatedFilePath(fileName)));
+  } catch {
+    return null;
   }
 }
 

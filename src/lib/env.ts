@@ -21,6 +21,14 @@ const STRIPE_VARS = [
   "STRIPE_PRICE_TOPUP_100",
 ] as const;
 
+const S3_VARS = [
+  "S3_ENDPOINT",
+  "S3_REGION",
+  "S3_BUCKET",
+  "S3_ACCESS_KEY_ID",
+  "S3_SECRET_ACCESS_KEY",
+] as const;
+
 const schema = z
   .object({
     NODE_ENV: z
@@ -89,6 +97,14 @@ const schema = z
 
     // ── Storage via Vercel Blob (optional — ./.generated fallback in dev) ─
     BLOB_READ_WRITE_TOKEN: z.string().optional(),
+
+    // ── Storage via S3-compatible object storage (AnySites / DO Spaces) ───
+    // Objects are private; /api/images serves them to their owner only.
+    S3_ENDPOINT: z.url().optional(),
+    S3_REGION: z.string().optional(),
+    S3_BUCKET: z.string().optional(),
+    S3_ACCESS_KEY_ID: z.string().optional(),
+    S3_SECRET_ACCESS_KEY: z.string().optional(),
   })
   .superRefine((env, ctx) => {
     const pairs = [
@@ -102,6 +118,16 @@ const schema = z
           code: "custom",
           path: [env[a] ? b : a],
           message: `set both ${a} and ${b}, or neither`,
+        });
+      }
+    }
+    const s3Set = S3_VARS.filter((key) => env[key]);
+    if (s3Set.length > 0 && s3Set.length < S3_VARS.length) {
+      for (const key of S3_VARS.filter((k) => !env[k])) {
+        ctx.addIssue({
+          code: "custom",
+          path: [key],
+          message: `set all of ${S3_VARS.join(", ")}, or none`,
         });
       }
     }
@@ -224,6 +250,8 @@ export function deriveFeatures(e: Env) {
     redisRateLimit: Boolean(e.UPSTASH_REDIS_REST_URL),
     /** Store generated images in Vercel Blob; otherwise ./.generated (dev). */
     blobStorage: Boolean(e.BLOB_READ_WRITE_TOKEN),
+    /** Private S3-compatible storage; takes precedence over Blob/local. */
+    s3Storage: S3_VARS.every((key) => Boolean(e[key])),
   } as const;
 }
 

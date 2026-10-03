@@ -26,6 +26,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1146.0",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.1.0",
     "@upstash/ratelimit": "^2.0.8",
