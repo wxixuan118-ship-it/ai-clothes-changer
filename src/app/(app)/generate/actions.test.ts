@@ -46,7 +46,14 @@ vi.mock("@/lib/credits", async (importOriginal) => ({
 }));
 
 import { db } from "@/db";
-import { creditTransactions, generations, users } from "@/db/schema";
+import {
+  creditTransactions,
+  generations,
+  subscriptions,
+  users,
+} from "@/db/schema";
+import { readStoredImage } from "@/lib/ai/storage";
+import { ContentBlockedError } from "@/lib/ai/errors";
 import { mockProvider } from "@/lib/ai/mock";
 import * as credits from "@/lib/credits";
 import { grantCredits } from "@/lib/credits";
@@ -72,8 +79,9 @@ afterAll(async () => {
 beforeEach(() => {
   signedOut = false;
   providerGenerate.mockReset();
+  // A real PNG, like DashScope returns — free-plan results get watermarked.
   providerGenerate.mockResolvedValue({
-    url: `data:image/svg+xml;base64,${Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'/>").toString("base64")}`,
+    url: `data:image/png;base64,${PNG_BYTES.toString("base64")}`,
     width: 1024,
     height: 1024,
     model: "mock/placeholder",
@@ -508,5 +516,99 @@ describe("generateImageAction — hairstyle changer", () => {
 
     expect(result).toEqual({ ok: false, error });
     expect((await rowsFor(userId)).spends).toHaveLength(0);
+  });
+});
+
+describe("generateImageAction — content safety", () => {
+  it.each([
+    ["clothes", "remove her clothes", "blocked_prompt"],
+    ["hair", "make her look 15 years old", "blocked_prompt"],
+    ["clothes", "red bikini", "unsupported_prompt"],
+  ] as const)(
+    "%s prompt %j is refused before any side effect",
+    async (tool, prompt, error) => {
+      const userId = await createUser(2);
+      const form = promptForm(prompt);
+      form.set("tool", tool);
+
+      const result = await runAction(form);
+
+      expect(result).toEqual({ ok: false, error });
+      const { generations: rows, spends } = await rowsFor(userId);
+      expect(rows).toHaveLength(0);
+      expect(spends).toHaveLength(0);
+      expect(providerGenerate).not.toHaveBeenCalled();
+    },
+  );
+
+  it("a provider safety refusal refunds and reports blocked_result", async () => {
+    const userId = await createUser(3);
+    providerGenerate.mockRejectedValueOnce(
+      new ContentBlockedError("DataInspectionFailed"),
+    );
+
+    const result = await runAction(promptForm());
+
+    expect(result).toEqual({ ok: false, error: "blocked_result" });
+    expect(await balanceOf(userId)).toBe(3);
+    const { generations: rows, refunds } = await rowsFor(userId);
+    expect(rows[0]?.status).toBe("failed");
+    expect(refunds).toHaveLength(1);
+    await expectInvariant(userId);
+  });
+});
+
+describe("generateImageAction — free-plan watermark", () => {
+  async function storedBytesFor(userId: string) {
+    const { generations: rows } = await rowsFor(userId);
+    const file = rows[0]?.imageUrl?.split("/").pop() as string;
+    return Buffer.from((await readStoredImage(file)) ?? new Uint8Array());
+  }
+
+  async function grayPng() {
+    const sharp = (await import("sharp")).default;
+    return sharp({
+      create: { width: 400, height: 500, channels: 3, background: "#777777" },
+    })
+      .png()
+      .toBuffer();
+  }
+
+  it("free users get a watermarked result", async () => {
+    const userId = await createUser(2);
+    const original = await grayPng();
+    providerGenerate.mockResolvedValueOnce({
+      url: `data:image/png;base64,${original.toString("base64")}`,
+      width: 400,
+      height: 500,
+      model: "mock/placeholder",
+    });
+
+    expect(await runAction(promptForm())).toMatchObject({ ok: true });
+
+    const stored = await storedBytesFor(userId);
+    expect(stored.length).toBeGreaterThan(0);
+    expect(stored.equals(original)).toBe(false);
+  });
+
+  it("paid users get the provider output untouched", async () => {
+    const userId = await createUser(2);
+    await db.insert(subscriptions).values({
+      userId,
+      stripeCustomerId: `cus_${userId}`,
+      status: "active",
+      priceId: process.env.STRIPE_PRICE_PRO_MONTHLY as string,
+    });
+    const original = await grayPng();
+    providerGenerate.mockResolvedValueOnce({
+      url: `data:image/png;base64,${original.toString("base64")}`,
+      width: 400,
+      height: 500,
+      model: "mock/placeholder",
+    });
+
+    expect(await runAction(promptForm())).toMatchObject({ ok: true });
+
+    expect((await storedBytesFor(userId)).equals(original)).toBe(true);
   });
 });

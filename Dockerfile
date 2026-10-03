@@ -23,6 +23,9 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0
+# Fonts for the free-plan watermark: sharp renders SVG text through
+# fontconfig, and with no font installed the text silently comes out blank.
+RUN apk add --no-cache fontconfig font-dejavu
 RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
 # Standalone server (includes drizzle/ migrations, applied on start).
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

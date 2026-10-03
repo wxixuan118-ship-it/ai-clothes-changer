@@ -90,6 +90,15 @@ const schema = z
       .regex(/^[\w.-]+\/[\w.:-]+$/, 'expected "provider/model" format')
       .default("openai/gpt-image-1"),
     AI_MOCK: stringBool(),
+    // Alibaba Cloud Model Studio (DashScope) image editing — the provider for
+    // both the hairstyle and clothes changers when the key is set. Keys are
+    // per region: a Singapore key needs the international base URL.
+    DASHSCOPE_API_KEY: z.string().optional(),
+    DASHSCOPE_BASE_URL: z
+      .url()
+      .default("https://dashscope-intl.aliyuncs.com")
+      .transform((url) => url.replace(/\/+$/, "")),
+    AI_EDIT_MODEL: z.string().default("qwen-image-edit-plus"),
 
     // ── Rate limiting via Upstash (optional — in-memory fallback) ─────────
     UPSTASH_REDIS_REST_URL: z.url().optional(),
@@ -250,6 +259,10 @@ export function deriveFeatures(e: Env) {
     redisRateLimit: Boolean(e.UPSTASH_REDIS_REST_URL),
     /** Store generated images in Vercel Blob; otherwise ./.generated (dev). */
     blobStorage: Boolean(e.BLOB_READ_WRITE_TOKEN),
+    /** Real image editing via DashScope; otherwise AI Gateway (no try-on). */
+    dashscope: Boolean(e.DASHSCOPE_API_KEY),
+    /** Some provider can actually edit a person photo (mock counts in dev). */
+    imageEditing: e.AI_MOCK || Boolean(e.DASHSCOPE_API_KEY),
     /** Private S3-compatible storage; takes precedence over Blob/local. */
     s3Storage: S3_VARS.every((key) => Boolean(e[key])),
   } as const;

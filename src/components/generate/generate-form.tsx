@@ -43,9 +43,20 @@ const MAX_ORIGINAL_BYTES = 25 * 1024 * 1024;
 const errorMessages: Record<NonNullable<GenerateResult["error"]>, string> = {
   invalid_photo: "Use a JPG, PNG, or WebP photo of yourself (up to 25 MB).",
   invalid_garment: "Use a JPG, PNG, or WebP reference photo.",
-  invalid_prompt: "Describe the outfit in 3–1000 characters.",
+  invalid_prompt: "Describe the look in 3–300 characters.",
   invalid_style: "Pick a style first.",
   unauthenticated: "Please sign in again to continue.",
+  blocked_prompt:
+    "We can't make this edit. We only create fully clothed, non-sexual looks of adults. Try a different description. No credits were used.",
+  unsupported_prompt:
+    "Swimwear, lingerie, and suggestive looks aren't supported. Try describing the cut, color, or fabric instead. No credits were used.",
+  english_only: "Please describe the look in English.",
+  unavailable:
+    "Image generation isn't switched on yet — please check back soon. No credits were used.",
+  provider_busy:
+    "Our generator is busy right now — your credit was refunded. Please try again in a moment.",
+  blocked_result:
+    "Our safety check couldn't approve this photo or result, so no image was made. Try a photo where you're fully dressed. Your credit was refunded.",
   rate_limited: "Slow down — 10 per minute. Try again in a moment.",
   insufficient_credits:
     "You're out of credits — top up in Billing and try again.",
@@ -645,7 +656,7 @@ export function GenerateForm({
                         ? `e.g. "${copy.promptExample}" — mock mode: include FAIL to simulate an error and refund`
                         : `e.g. "${copy.promptExample}"`
                     }
-                    maxLength={1000}
+                    maxLength={300}
                     disabled={busy}
                     className="min-h-36 rounded-[18px] bg-[var(--canvas)]"
                   />

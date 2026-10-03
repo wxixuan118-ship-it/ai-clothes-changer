@@ -15,6 +15,8 @@ import { db } from "@/db";
 import { generations } from "@/db/schema";
 import { env, features } from "@/lib/env";
 
+import { applyWatermark } from "./watermark";
+
 // Persists a generated image and returns the durable URL for the
 // generations record. Backends, in order: S3-compatible object storage
 // (private objects, served to their owner by /api/images), Vercel Blob,
@@ -22,6 +24,8 @@ import { env, features } from "@/lib/env";
 
 const GENERATED_DIR = path.join(process.cwd(), ".generated");
 const S3_PREFIX = "generations/";
+const FETCH_TIMEOUT_MS = 30_000;
+const MAX_RESULT_BYTES = 25 * 1024 * 1024;
 
 let s3Client: S3Client | null = null;
 function s3(): S3Client {
@@ -53,26 +57,50 @@ async function decodeImageUrl(
     }
     return { bytes: Buffer.from(match[2], "base64"), mediaType: match[1] };
   }
-  const response = await fetch(url);
+  // Provider result URLs (DashScope OSS, valid 24h): bounded in time and
+  // size so a stalled or oversized download fails into the refund path.
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(
       `storage: fetching provider image failed (${response.status})`,
     );
   }
-  return {
-    bytes: Buffer.from(await response.arrayBuffer()),
-    mediaType: response.headers.get("content-type") ?? "image/png",
-  };
+  const mediaType =
+    (response.headers.get("content-type") ?? "image/png")
+      .split(";")[0]
+      ?.trim() ?? "image/png";
+  if (!mediaType.startsWith("image/")) {
+    throw new Error(`storage: provider returned ${mediaType}, not an image`);
+  }
+  const declared = Number(response.headers.get("content-length") ?? 0);
+  if (declared > MAX_RESULT_BYTES) {
+    throw new Error(`storage: provider image too large (${declared} bytes)`);
+  }
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (bytes.length > MAX_RESULT_BYTES) {
+    throw new Error(
+      `storage: provider image too large (${bytes.length} bytes)`,
+    );
+  }
+  return { bytes, mediaType };
 }
 
 export async function storeGeneratedImage({
   generationId,
   url,
+  watermark,
 }: {
   generationId: string;
   url: string;
+  /** Burn this text into the image (free plan). */
+  watermark?: string;
 }): Promise<string> {
-  const { bytes, mediaType } = await decodeImageUrl(url);
+  const decoded = await decodeImageUrl(url);
+  const { bytes, mediaType } = watermark
+    ? await applyWatermark(decoded.bytes, watermark)
+    : decoded;
   const extension = extensionByMediaType[mediaType] ?? "png";
 
   if (features.s3Storage) {

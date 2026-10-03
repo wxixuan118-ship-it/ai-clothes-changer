@@ -1,7 +1,10 @@
-import { env } from "@/lib/env";
+import { env, features } from "@/lib/env";
 
+import { dashscopeProvider } from "./dashscope";
 import { gatewayProvider } from "./gateway";
 import { mockProvider } from "./mock";
+
+export { ContentBlockedError } from "./errors";
 
 // The image-generation contract. One implementation ships here (AI Gateway,
 // ./gateway.ts) plus the zero-network mock for dev and e2e (AI_MOCK=true).
@@ -50,5 +53,6 @@ export interface ImageProvider {
 
 /** Env-driven selection — no provider conditionals in UI or actions. */
 export function getImageProvider(): ImageProvider {
-  return env.AI_MOCK ? mockProvider : gatewayProvider;
+  if (env.AI_MOCK) return mockProvider;
+  return features.dashscope ? dashscopeProvider : gatewayProvider;
 }

@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { GENERATION_COST_CREDITS } from "@/config/plans";
 import { getHairPreset } from "@/config/hairstyles";
+import { siteConfig } from "@/config/site";
 import { getStylePreset } from "@/config/styles";
 import { db } from "@/db";
 import { generations } from "@/db/schema";
@@ -21,13 +22,17 @@ import {
   refundCredits,
   spendCredits,
 } from "@/lib/credits";
+import { ContentBlockedError, ProviderBusyError } from "@/lib/ai/errors";
+import { hasPaidPlan } from "@/lib/entitlements";
+import { features } from "@/lib/env";
+import { screenPrompt } from "@/lib/moderation";
 import { limitGeneration } from "@/lib/rate-limit";
 
 const promptSchema = z
   .string()
   .trim()
   .min(3, "Prompt must be at least 3 characters")
-  .max(1000, "Prompt must be at most 1000 characters");
+  .max(300, "Prompt must be at most 300 characters");
 
 // "garment" (clothes) and "reference" (hair) both mean "use the uploaded
 // reference photo".
@@ -91,6 +96,18 @@ export type GenerateResult = {
     | "invalid_prompt"
     | "invalid_style"
     | "unauthenticated"
+    /** Hard block (undress, nudity, sexual, minors) — no credit spent. */
+    | "blocked_prompt"
+    /** Not supported yet (swimwear, lingerie, suggestive wording). */
+    | "unsupported_prompt"
+    /** The provider's safety check refused the photo or result — refunded. */
+    | "blocked_result"
+    /** Non-Latin script in the description — the tools are English-only. */
+    | "english_only"
+    /** No image provider is configured — nothing is spent. */
+    | "unavailable"
+    /** Provider throttled us after retries — refunded. */
+    | "provider_busy"
     | "rate_limited"
     | "insufficient_credits"
     | "generation_failed";
@@ -112,6 +129,8 @@ type ChangeRequest = {
   /** What the model receives. */
   instruction: string;
   task: "clothes" | "hair";
+  /** The user's own words (prompt mode) — screened before any spend. */
+  userText?: string;
   personImage: InputImage;
   referenceImage?: InputImage;
   garmentType?: GarmentType;
@@ -148,6 +167,7 @@ async function parseHairRequest(
   return {
     task: "hair",
     label: prompt.data,
+    userText: prompt.data,
     instruction: `Change only the person's hair to: ${prompt.data}. ${KEEP_FOR_HAIR}`,
     personImage,
   };
@@ -201,6 +221,7 @@ async function parseChangeRequest(
   return {
     task: "clothes",
     label: prompt.data,
+    userText: prompt.data,
     instruction: `Change the person's outfit to: ${prompt.data}. Keep face, hair, pose, body shape, background, and lighting unchanged.`,
     personImage,
   };
@@ -227,6 +248,32 @@ export async function generateImageAction(
   const request = await parseChangeRequest(formData);
   if (typeof request === "string") {
     return { ok: false, error: request };
+  }
+
+  // Content screen before rate limit, record, or spend: a blocked request
+  // leaves no trace in the ledger. Log the rule only, never the text.
+  if (request.userText) {
+    const verdict = screenPrompt(request.userText, request.task);
+    if (verdict) {
+      console.warn(
+        `[safety] prompt blocked user=${session.user.id} tool=${request.task} rule=${verdict.rule} severity=${verdict.severity}`,
+      );
+      return {
+        ok: false,
+        error:
+          verdict.severity === "hard"
+            ? "blocked_prompt"
+            : verdict.rule === "script"
+              ? "english_only"
+              : "unsupported_prompt",
+      };
+    }
+  }
+
+  // Without a real provider every run would spend and refund — say so
+  // instead, before touching the ledger.
+  if (!features.imageEditing) {
+    return { ok: false, error: "unavailable" };
   }
 
   const limit = await limitGeneration(session.user.id);
@@ -284,6 +331,10 @@ export async function generateImageAction(
     storedUrl = await storeGeneratedImage({
       generationId: generation.id,
       url: image.url,
+      // Free plan results carry a visible watermark (pricing promise).
+      watermark: (await hasPaidPlan(session.user.id))
+        ? undefined
+        : siteConfig.name,
     });
     await db
       .update(generations)
@@ -316,6 +367,15 @@ export async function generateImageAction(
       .set({ status: "failed" })
       .where(eq(generations.id, generation.id));
     revalidatePath("/", "layout");
+    if (error instanceof ProviderBusyError) {
+      return { ok: false, error: "provider_busy" };
+    }
+    if (error instanceof ContentBlockedError) {
+      console.warn(
+        `[safety] provider blocked user=${session.user.id} tool=${request.task} code=${error.code}`,
+      );
+      return { ok: false, error: "blocked_result" };
+    }
     return { ok: false, error: "generation_failed" };
   }
 
