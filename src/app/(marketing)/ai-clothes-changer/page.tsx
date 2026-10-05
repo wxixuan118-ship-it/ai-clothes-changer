@@ -3,7 +3,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { ToolLanding } from "@/components/atelier/tool-landing";
 
 // Secondary keyword page: "ai clothes changer".
-const title = "AI Clothes Changer — Try On Any Outfit in Seconds";
+const title = "AI Clothes Changer: Try On Any Outfit Online | StyleMirror AI";
 const description =
   "Upload a photo and change clothes with AI. Try on any outfit from a garment image, a text prompt, or a curated style — your face and pose stay the same.";
 

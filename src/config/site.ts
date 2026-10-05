@@ -1,8 +1,11 @@
-// Site-wide constants, safe for client components. The canonical origin is
-// env-driven and server-only: see src/lib/site-url.ts.
+// Site-wide constants, safe for client components. The canonical origin in
+// production is `url` (override with SITE_URL); server code reads it through
+// src/lib/site-url.ts.
 export const siteConfig = {
-  name: "AI Hairstyle Changer",
-  title: "AI Hairstyle Changer — Try New Hairstyles on Your Photo",
+  name: "StyleMirror AI",
+  domain: "stylemirrorai.com",
+  url: "https://stylemirrorai.com",
+  title: "AI Hairstyle Changer: Try New Hairstyles Online | StyleMirror AI",
   description:
     "Upload a selfie and try any hairstyle with AI: haircuts, colors, curls, and bangs from a reference photo, a text prompt, or a curated style. Your face stays yours.",
 } as const;

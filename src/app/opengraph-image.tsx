@@ -37,6 +37,9 @@ export default function OpengraphImage() {
         <div style={{ fontSize: 30, letterSpacing: -0.5 }}>
           {siteConfig.name}
         </div>
+        <div style={{ fontSize: 24, color: "#9a9a92", marginLeft: 4 }}>
+          {siteConfig.domain}
+        </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <div style={{ fontSize: 76, fontWeight: 700, letterSpacing: -2 }}>

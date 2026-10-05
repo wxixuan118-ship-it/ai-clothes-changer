@@ -334,7 +334,7 @@ export async function generateImageAction(
       // Free plan results carry a visible watermark (pricing promise).
       watermark: (await hasPaidPlan(session.user.id))
         ? undefined
-        : siteConfig.name,
+        : siteConfig.domain,
     });
     await db
       .update(generations)

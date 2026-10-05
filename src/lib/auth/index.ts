@@ -15,6 +15,7 @@ import {
 import { deleteStoredImagesForUser } from "@/lib/ai/storage";
 import { grantWelcomeCredits } from "@/lib/credits";
 import { sendEmail } from "@/lib/email";
+import { siteConfig } from "@/config/site";
 import { env, features } from "@/lib/env";
 
 // Server-side Better Auth instance. The HTTP surface is mounted at
@@ -50,6 +51,14 @@ if (features.githubOAuth && env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
+  // The custom domain (apex + www) is trusted alongside BETTER_AUTH_URL so
+  // switching hosts doesn't break sign-in mid-migration.
+  trustedOrigins: [
+    env.BETTER_AUTH_URL,
+    siteConfig.url,
+    `https://www.${siteConfig.domain}`,
+    ...(env.SITE_URL ? [env.SITE_URL] : []),
+  ],
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",

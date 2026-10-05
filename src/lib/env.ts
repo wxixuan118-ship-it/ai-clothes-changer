@@ -65,7 +65,7 @@ const schema = z
     RESEND_API_KEY: z.string().optional(),
     EMAIL_FROM: z
       .string()
-      .default("AI Clothes Changer <onboarding@resend.dev>"),
+      .default("StyleMirror AI <onboarding@resend.dev>"),
 
     // ── Stripe ────────────────────────────────────────────────────────────
     // Optional in development so a fresh clone boots without a Stripe

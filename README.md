@@ -1,6 +1,6 @@
-# AI Hairstyle Changer
+# StyleMirror AI
 
-Try new hairstyles and outfits on your own photo with AI.
+[stylemirrorai.com](https://stylemirrorai.com) — try new hairstyles and outfits on your own photo with AI.
 
 - **AI Hairstyle Changer** (home page, `/`) — upload a selfie, then pick a
   hairstyle photo, describe the cut and color, or choose one of 16 curated
@@ -92,6 +92,13 @@ Next.js standalone output, non-root runtime on port 3000). It is used on
 - **Stripe webhook:** `https://<your-domain>/api/stripe/webhook` with the
   events `checkout.session.completed`, `invoice.paid`,
   `customer.subscription.updated`, and `customer.subscription.deleted`.
+
+- **Domain:** the canonical origin is `https://stylemirrorai.com`
+  (`siteConfig.url`; override with `SITE_URL`). Canonical tags and the
+  sitemap always use it in production. `www` redirects to the apex; the
+  platform subdomain redirects too once `SITE_URL` is set (set it, and
+  `BETTER_AUTH_URL`, after the domain serves the app). `/api` is never
+  redirected.
 
 Environment changes only apply after a redeploy.
 
