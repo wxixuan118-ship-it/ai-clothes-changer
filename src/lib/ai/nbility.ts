@@ -25,7 +25,7 @@ const BLOCKED =
   /moderation|safety system|content[ _-]?policy|safety_violation|sensitive|blocked/i;
 
 type ImageData = { url?: string; b64_json?: string };
-type GatewayBody = {
+export type GatewayBody = {
   code?: string;
   message?: string;
   error?: { message?: string; code?: string; type?: string };
@@ -74,11 +74,11 @@ function errorText(body: GatewayBody, status: number): string {
   );
 }
 
-function headers(): Record<string, string> {
+export function headers(): Record<string, string> {
   return { Authorization: `Bearer ${env.NBILITY_API_KEY}` };
 }
 
-async function readJson(response: Response): Promise<GatewayBody> {
+export async function readJson(response: Response): Promise<GatewayBody> {
   return (await response.json().catch(() => ({}))) as GatewayBody;
 }
 
@@ -87,7 +87,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 /** A finished image (sync shape) or null when the body is a task. */
-function imageFrom(body: GatewayBody): string | null {
+export function imageFrom(body: GatewayBody): string | null {
   if (!Array.isArray(body.data)) return null;
   const first = body.data[0];
   if (first?.url) return first.url;
@@ -95,7 +95,7 @@ function imageFrom(body: GatewayBody): string | null {
   return null;
 }
 
-function throwFor(message: string, status: number): never {
+export function throwFor(message: string, status: number): never {
   if (BLOCKED.test(message)) throw new ContentBlockedError("nbility_blocked");
   if (status === 429) throw new ProviderBusyError("nbility_429");
   throw new Error(`nbility ${status}: ${message}`.slice(0, 500));
@@ -145,7 +145,10 @@ async function submit(
   }
 }
 
-async function waitForTask(taskId: string, deadline: number): Promise<string> {
+export async function waitForTask(
+  taskId: string,
+  deadline: number,
+): Promise<string> {
   while (Date.now() < deadline) {
     await sleep(POLL_INTERVAL_MS);
     const response = await fetch(

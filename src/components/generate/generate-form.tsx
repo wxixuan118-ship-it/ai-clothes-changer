@@ -381,6 +381,21 @@ export function GenerateForm({
   );
   const [garmentType, setGarmentType] =
     React.useState<(typeof garmentTypes)[number]["id"]>("full");
+  // Preview photos of the curated hairstyles (id → version), once generated.
+  const [previews, setPreviews] = React.useState<Record<string, number>>({});
+  React.useEffect(() => {
+    if (tool !== "hair") return;
+    let cancelled = false;
+    fetch("/api/preset-previews")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { hair?: Record<string, number> } | null) => {
+        if (!cancelled && data?.hair) setPreviews(data.hair);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [tool]);
   const [prompt, setPrompt] = React.useState("");
   const [styleFilter, setStyleFilter] = React.useState<string>("All");
   const [styleId, setStyleId] = React.useState<string>(
@@ -731,30 +746,73 @@ export function GenerateForm({
                           <p className="mb-2 text-sm text-[var(--muted-ink)]">
                             {category}
                           </p>
-                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                          <div
+                            className={cn(
+                              "grid gap-2",
+                              tool === "hair"
+                                ? "grid-cols-3 sm:grid-cols-5"
+                                : "grid-cols-2 sm:grid-cols-3",
+                            )}
+                          >
                             {copy.presets
                               .filter((preset) => preset.category === category)
-                              .map((preset) => (
-                                <button
-                                  key={preset.id}
-                                  type="button"
-                                  aria-pressed={styleId === preset.id}
-                                  onClick={() => setStyleId(preset.id)}
-                                  className={cn(
-                                    "flex items-center gap-3 rounded-[14px] border p-2 text-left text-sm transition-colors",
-                                    styleId === preset.id
-                                      ? "border-[var(--brand)] bg-[var(--brand-soft)]"
-                                      : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_95%)]",
-                                  )}
-                                >
-                                  <span
-                                    aria-hidden
-                                    className="h-10 w-7 shrink-0 rounded-t-full rounded-b-sm"
-                                    style={{ background: preset.tint }}
-                                  />
-                                  {preset.name}
-                                </button>
-                              ))}
+                              .map((preset) =>
+                                tool === "hair" ? (
+                                  // Hairstyles: a photo card (preview image
+                                  // once generated in /admin, else the tint).
+                                  <button
+                                    key={preset.id}
+                                    type="button"
+                                    aria-pressed={styleId === preset.id}
+                                    onClick={() => setStyleId(preset.id)}
+                                    className={cn(
+                                      "overflow-hidden rounded-[14px] border text-left text-xs transition-colors",
+                                      styleId === preset.id
+                                        ? "border-[var(--brand)] bg-[var(--brand-soft)] ring-2 ring-[var(--brand)]"
+                                        : "hover:border-[var(--muted-ink)]",
+                                    )}
+                                  >
+                                    <span
+                                      aria-hidden
+                                      className="relative block aspect-[3/4]"
+                                      style={{ background: preset.tint }}
+                                    >
+                                      {previews[preset.id] ? (
+                                        // eslint-disable-next-line @next/next/no-img-element -- small stored JPEG
+                                        <img
+                                          src={`/api/preset-previews/hair/${preset.id}?v=${previews[preset.id]}`}
+                                          alt=""
+                                          loading="lazy"
+                                          className="absolute inset-0 size-full object-cover"
+                                        />
+                                      ) : null}
+                                    </span>
+                                    <span className="block truncate px-2 py-1.5">
+                                      {preset.name}
+                                    </span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    key={preset.id}
+                                    type="button"
+                                    aria-pressed={styleId === preset.id}
+                                    onClick={() => setStyleId(preset.id)}
+                                    className={cn(
+                                      "flex items-center gap-3 rounded-[14px] border p-2 text-left text-sm transition-colors",
+                                      styleId === preset.id
+                                        ? "border-[var(--brand)] bg-[var(--brand-soft)]"
+                                        : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_95%)]",
+                                    )}
+                                  >
+                                    <span
+                                      aria-hidden
+                                      className="h-10 w-7 shrink-0 rounded-t-full rounded-b-sm"
+                                      style={{ background: preset.tint }}
+                                    />
+                                    {preset.name}
+                                  </button>
+                                ),
+                              )}
                           </div>
                         </div>
                       ))}

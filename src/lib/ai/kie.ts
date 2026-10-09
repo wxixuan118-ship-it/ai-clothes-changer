@@ -125,7 +125,10 @@ async function uploadImage(
   return body.data.downloadUrl;
 }
 
-async function createTask(payload: unknown, deadline: number): Promise<string> {
+export async function createTask(
+  payload: unknown,
+  deadline: number,
+): Promise<string> {
   for (let attempt = 0; ; attempt++) {
     const response = await fetch(`${env.KIE_BASE_URL}/api/v1/jobs/createTask`, {
       method: "POST",
@@ -146,7 +149,10 @@ async function createTask(payload: unknown, deadline: number): Promise<string> {
   }
 }
 
-async function waitForTask(taskId: string, deadline: number): Promise<string> {
+export async function waitForTask(
+  taskId: string,
+  deadline: number,
+): Promise<string> {
   while (Date.now() < deadline) {
     await sleep(POLL_INTERVAL_MS);
     const response = await fetch(

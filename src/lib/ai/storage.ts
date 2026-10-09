@@ -1,9 +1,17 @@
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  readdir,
+  readFile,
+  stat,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -204,3 +212,123 @@ export function generatedFilePath(fileName: string): string {
 export const mediaTypeByExtension: Record<string, string> = Object.fromEntries(
   Object.entries(extensionByMediaType).map(([type, ext]) => [ext, type]),
 );
+
+// ── Preset previews ──────────────────────────────────────────────────────────
+// One small JPEG per curated preset (hairstyle / outfit), generated from
+// /admin. Stored next to results: S3 "presets/<tool>/<id>.jpg", or
+// ./.generated/presets/<tool>/ locally. Public — they're marketing images.
+
+export type PresetTool = "hair" | "clothes";
+
+const PRESET_PREFIX = "presets/";
+
+function presetKey(tool: PresetTool, id: string): string {
+  return `${PRESET_PREFIX}${tool}/${id}.jpg`;
+}
+
+function presetDir(tool: PresetTool): string {
+  return path.join(GENERATED_DIR, "presets", tool);
+}
+
+export async function storePresetPreview(
+  tool: PresetTool,
+  id: string,
+  bytes: Buffer,
+): Promise<void> {
+  listCache.delete(tool);
+  if (features.s3Storage) {
+    await s3().send(
+      new PutObjectCommand({
+        Bucket: env.S3_BUCKET,
+        Key: presetKey(tool, id),
+        Body: bytes,
+        ContentType: "image/jpeg",
+      }),
+    );
+    return;
+  }
+  await mkdir(presetDir(tool), { recursive: true });
+  await writeFile(path.join(presetDir(tool), `${id}.jpg`), bytes);
+}
+
+export async function readPresetPreview(
+  tool: PresetTool,
+  id: string,
+): Promise<Uint8Array | null> {
+  if (features.s3Storage) {
+    try {
+      const object = await s3().send(
+        new GetObjectCommand({
+          Bucket: env.S3_BUCKET,
+          Key: presetKey(tool, id),
+        }),
+      );
+      return object.Body ? await object.Body.transformToByteArray() : null;
+    } catch (error) {
+      if ((error as { name?: string }).name === "NoSuchKey") return null;
+      throw error;
+    }
+  }
+  try {
+    return new Uint8Array(
+      await readFile(path.join(presetDir(tool), `${id}.jpg`)),
+    );
+  } catch {
+    return null;
+  }
+}
+
+const LIST_TTL_MS = 30_000;
+const listCache = new Map<
+  PresetTool,
+  { at: number; value: Record<string, number> }
+>();
+
+/**
+ * id → version (last-modified ms) for every stored preview of a tool.
+ * Cached briefly per instance; storing a preview clears the cache.
+ */
+export async function listPresetPreviews(
+  tool: PresetTool,
+): Promise<Record<string, number>> {
+  const hit = listCache.get(tool);
+  if (hit && Date.now() - hit.at < LIST_TTL_MS) return hit.value;
+  const value = await listPresetPreviewsUncached(tool);
+  listCache.set(tool, { at: Date.now(), value });
+  return value;
+}
+
+async function listPresetPreviewsUncached(
+  tool: PresetTool,
+): Promise<Record<string, number>> {
+  const found: Record<string, number> = {};
+  if (features.s3Storage) {
+    let token: string | undefined;
+    do {
+      const page = await s3().send(
+        new ListObjectsV2Command({
+          Bucket: env.S3_BUCKET,
+          Prefix: `${PRESET_PREFIX}${tool}/`,
+          ContinuationToken: token,
+        }),
+      );
+      for (const object of page.Contents ?? []) {
+        const match = /\/([\w-]+)\.jpg$/.exec(object.Key ?? "");
+        if (match?.[1]) {
+          found[match[1]] = object.LastModified?.getTime() ?? 0;
+        }
+      }
+      token = page.IsTruncated ? page.NextContinuationToken : undefined;
+    } while (token);
+    return found;
+  }
+  const files = await readdir(presetDir(tool)).catch(() => [] as string[]);
+  for (const file of files) {
+    const match = /^([\w-]+)\.jpg$/.exec(file);
+    if (!match?.[1]) continue;
+    found[match[1]] = Math.round(
+      (await stat(path.join(presetDir(tool), file))).mtimeMs,
+    );
+  }
+  return found;
+}

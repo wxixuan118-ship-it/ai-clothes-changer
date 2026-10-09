@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/admin/auth";
+import { generateHairPreview } from "@/lib/ai/preset-preview";
 import { adjustCredits, InsufficientCreditsError } from "@/lib/credits";
 import {
   findModel,
@@ -113,4 +114,24 @@ export async function setProviderEnabledAction(
     ok: true,
     message: `${label} switched ${state}.`,
   };
+}
+
+/** Generates (or regenerates) one hairstyle preview image. */
+export async function generatePresetPreviewAction(
+  id: string,
+): Promise<AdminActionResult> {
+  await requireAdmin();
+  try {
+    const { provider } = await generateHairPreview(id);
+    revalidatePath("/admin/presets");
+    return { ok: true, message: `Preview ready (${provider}).` };
+  } catch (error) {
+    return {
+      ok: false,
+      message: (error instanceof Error ? error.message : String(error)).slice(
+        0,
+        300,
+      ),
+    };
+  }
 }
