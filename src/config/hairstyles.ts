@@ -1,26 +1,48 @@
-// Curated hairstyle presets for the AI hairstyle changer: 10 styles with 5
-// choices each. Each preset is a prompt fragment applied to the user's
-// photo — no reference image needed. `cover` is an Unsplash photo id used on
+// Curated hairstyle presets for the AI hairstyle changer, split by gender
+// (Female: 8 styles × 5, Male: 5 styles × 5). Each preset is a prompt
+// fragment applied to the user's photo — hair color is picked separately
+// (src/config/hair-colors.ts). `cover` is an Unsplash photo id used on
 // marketing surfaces. Keep ids stable: home page cards link to ?style=<id>.
 
-export const hairCategories = [
-  "Short cuts",
-  "Men's styles",
-  "Bobs",
-  "Bangs & fringe",
-  "Layers & shag",
-  "Long & sleek",
-  "Waves & curls",
-  "Braids & locs",
-  "Natural & afro",
-  "Bold color",
-] as const;
+export type HairGender = "female" | "male";
 
-export type HairCategory = (typeof hairCategories)[number];
+export const hairGenders: { id: HairGender; label: string }[] = [
+  { id: "female", label: "Female" },
+  { id: "male", label: "Male" },
+];
+
+export const hairCategoriesByGender = {
+  female: [
+    "Pixie & short",
+    "Bobs",
+    "Bangs & fringe",
+    "Layers & shag",
+    "Long & sleek",
+    "Waves & curls",
+    "Braids & locs",
+    "Natural & afro",
+  ],
+  male: [
+    "Short cuts",
+    "Classic",
+    "Quiffs & fringes",
+    "Medium & long",
+    "Curly & textured",
+  ],
+} as const satisfies Record<HairGender, readonly string[]>;
+
+export type HairCategory = (typeof hairCategoriesByGender)[HairGender][number];
+
+/** Every category, female first (generic consumers, e.g. the form copy). */
+export const hairCategories: readonly HairCategory[] = [
+  ...hairCategoriesByGender.female,
+  ...hairCategoriesByGender.male,
+];
 
 export type HairPreset = {
   id: string;
   name: string;
+  gender: HairGender;
   category: HairCategory;
   prompt: string;
   tint: string;
@@ -31,86 +53,56 @@ export const hairPresets: HairPreset[] = [
   {
     id: "pixie-cut",
     name: "Pixie cut",
-    category: "Short cuts",
+    gender: "female",
+    category: "Pixie & short",
     prompt: "a cropped pixie cut with soft side-swept bangs",
     tint: "var(--pop-orange-bold)",
   },
   {
-    id: "buzz-cut",
-    name: "Buzz cut",
-    category: "Short cuts",
-    prompt: "a clean, even buzz cut",
+    id: "sideswept-pixie",
+    name: "Side-swept pixie",
+    gender: "female",
+    category: "Pixie & short",
+    prompt: "a longer pixie cut with a long, side-swept fringe",
     tint: "var(--pop-pink-bold)",
   },
   {
-    id: "crew-cut",
-    name: "Crew cut",
-    category: "Short cuts",
-    prompt: "a neat, short crew cut, slightly longer on top",
+    id: "shaggy-pixie",
+    name: "Shaggy pixie",
+    gender: "female",
+    category: "Pixie & short",
+    prompt: "a choppy, textured shaggy pixie cut",
     tint: "var(--pop-mint-bold)",
   },
   {
-    id: "french-crop",
-    name: "French crop",
-    category: "Short cuts",
-    prompt: "a textured French crop with a short blunt fringe and faded sides",
+    id: "undercut-pixie",
+    name: "Undercut pixie",
+    gender: "female",
+    category: "Pixie & short",
+    prompt: "a pixie cut with a short undercut on the sides and volume on top",
     tint: "var(--pop-sky-bold)",
   },
   {
-    id: "classic-fade",
-    name: "Classic fade",
-    category: "Short cuts",
-    prompt: "a classic short taper fade, neatly combed on top",
-    tint: "var(--pop-yellow-bold)",
-  },
-  {
-    id: "slick-back",
-    name: "Slicked-back undercut",
-    category: "Men's styles",
-    prompt: "a slicked-back top with a clean undercut on the sides",
-    tint: "var(--pop-orange-bold)",
-  },
-  {
-    id: "silver-quiff",
-    name: "Silver quiff",
-    category: "Men's styles",
-    prompt: "a short textured quiff with faded sides in silver-grey",
-    tint: "var(--pop-pink-bold)",
-    cover: "1660144689256-c9a4a4ac116c",
-  },
-  {
-    id: "side-part",
-    name: "Side part",
-    category: "Men's styles",
-    prompt: "a classic gentleman's side part with a neat taper",
-    tint: "var(--pop-mint-bold)",
-  },
-  {
-    id: "modern-mullet",
-    name: "Modern mullet",
-    category: "Men's styles",
-    prompt:
-      "a modern textured mullet, shorter on the sides and longer at the back",
-    tint: "var(--pop-sky-bold)",
-  },
-  {
-    id: "man-bun",
-    name: "Man bun",
-    category: "Men's styles",
-    prompt: "shoulder-length hair pulled back into a neat top knot bun",
+    id: "curly-pixie",
+    name: "Curly pixie",
+    gender: "female",
+    category: "Pixie & short",
+    prompt: "a short curly pixie cut with defined curls",
     tint: "var(--pop-yellow-bold)",
   },
   {
     id: "copper-bob",
-    name: "Copper bob",
+    name: "Classic bob",
+    gender: "female",
     category: "Bobs",
-    prompt: "a chin-length copper bob with soft, polished ends",
+    prompt: "a chin-length classic bob with soft, polished ends",
     tint: "var(--pop-orange-bold)",
     cover: "1438761681033-6461ffad8d80",
   },
   {
     id: "blunt-bob",
     name: "Blunt bob",
+    gender: "female",
     category: "Bobs",
     prompt: "a sharp, jaw-length blunt bob with a straight hemline",
     tint: "var(--pop-pink-bold)",
@@ -118,6 +110,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "long-bob",
     name: "Long bob",
+    gender: "female",
     category: "Bobs",
     prompt: "a collarbone-length lob with soft, piecey ends",
     tint: "var(--pop-mint-bold)",
@@ -125,6 +118,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "french-bob",
     name: "French bob",
+    gender: "female",
     category: "Bobs",
     prompt: "a short French bob at cheekbone length with a light fringe",
     tint: "var(--pop-sky-bold)",
@@ -132,6 +126,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "asymmetric-bob",
     name: "Asymmetric bob",
+    gender: "female",
     category: "Bobs",
     prompt: "an asymmetric bob, longer on one side with a sleek finish",
     tint: "var(--pop-yellow-bold)",
@@ -139,6 +134,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "curtain-bangs",
     name: "Curtain bangs",
+    gender: "female",
     category: "Bangs & fringe",
     prompt: "shoulder-length hair with soft curtain bangs",
     tint: "var(--pop-orange-bold)",
@@ -146,6 +142,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "wispy-bangs",
     name: "Wispy bangs",
+    gender: "female",
     category: "Bangs & fringe",
     prompt: "long hair with light, wispy see-through bangs",
     tint: "var(--pop-pink-bold)",
@@ -153,6 +150,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "blunt-bangs",
     name: "Blunt bangs",
+    gender: "female",
     category: "Bangs & fringe",
     prompt: "straight hair with full, blunt eyebrow-length bangs",
     tint: "var(--pop-mint-bold)",
@@ -160,6 +158,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "side-swept-bangs",
     name: "Side-swept bangs",
+    gender: "female",
     category: "Bangs & fringe",
     prompt: "layered hair with long side-swept bangs",
     tint: "var(--pop-sky-bold)",
@@ -167,6 +166,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "middle-part",
     name: "Middle-part curtains",
+    gender: "female",
     category: "Bangs & fringe",
     prompt:
       "medium-length hair parted in the middle, falling as soft curtains around the face",
@@ -175,6 +175,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "wolf-cut",
     name: "Wolf cut",
+    gender: "female",
     category: "Layers & shag",
     prompt: "a choppy, textured wolf cut with feathered layers",
     tint: "var(--pop-orange-bold)",
@@ -182,13 +183,16 @@ export const hairPresets: HairPreset[] = [
   {
     id: "shag",
     name: "Classic shag",
+    gender: "female",
     category: "Layers & shag",
     prompt: "a 70s-style shag with choppy layers and a feathered fringe",
     tint: "var(--pop-pink-bold)",
+    cover: "1648213037568-2c9c6d267e25",
   },
   {
     id: "butterfly-cut",
     name: "Butterfly cut",
+    gender: "female",
     category: "Layers & shag",
     prompt: "a voluminous butterfly cut with short face-framing layers",
     tint: "var(--pop-mint-bold)",
@@ -196,6 +200,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "long-layers",
     name: "Long layers",
+    gender: "female",
     category: "Layers & shag",
     prompt: "long, glossy hair with face-framing layers",
     tint: "var(--pop-sky-bold)",
@@ -203,6 +208,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "curly-shag",
     name: "Curly shag",
+    gender: "female",
     category: "Layers & shag",
     prompt: "a curly shag cut with bouncy layers and curly bangs",
     tint: "var(--pop-yellow-bold)",
@@ -210,6 +216,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "sleek-straight",
     name: "Sleek straight",
+    gender: "female",
     category: "Long & sleek",
     prompt: "long, sleek, straight hair with a center part",
     tint: "var(--pop-orange-bold)",
@@ -217,6 +224,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "bouncy-blowout",
     name: "Bouncy blowout",
+    gender: "female",
     category: "Long & sleek",
     prompt: "a voluminous, bouncy blowout with rounded layers",
     tint: "var(--pop-pink-bold)",
@@ -224,6 +232,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "half-up",
     name: "Half-up, half-down",
+    gender: "female",
     category: "Long & sleek",
     prompt: "long hair styled half-up, half-down with loose waves",
     tint: "var(--pop-mint-bold)",
@@ -231,6 +240,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "high-ponytail",
     name: "High ponytail",
+    gender: "female",
     category: "Long & sleek",
     prompt: "long hair in a sleek, high ponytail",
     tint: "var(--pop-sky-bold)",
@@ -238,6 +248,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "low-bun",
     name: "Sleek low bun",
+    gender: "female",
     category: "Long & sleek",
     prompt: "hair pulled back into a polished, sleek low bun",
     tint: "var(--pop-yellow-bold)",
@@ -245,21 +256,24 @@ export const hairPresets: HairPreset[] = [
   {
     id: "beach-waves",
     name: "Beach waves",
+    gender: "female",
     category: "Waves & curls",
-    prompt: "long, loose beach waves with sun-kissed highlights",
+    prompt: "long, loose beach waves",
     tint: "var(--pop-orange-bold)",
   },
   {
     id: "long-curls",
     name: "Long curls",
+    gender: "female",
     category: "Waves & curls",
-    prompt: "long, voluminous, defined dark curls",
+    prompt: "long, voluminous, defined curls",
     tint: "var(--pop-pink-bold)",
     cover: "1569430548104-6ca1cda3ec41",
   },
   {
     id: "hollywood-waves",
     name: "Hollywood waves",
+    gender: "female",
     category: "Waves & curls",
     prompt: "glamorous, glossy vintage Hollywood waves",
     tint: "var(--pop-mint-bold)",
@@ -267,6 +281,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "spiral-curls",
     name: "Spiral curls",
+    gender: "female",
     category: "Waves & curls",
     prompt: "bouncy, defined spiral curls at shoulder length",
     tint: "var(--pop-sky-bold)",
@@ -274,6 +289,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "loose-curls",
     name: "Loose curls",
+    gender: "female",
     category: "Waves & curls",
     prompt: "soft, loose curls with lots of volume",
     tint: "var(--pop-yellow-bold)",
@@ -281,6 +297,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "box-braids",
     name: "Box braids",
+    gender: "female",
     category: "Braids & locs",
     prompt: "long, neat box braids",
     tint: "var(--pop-orange-bold)",
@@ -288,6 +305,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "cornrows",
     name: "Cornrows",
+    gender: "female",
     category: "Braids & locs",
     prompt: "neat straight-back cornrow braids",
     tint: "var(--pop-pink-bold)",
@@ -295,6 +313,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "locs",
     name: "Locs",
+    gender: "female",
     category: "Braids & locs",
     prompt: "shoulder-length, well-groomed locs",
     tint: "var(--pop-mint-bold)",
@@ -302,6 +321,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "dutch-braids",
     name: "Dutch braids",
+    gender: "female",
     category: "Braids & locs",
     prompt: "two tight Dutch braids running from the hairline to the ends",
     tint: "var(--pop-sky-bold)",
@@ -309,6 +329,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "twists",
     name: "Senegalese twists",
+    gender: "female",
     category: "Braids & locs",
     prompt: "long, sleek Senegalese twists",
     tint: "var(--pop-yellow-bold)",
@@ -316,6 +337,7 @@ export const hairPresets: HairPreset[] = [
   {
     id: "afro",
     name: "Natural afro",
+    gender: "female",
     category: "Natural & afro",
     prompt: "a full, rounded natural afro",
     tint: "var(--pop-orange-bold)",
@@ -323,65 +345,235 @@ export const hairPresets: HairPreset[] = [
   {
     id: "twist-out",
     name: "Twist-out",
+    gender: "female",
     category: "Natural & afro",
     prompt: "a defined, voluminous twist-out on natural hair",
     tint: "var(--pop-pink-bold)",
   },
   {
-    id: "tapered-afro",
-    name: "Tapered afro",
-    category: "Natural & afro",
-    prompt: "a short tapered afro, fuller on top and shorter at the sides",
-    tint: "var(--pop-mint-bold)",
-  },
-  {
     id: "afro-puff",
     name: "Afro puff",
+    gender: "female",
     category: "Natural & afro",
     prompt: "natural hair gathered into a high afro puff",
-    tint: "var(--pop-sky-bold)",
+    tint: "var(--pop-mint-bold)",
   },
   {
     id: "bantu-knots",
     name: "Bantu knots",
+    gender: "female",
     category: "Natural & afro",
     prompt: "neat bantu knots across the head",
-    tint: "var(--pop-yellow-bold)",
-  },
-  {
-    id: "platinum-blonde",
-    name: "Platinum blonde",
-    category: "Bold color",
-    prompt: "the same haircut recolored platinum blonde",
-    tint: "var(--pop-orange-bold)",
-  },
-  {
-    id: "cherry-red",
-    name: "Cherry red",
-    category: "Bold color",
-    prompt: "the same haircut recolored a vivid cherry red",
-    tint: "var(--pop-pink-bold)",
-  },
-  {
-    id: "pastel-shag",
-    name: "Pastel shag",
-    category: "Bold color",
-    prompt: "a layered shag cut with pastel blue and lilac tones",
-    tint: "var(--pop-mint-bold)",
-    cover: "1648213037568-2c9c6d267e25",
-  },
-  {
-    id: "honey-balayage",
-    name: "Honey balayage",
-    category: "Bold color",
-    prompt: "the same haircut with a soft honey-blonde balayage",
     tint: "var(--pop-sky-bold)",
   },
   {
-    id: "rose-pink",
-    name: "Rose pink",
-    category: "Bold color",
-    prompt: "the same haircut recolored a soft rose pink",
+    id: "short-natural-curls",
+    name: "Short natural curls",
+    gender: "female",
+    category: "Natural & afro",
+    prompt: "a short, rounded cut of natural coily curls",
+    tint: "var(--pop-yellow-bold)",
+  },
+  {
+    id: "buzz-cut",
+    name: "Buzz cut",
+    gender: "male",
+    category: "Short cuts",
+    prompt: "a clean, even buzz cut",
+    tint: "var(--pop-orange-bold)",
+  },
+  {
+    id: "crew-cut",
+    name: "Crew cut",
+    gender: "male",
+    category: "Short cuts",
+    prompt: "a neat, short crew cut, slightly longer on top",
+    tint: "var(--pop-pink-bold)",
+  },
+  {
+    id: "french-crop",
+    name: "French crop",
+    gender: "male",
+    category: "Short cuts",
+    prompt: "a textured French crop with a short blunt fringe and faded sides",
+    tint: "var(--pop-mint-bold)",
+  },
+  {
+    id: "classic-fade",
+    name: "Classic fade",
+    gender: "male",
+    category: "Short cuts",
+    prompt: "a classic short taper fade, neatly combed on top",
+    tint: "var(--pop-sky-bold)",
+  },
+  {
+    id: "textured-crop",
+    name: "Textured crop",
+    gender: "male",
+    category: "Short cuts",
+    prompt: "a short textured crop with a messy top and skin fade",
+    tint: "var(--pop-yellow-bold)",
+  },
+  {
+    id: "slick-back",
+    name: "Slicked-back undercut",
+    gender: "male",
+    category: "Classic",
+    prompt: "a slicked-back top with a clean undercut on the sides",
+    tint: "var(--pop-orange-bold)",
+  },
+  {
+    id: "side-part",
+    name: "Side part",
+    gender: "male",
+    category: "Classic",
+    prompt: "a classic gentleman's side part with a neat taper",
+    tint: "var(--pop-pink-bold)",
+  },
+  {
+    id: "pompadour",
+    name: "Pompadour",
+    gender: "male",
+    category: "Classic",
+    prompt: "a voluminous pompadour swept up and back with short sides",
+    tint: "var(--pop-mint-bold)",
+  },
+  {
+    id: "comb-over",
+    name: "Comb-over fade",
+    gender: "male",
+    category: "Classic",
+    prompt: "a neat comb-over with a low fade",
+    tint: "var(--pop-sky-bold)",
+  },
+  {
+    id: "ivy-league",
+    name: "Ivy League",
+    gender: "male",
+    category: "Classic",
+    prompt: "a short Ivy League cut, longer at the front and side-parted",
+    tint: "var(--pop-yellow-bold)",
+  },
+  {
+    id: "silver-quiff",
+    name: "Textured quiff",
+    gender: "male",
+    category: "Quiffs & fringes",
+    prompt: "a short textured quiff with faded sides",
+    tint: "var(--pop-orange-bold)",
+    cover: "1660144689256-c9a4a4ac116c",
+  },
+  {
+    id: "messy-fringe",
+    name: "Messy fringe",
+    gender: "male",
+    category: "Quiffs & fringes",
+    prompt: "a messy textured fringe falling forward over the forehead",
+    tint: "var(--pop-pink-bold)",
+  },
+  {
+    id: "curtains-men",
+    name: "Curtains",
+    gender: "male",
+    category: "Quiffs & fringes",
+    prompt: "medium-length hair parted in the middle, falling as curtains",
+    tint: "var(--pop-mint-bold)",
+  },
+  {
+    id: "faux-hawk",
+    name: "Faux hawk",
+    gender: "male",
+    category: "Quiffs & fringes",
+    prompt: "a faux hawk with short sides and a textured ridge on top",
+    tint: "var(--pop-sky-bold)",
+  },
+  {
+    id: "spiky",
+    name: "Spiky",
+    gender: "male",
+    category: "Quiffs & fringes",
+    prompt: "short spiky hair styled up with texture",
+    tint: "var(--pop-yellow-bold)",
+  },
+  {
+    id: "modern-mullet",
+    name: "Modern mullet",
+    gender: "male",
+    category: "Medium & long",
+    prompt:
+      "a modern textured mullet, shorter on the sides and longer at the back",
+    tint: "var(--pop-orange-bold)",
+  },
+  {
+    id: "man-bun",
+    name: "Man bun",
+    gender: "male",
+    category: "Medium & long",
+    prompt: "shoulder-length hair pulled back into a neat top knot bun",
+    tint: "var(--pop-pink-bold)",
+  },
+  {
+    id: "long-flow",
+    name: "Flow",
+    gender: "male",
+    category: "Medium & long",
+    prompt: "medium-long hair swept back with natural flow behind the ears",
+    tint: "var(--pop-mint-bold)",
+  },
+  {
+    id: "surfer-waves",
+    name: "Surfer waves",
+    gender: "male",
+    category: "Medium & long",
+    prompt: "shoulder-length, loose surfer waves",
+    tint: "var(--pop-sky-bold)",
+  },
+  {
+    id: "shoulder-length-men",
+    name: "Shoulder length",
+    gender: "male",
+    category: "Medium & long",
+    prompt: "straight shoulder-length hair with a center part",
+    tint: "var(--pop-yellow-bold)",
+  },
+  {
+    id: "tapered-afro",
+    name: "Tapered afro",
+    gender: "male",
+    category: "Curly & textured",
+    prompt: "a short tapered afro, fuller on top and shorter at the sides",
+    tint: "var(--pop-orange-bold)",
+  },
+  {
+    id: "curly-top-fade",
+    name: "Curly top fade",
+    gender: "male",
+    category: "Curly & textured",
+    prompt: "defined curls on top with a high skin fade",
+    tint: "var(--pop-pink-bold)",
+  },
+  {
+    id: "waves-360",
+    name: "360 waves",
+    gender: "male",
+    category: "Curly & textured",
+    prompt: "a short haircut with smooth, defined 360 waves",
+    tint: "var(--pop-mint-bold)",
+  },
+  {
+    id: "twists-men",
+    name: "Two-strand twists",
+    gender: "male",
+    category: "Curly & textured",
+    prompt: "short two-strand twists on top with faded sides",
+    tint: "var(--pop-sky-bold)",
+  },
+  {
+    id: "cornrows-men",
+    name: "Cornrows",
+    gender: "male",
+    category: "Curly & textured",
+    prompt: "neat straight-back cornrows",
     tint: "var(--pop-yellow-bold)",
   },
 ];

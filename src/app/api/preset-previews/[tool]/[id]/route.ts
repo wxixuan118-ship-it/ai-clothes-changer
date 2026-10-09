@@ -10,7 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ tool: string; id: string }> },
 ): Promise<Response> {
   const { tool, id } = await params;
-  if (tool !== "hair" || !getHairPreset(id)) {
+  const isBase = id === "_base-female" || id === "_base-male";
+  if (tool !== "hair" || (!isBase && !getHairPreset(id))) {
     return new Response("Not found", { status: 404 });
   }
   const bytes = await readPresetPreview("hair", id);

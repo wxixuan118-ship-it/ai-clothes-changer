@@ -5,6 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
+  CheckIcon,
   ImageUpIcon,
   ScissorsIcon,
   ShirtIcon,
@@ -24,10 +25,14 @@ import {
   type AuthOptions,
 } from "@/components/generate/auth-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { DEFAULT_HAIR_COLOR, hairColors } from "@/config/hair-colors";
 import {
   getHairPreset,
   hairCategories,
+  hairCategoriesByGender,
+  hairGenders,
   hairPresets,
+  type HairGender,
 } from "@/config/hairstyles";
 import { getStylePreset, styleCategories, stylePresets } from "@/config/styles";
 import { tools, type ToolId } from "@/config/tools";
@@ -65,7 +70,14 @@ const errorMessages: Record<NonNullable<GenerateResult["error"]>, string> = {
 
 type Mode = "reference" | "prompt" | "style";
 
-type Preset = { id: string; name: string; category: string; tint: string };
+type Preset = {
+  id: string;
+  name: string;
+  category: string;
+  tint: string;
+  /** Hairstyles only: which library (Female / Male) it belongs to. */
+  gender?: HairGender;
+};
 
 const garmentTypes = [
   { id: "top", label: "Top" },
@@ -447,9 +459,24 @@ export function GenerateForm({
   }, [tool]);
   const [prompt, setPrompt] = React.useState("");
   const [styleFilter, setStyleFilter] = React.useState<string>("All");
+  // Hairstyles: Female / Male libraries and a separate hair color.
+  const [gender, setGender] = React.useState<HairGender>("female");
+  const [hairColor, setHairColor] = React.useState(DEFAULT_HAIR_COLOR);
+  const visiblePresets =
+    tool === "hair"
+      ? copy.presets.filter((preset) => preset.gender === gender)
+      : copy.presets;
+  const visibleCategories: readonly string[] =
+    tool === "hair" ? hairCategoriesByGender[gender] : copy.categories;
   const [styleId, setStyleId] = React.useState<string>(
-    copy.presets[0]?.id ?? "",
+    visiblePresets[0]?.id ?? "",
   );
+  function switchGender(next: HairGender) {
+    if (next === gender) return;
+    setGender(next);
+    setStyleFilter("All");
+    setStyleId(copy.presets.find((preset) => preset.gender === next)?.id ?? "");
+  }
 
   // "?style=<id>" (the home page style cards) preselects that style. Applied
   // during render whenever the param changes, so a second card click on the
@@ -460,9 +487,12 @@ export function GenerateForm({
   >(null);
   if (styleParam !== appliedStyleParam) {
     setAppliedStyleParam(styleParam);
-    if (styleParam && copy.getPreset(styleParam)) {
+    const linked = styleParam ? copy.getPreset(styleParam) : undefined;
+    if (styleParam && linked) {
       setMode("style");
       setStyleId(styleParam);
+      if (linked.gender) setGender(linked.gender);
+      setStyleFilter("All");
     }
   }
 
@@ -576,6 +606,7 @@ export function GenerateForm({
       }
       if (mode === "prompt") formData.set("prompt", prompt);
       if (mode === "style") formData.set("styleId", styleId);
+      if (tool === "hair") formData.set("hairColor", hairColor);
       React.startTransition(() => formAction(formData));
     });
   }
@@ -762,12 +793,37 @@ export function GenerateForm({
 
               {mode === "style" ? (
                 <div className="grid gap-3">
+                  {tool === "hair" ? (
+                    <div
+                      role="radiogroup"
+                      aria-label="Hairstyles for"
+                      className="grid grid-cols-2 gap-1 rounded-full border bg-[var(--canvas)] p-1"
+                    >
+                      {hairGenders.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={gender === option.id}
+                          onClick={() => switchGender(option.id)}
+                          className={cn(
+                            "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                            gender === option.id
+                              ? "bg-[var(--brand)] text-[var(--ink-deep)]"
+                              : "text-[var(--muted-ink)] hover:text-[var(--ink)]",
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                   <div
                     role="group"
                     aria-label="Filter by style"
                     className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]"
                   >
-                    {["All", ...copy.categories].map((category) => (
+                    {["All", ...visibleCategories].map((category) => (
                       <button
                         key={category}
                         type="button"
@@ -785,7 +841,7 @@ export function GenerateForm({
                     ))}
                   </div>
                   <div className="grid max-h-[26rem] gap-5 overflow-y-auto pr-1">
-                    {copy.categories
+                    {visibleCategories
                       .filter(
                         (category) =>
                           styleFilter === "All" || styleFilter === category,
@@ -803,7 +859,7 @@ export function GenerateForm({
                                 : "grid-cols-2 sm:grid-cols-3",
                             )}
                           >
-                            {copy.presets
+                            {visiblePresets
                               .filter((preset) => preset.category === category)
                               .map((preset) =>
                                 tool === "hair" ? (
@@ -865,6 +921,62 @@ export function GenerateForm({
                           </div>
                         </div>
                       ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {tool === "hair" && mode !== "prompt" ? (
+                <div className="grid gap-2">
+                  <p className="text-sm text-[var(--muted-ink)]">Hair color</p>
+                  <div
+                    role="radiogroup"
+                    aria-label="Hair color"
+                    className="flex gap-3 overflow-x-auto pt-2 pb-1 [scrollbar-width:none]"
+                  >
+                    {hairColors.map((color) => (
+                      <button
+                        key={color.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={hairColor === color.id}
+                        onClick={() => setHairColor(color.id)}
+                        className="group grid w-16 shrink-0 justify-items-center gap-1.5 text-center text-xs"
+                      >
+                        <span className="relative">
+                          <span
+                            aria-hidden
+                            className={cn(
+                              "block size-12 rounded-full border transition-shadow",
+                              hairColor === color.id
+                                ? "ring-2 ring-[var(--brand)] ring-offset-2 ring-offset-[var(--paper-2)]"
+                                : "group-hover:ring-1 group-hover:ring-[var(--muted-ink)]",
+                            )}
+                            style={{ background: color.swatch }}
+                          />
+                          {hairColor === color.id ? (
+                            <CheckIcon
+                              aria-hidden
+                              className="absolute inset-0 m-auto size-5 rounded-full bg-[var(--brand)] p-0.5 text-[var(--ink-deep)]"
+                            />
+                          ) : null}
+                          {color.hot ? (
+                            <span className="absolute -top-2 -right-3 rounded-full bg-[var(--brand)] px-1.5 py-px text-[10px] font-semibold text-[var(--ink-deep)]">
+                              HOT
+                            </span>
+                          ) : null}
+                        </span>
+                        <span
+                          className={cn(
+                            "leading-tight",
+                            hairColor === color.id
+                              ? "text-[var(--ink)]"
+                              : "text-[var(--muted-ink)]",
+                          )}
+                        >
+                          {color.name}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               ) : null}

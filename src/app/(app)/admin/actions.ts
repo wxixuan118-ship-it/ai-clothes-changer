@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/admin/auth";
-import { generateHairPreview } from "@/lib/ai/preset-preview";
+import {
+  generateBaseModel,
+  generateHairPreview,
+} from "@/lib/ai/preset-preview";
 import { adjustCredits, InsufficientCreditsError } from "@/lib/credits";
 import {
   findModel,
@@ -122,9 +125,32 @@ export async function generatePresetPreviewAction(
 ): Promise<AdminActionResult> {
   await requireAdmin();
   try {
-    const { provider } = await generateHairPreview(id);
+    const { model } = await generateHairPreview(id);
     revalidatePath("/admin/presets");
-    return { ok: true, message: `Preview ready (${provider}).` };
+    return { ok: true, message: `Preview ready (${model}).` };
+  } catch (error) {
+    return {
+      ok: false,
+      message: (error instanceof Error ? error.message : String(error)).slice(
+        0,
+        300,
+      ),
+    };
+  }
+}
+
+/** Renders (or re-renders) the shared model photo for Female or Male. */
+export async function generateBaseModelAction(
+  gender: string,
+): Promise<AdminActionResult> {
+  await requireAdmin();
+  if (gender !== "female" && gender !== "male") {
+    return { ok: false, message: "Unknown gender." };
+  }
+  try {
+    const { provider } = await generateBaseModel(gender);
+    revalidatePath("/admin/presets");
+    return { ok: true, message: `Model photo ready (${provider}).` };
   } catch (error) {
     return {
       ok: false,

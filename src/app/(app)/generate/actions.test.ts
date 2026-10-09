@@ -474,6 +474,35 @@ describe("generateImageAction — hairstyle changer", () => {
     expect(rows[0]?.prompt).toBe("Hairstyle · Pixie cut");
   });
 
+  it("preset + hair color: the color goes into the instruction and label", async () => {
+    const userId = await createUser(2);
+
+    const result = await runAction(
+      hairForm({
+        mode: "style",
+        styleId: "classic-fade",
+        hairColor: "platinum",
+      }),
+    );
+
+    expect(result).toMatchObject({ ok: true });
+    const input = providerGenerate.mock.calls[0]?.[0];
+    expect(input.prompt).toContain("classic short taper fade");
+    expect(input.prompt).toContain("Hair color: platinum blonde.");
+    const { generations: rows } = await rowsFor(userId);
+    expect(rows[0]?.prompt).toBe("Hairstyle · Classic fade · Platinum");
+  });
+
+  it("rejects an unknown hair color before spending", async () => {
+    const userId = await createUser(2);
+    const result = await runAction(
+      hairForm({ mode: "style", styleId: "pixie-cut", hairColor: "neon" }),
+    );
+    expect(result).toMatchObject({ ok: false });
+    const { spends } = await rowsFor(userId);
+    expect(spends).toHaveLength(0);
+  });
+
   it("reference photo: sends it as the reference image", async () => {
     const userId = await createUser(2);
 

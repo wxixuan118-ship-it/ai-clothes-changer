@@ -5,6 +5,11 @@ import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 
 import { GENERATION_COST_CREDITS } from "@/config/plans";
+import {
+  DEFAULT_HAIR_COLOR,
+  getHairColor,
+  hairColorInstruction,
+} from "@/config/hair-colors";
 import { getHairPreset } from "@/config/hairstyles";
 import { getStylePreset } from "@/config/styles";
 import { db } from "@/db";
@@ -147,13 +152,26 @@ async function parseHairRequest(
   mode: z.infer<typeof modeSchema>,
   personImage: InputImage,
 ): Promise<ChangeRequest | NonNullable<GenerateResult["error"]>> {
+  // Hair color is picked separately (photo and library modes).
+  const color = getHairColor(
+    String(formData.get("hairColor") ?? DEFAULT_HAIR_COLOR),
+  );
+  if (!color) return "invalid_style";
+  const colorLabel =
+    color.prompt && color.id !== "keep" ? ` · ${color.name}` : "";
+
   if (mode === "reference" || mode === "garment") {
     const referenceImage = await readPhoto(formData.get("referenceImage"));
     if (!referenceImage) return "invalid_garment";
+    // "AI recommended" keeps the reference photo's own color.
+    const instruction =
+      color.id === "ai"
+        ? "Give the person the hairstyle shown in the reference photo — same cut, length, texture, and color."
+        : `Give the person the hairstyle shown in the reference photo — same cut, length, and texture. ${hairColorInstruction(color)}`;
     return {
       task: "hair",
-      label: "Hairstyle photo",
-      instruction: `Give the person the hairstyle shown in the reference photo — same cut, length, texture, and color. ${KEEP_FOR_HAIR}`,
+      label: `Hairstyle photo${colorLabel}`,
+      instruction: `${instruction} ${KEEP_FOR_HAIR}`,
       personImage,
       referenceImage,
     };
@@ -163,8 +181,8 @@ async function parseHairRequest(
     if (!preset) return "invalid_style";
     return {
       task: "hair",
-      label: `Hairstyle · ${preset.name}`,
-      instruction: `Change only the person's hair to ${preset.prompt}. ${KEEP_FOR_HAIR}`,
+      label: `Hairstyle · ${preset.name}${colorLabel}`,
+      instruction: `Change only the person's hair to ${preset.prompt}. ${hairColorInstruction(color)} ${KEEP_FOR_HAIR}`,
       personImage,
     };
   }
