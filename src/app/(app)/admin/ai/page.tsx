@@ -182,12 +182,45 @@ function LiveRows({
 
 export default async function AdminAiPage() {
   await requireAdmin();
+  // Each part loads independently: one failing query or provider check
+  // shows its error here instead of taking the whole page down.
+  const errors: string[] = [];
+  const safely = async <T,>(
+    label: string,
+    load: () => Promise<T>,
+    fallback: T,
+  ) => {
+    try {
+      return await load();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[admin/ai] ${label} failed:`, error);
+      errors.push(`${label}: ${message}`.slice(0, 400));
+      return fallback;
+    }
+  };
+  const emptyUsage: Awaited<ReturnType<typeof getModelUsage>> = {
+    byModel: [],
+    chart: [],
+    completedByDayModel: new Map(),
+    chartDays: [],
+    recentFailures: [],
+    lastRuns: [],
+  };
   const [current, usage, nbility, kie, enabledList] = await Promise.all([
-    getEditModel(),
-    getModelUsage(),
-    features.nbility ? checkNbility("gpt-image-2") : Promise.resolve(null),
-    features.kie ? checkKie() : Promise.resolve(null),
-    Promise.all(PROVIDERS.map((p) => isProviderEnabled(p.id))),
+    safely("Current model", getEditModel, null),
+    safely("Usage stats", getModelUsage, emptyUsage),
+    features.nbility
+      ? safely("Nbility check", () => checkNbility("gpt-image-2"), null)
+      : Promise.resolve(null),
+    features.kie
+      ? safely("kie.ai check", checkKie, null)
+      : Promise.resolve(null),
+    safely(
+      "Provider switches",
+      () => Promise.all(PROVIDERS.map((p) => isProviderEnabled(p.id))),
+      PROVIDERS.map(() => true),
+    ),
   ]);
   const checks: Checks = { nbility, kie };
   const enabled = Object.fromEntries(
@@ -227,6 +260,21 @@ export default async function AdminAiPage() {
 
   return (
     <div className="space-y-6">
+      {errors.length ? (
+        <div
+          role="alert"
+          className="space-y-1 rounded-[20px] border border-red-400 p-4 text-sm"
+        >
+          <p className="font-medium text-red-300">
+            Part of this page failed to load
+          </p>
+          {errors.map((error) => (
+            <p key={error} className="break-words text-[var(--muted-ink)]">
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat
           label="Model in use"
