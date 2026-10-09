@@ -1,0 +1,1 @@
+ALTER TABLE "generations" ADD COLUMN "watermark_free" boolean DEFAULT false NOT NULL;

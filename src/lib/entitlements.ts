@@ -24,3 +24,18 @@ export async function getCurrentPlan(userId: string): Promise<Plan> {
 export async function hasPaidPlan(userId: string): Promise<boolean> {
   return (await getCurrentPlan(userId)).id !== "free";
 }
+
+/**
+ * May this result be shown/downloaded without the watermark? Yes when the
+ * run was made watermark-free (paid plan or purchased credits at the time)
+ * or the owner is on a paid plan now — upgrading unlocks old results too.
+ */
+export async function canRemoveWatermark({
+  userId,
+  watermarkFree,
+}: {
+  userId: string;
+  watermarkFree: boolean;
+}): Promise<boolean> {
+  return watermarkFree || (await hasPaidPlan(userId));
+}

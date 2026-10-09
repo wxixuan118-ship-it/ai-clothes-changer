@@ -9,9 +9,13 @@ import { db } from "@/db";
 import { generations } from "@/db/schema";
 import { requireSession } from "@/lib/auth/session";
 import { getRefundedGenerationIds } from "@/lib/credits";
+import { hasPaidPlan } from "@/lib/entitlements";
 import { env } from "@/lib/env";
 import { DeleteLookButton } from "@/components/generate/delete-look-button";
-import { GenerateForm } from "@/components/generate/generate-form";
+import {
+  GenerateForm,
+  RetryingImage,
+} from "@/components/generate/generate-form";
 import { PageHeader } from "@/components/app/page-header";
 import { SparkleSpinner } from "@/components/sparkle-spinner";
 
@@ -35,6 +39,8 @@ export default async function GeneratePage({
     .where(eq(generations.userId, session.user.id))
     .orderBy(desc(generations.createdAt), desc(generations.id))
     .limit(24);
+  // Paid plan now → every result is clean; otherwise per-run entitlement.
+  const paid = await hasPaidPlan(session.user.id);
   // A failed row only says "refunded" when the refund actually landed.
   const refunded = await getRefundedGenerationIds(
     session.user.id,
@@ -100,13 +106,12 @@ export default async function GeneratePage({
                 <div className="relative aspect-[4/5] bg-[var(--canvas)]">
                   {generation.status === "completed" && generation.imageUrl ? (
                     <a
-                      href={generation.imageUrl}
+                      href={`${generation.imageUrl}?variant=${paid || generation.watermarkFree ? "clean" : "watermarked"}`}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element -- API-served user images */}
-                      <img
-                        src={generation.imageUrl}
+                      <RetryingImage
+                        src={`${generation.imageUrl}?variant=${paid || generation.watermarkFree ? "clean" : "watermarked"}`}
                         alt={generation.prompt}
                         className="absolute inset-0 size-full object-cover"
                       />
@@ -133,6 +138,34 @@ export default async function GeneratePage({
                     <p className="text-xs text-[var(--muted-ink)]">
                       {formatTimestamp(generation.createdAt)}
                     </p>
+                    {generation.status === "completed" &&
+                    generation.imageUrl ? (
+                      <p className="flex flex-wrap gap-x-3 text-xs">
+                        <a
+                          href={`${generation.imageUrl}?variant=watermarked&download=1`}
+                          download
+                          className="text-[var(--muted-ink)] underline underline-offset-4 hover:text-[var(--ink)]"
+                        >
+                          Free download
+                        </a>
+                        {paid || generation.watermarkFree ? (
+                          <a
+                            href={`${generation.imageUrl}?variant=clean&download=1`}
+                            download
+                            className="text-[var(--brand)] underline underline-offset-4"
+                          >
+                            No watermark
+                          </a>
+                        ) : (
+                          <Link
+                            href="/billing"
+                            className="text-[var(--brand)] underline underline-offset-4"
+                          >
+                            Remove watermark
+                          </Link>
+                        )}
+                      </p>
+                    ) : null}
                   </div>
                   {generation.status !== "pending" ? (
                     <DeleteLookButton

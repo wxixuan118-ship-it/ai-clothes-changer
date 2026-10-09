@@ -172,8 +172,57 @@ async function downscale(file: File): Promise<Blob> {
 }
 
 /** Same-origin dev images and Blob URLs both download via ?download=1. */
-function downloadHref(url: string): string {
-  return `${url}${url.includes("?") ? "&" : "?"}download=1`;
+type Variant = "clean" | "watermarked";
+
+function withParams(url: string, params: Record<string, string>): string {
+  const query = new URLSearchParams(params).toString();
+  return `${url}${url.includes("?") ? "&" : "?"}${query}`;
+}
+
+function variantSrc(url: string, variant: Variant): string {
+  return withParams(url, { variant });
+}
+
+function downloadHref(url: string, variant: Variant): string {
+  return withParams(url, { variant, download: "1" });
+}
+
+/**
+ * A freshly stored result can take a moment to become readable in object
+ * storage: retry a few times before showing a broken image.
+ */
+export function RetryingImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const [attempt, setAttempt] = React.useState(0);
+  const [failed, setFailed] = React.useState(false);
+  const current = attempt ? withParams(src, { retry: String(attempt) }) : src;
+  if (failed) {
+    return (
+      <span className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-[var(--muted-ink)]">
+        Still processing — refresh in a moment.
+      </span>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- API-served user images
+    <img
+      key={current}
+      src={current}
+      alt={alt}
+      className={className}
+      onError={() => {
+        if (attempt >= 4) return setFailed(true);
+        setTimeout(() => setAttempt((n) => n + 1), 800 * (attempt + 1));
+      }}
+    />
+  );
 }
 
 function usePhoto() {
@@ -886,27 +935,66 @@ export function GenerateForm({
                 All my looks
               </Link>
             ) : null}
-            <a
-              href={downloadHref(latest.imageUrl)}
-              download
-              className="pill pill-brand px-5 py-2 text-sm"
-            >
-              Download
-            </a>
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={downloadHref(latest.imageUrl, "watermarked")}
+                download
+                className="pill pill-dark px-5 py-2 text-sm"
+              >
+                Free download
+              </a>
+              {latest.watermarkFree ? (
+                <a
+                  href={downloadHref(latest.imageUrl, "clean")}
+                  download
+                  className="pill pill-brand px-5 py-2 text-sm"
+                >
+                  Download without watermark
+                </a>
+              ) : (
+                <Link
+                  href="/billing"
+                  className="pill pill-brand px-5 py-2 text-sm"
+                >
+                  Remove watermark — upgrade
+                </Link>
+              )}
+            </div>
           </div>
+          {!latest.watermarkFree ? (
+            <p className="-mt-2 mb-3 text-xs text-[var(--muted-ink)]">
+              Free results carry a small watermark. Go Pro or buy credits to
+              download it clean — this image included.
+            </p>
+          ) : null}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { src: person.preview, caption: "Before" },
-              { src: latest.imageUrl, caption: latest.label },
+              { src: person.preview, caption: "Before", result: false },
+              {
+                src: variantSrc(
+                  latest.imageUrl,
+                  latest.watermarkFree ? "clean" : "watermarked",
+                ),
+                caption: latest.label,
+                result: true,
+              },
             ].map((item) => (
               <figure key={item.caption} className="grid min-w-0 gap-2">
                 <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--canvas)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- blob + API-served images */}
-                  <img
-                    src={item.src}
-                    alt={item.caption}
-                    className="absolute inset-0 size-full object-contain"
-                  />
+                  {item.result ? (
+                    <RetryingImage
+                      src={item.src}
+                      alt={item.caption}
+                      className="absolute inset-0 size-full object-contain"
+                    />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element -- local blob preview
+                    <img
+                      src={item.src}
+                      alt={item.caption}
+                      className="absolute inset-0 size-full object-contain"
+                    />
+                  )}
                 </div>
                 <figcaption className="truncate text-sm text-[var(--muted-ink)]">
                   {item.caption}

@@ -234,6 +234,21 @@ export async function getBalance(userId: string): Promise<number> {
   return row.creditBalance;
 }
 
+/** The user has bought credits at least once (a one-time top-up). Read-only. */
+export async function hasPurchasedCredits(userId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: creditTransactions.id })
+    .from(creditTransactions)
+    .where(
+      and(
+        eq(creditTransactions.userId, userId),
+        eq(creditTransactions.type, "topup"),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
+}
+
 export type CreditTransaction = typeof creditTransactions.$inferSelect;
 
 /** Newest-first ledger entries; backed by the (user_id, created_at DESC) index. */

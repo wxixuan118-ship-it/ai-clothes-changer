@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { GENERATION_COST_CREDITS } from "@/config/plans";
 import { getHairPreset } from "@/config/hairstyles";
-import { siteConfig } from "@/config/site";
 import { getStylePreset } from "@/config/styles";
 import { db } from "@/db";
 import { generations } from "@/db/schema";
@@ -19,6 +18,7 @@ import { deleteStoredImage, storeGeneratedImage } from "@/lib/ai/storage";
 import { getSession, requireSession } from "@/lib/auth/session";
 import {
   InsufficientCreditsError,
+  hasPurchasedCredits,
   refundCredits,
   spendCredits,
 } from "@/lib/credits";
@@ -90,7 +90,12 @@ const garmentLabels: Record<GarmentType, string> = {
 export type GenerateResult = {
   ok: boolean;
   /** Set on success — the stored image and its history label. */
-  result?: { imageUrl: string; label: string };
+  result?: {
+    imageUrl: string;
+    label: string;
+    /** May be shown/downloaded without the watermark. */
+    watermarkFree: boolean;
+  };
   error?:
     | "invalid_photo"
     | "invalid_garment"
@@ -325,6 +330,12 @@ export async function generateImageAction(
     throw error;
   }
 
+  // Paid plan, or credits the user bought → this result may be downloaded
+  // without the watermark (free sign-up credits alone don't qualify).
+  const watermarkFree =
+    (await hasPaidPlan(session.user.id)) ||
+    (await hasPurchasedCredits(session.user.id));
+
   let storedUrl: string;
   try {
     const image = await provider.generateImage({
@@ -336,13 +347,11 @@ export async function generateImageAction(
       garmentType: request.garmentType,
       model,
     });
+    // Stored clean; /api/images adds the watermark when serving to anyone
+    // not entitled to the clean file (pricing promise for free results).
     storedUrl = await storeGeneratedImage({
       generationId: generation.id,
       url: image.url,
-      // Free plan results carry a visible watermark (pricing promise).
-      watermark: (await hasPaidPlan(session.user.id))
-        ? undefined
-        : siteConfig.domain,
     });
     await db
       .update(generations)
@@ -351,6 +360,7 @@ export async function generateImageAction(
         status: "completed",
         model: image.model,
         completedAt: new Date(),
+        watermarkFree,
       })
       .where(eq(generations.id, generation.id));
   } catch (error) {
@@ -408,7 +418,10 @@ export async function generateImageAction(
   }
 
   revalidatePath("/", "layout");
-  return { ok: true, result: { imageUrl: storedUrl, label: request.label } };
+  return {
+    ok: true,
+    result: { imageUrl: storedUrl, label: request.label, watermarkFree },
+  };
 }
 
 /**

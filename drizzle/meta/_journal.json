@@ -43,6 +43,13 @@
       "when": 1791546549562,
       "tag": "0005_minor_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791550891297,
+      "tag": "0006_wealthy_blindfold",
+      "breakpoints": true
     }
   ]
 }

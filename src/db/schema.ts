@@ -197,6 +197,9 @@ export const generations = pgTable(
       .defaultNow(),
     // When the run finished (completed or failed) — admin latency stats.
     completedAt: timestamp("completed_at", { withTimezone: true }),
+    // Decided when the run is made: the owner was on a paid plan or had
+    // bought credits, so the result may be downloaded without a watermark.
+    watermarkFree: boolean("watermark_free").notNull().default(false),
   },
   (t) => [
     // Composite: powers the history grid (newest-first per user); the

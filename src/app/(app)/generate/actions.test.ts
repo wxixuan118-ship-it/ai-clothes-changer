@@ -56,7 +56,7 @@ import { readStoredImage } from "@/lib/ai/storage";
 import { ContentBlockedError } from "@/lib/ai/errors";
 import { mockProvider } from "@/lib/ai/mock";
 import * as credits from "@/lib/credits";
-import { grantCredits } from "@/lib/credits";
+import { grantCredits, grantWelcomeCredits } from "@/lib/credits";
 import { closeDb, ensureTestDatabase } from "@/test/db";
 
 import {
@@ -558,7 +558,7 @@ describe("generateImageAction — content safety", () => {
   });
 });
 
-describe("generateImageAction — free-plan watermark", () => {
+describe("generateImageAction — watermark entitlement", () => {
   async function storedBytesFor(userId: string) {
     const { generations: rows } = await rowsFor(userId);
     const file = rows[0]?.imageUrl?.split("/").pop() as string;
@@ -574,24 +574,55 @@ describe("generateImageAction — free-plan watermark", () => {
       .toBuffer();
   }
 
-  it("free users get a watermarked result", async () => {
-    const userId = await createUser(2);
-    const original = await grayPng();
+  async function runWith(original: Buffer) {
     providerGenerate.mockResolvedValueOnce({
       url: `data:image/png;base64,${original.toString("base64")}`,
       width: 400,
       height: 500,
       model: "mock/placeholder",
     });
+    return runAction(promptForm());
+  }
 
-    expect(await runAction(promptForm())).toMatchObject({ ok: true });
+  /** Fetches the result through /api/images as the signed-in owner. */
+  async function serve(userId: string, query: string) {
+    const { GET } = await import("@/app/api/images/[file]/route");
+    const { generations: rows } = await rowsFor(userId);
+    const file = rows[0]?.imageUrl?.split("/").pop() as string;
+    const response = await GET(
+      new Request(`http://test.local/api/images/${file}${query}`),
+      { params: Promise.resolve({ file }) },
+    );
+    return {
+      status: response.status,
+      bytes: Buffer.from(await response.arrayBuffer()),
+    };
+  }
 
-    const stored = await storedBytesFor(userId);
-    expect(stored.length).toBeGreaterThan(0);
-    expect(stored.equals(original)).toBe(false);
+  it("free users: stored clean, served watermarked, clean download refused", async () => {
+    // Only the free sign-up credits — nothing bought.
+    const userId = await createUser(0);
+    await grantWelcomeCredits(userId);
+    const original = await grayPng();
+    expect(await runWith(original)).toMatchObject({
+      ok: true,
+      result: { watermarkFree: false },
+    });
+
+    expect((await storedBytesFor(userId)).equals(original)).toBe(true);
+    const { generations: rows } = await rowsFor(userId);
+    expect(rows[0]?.watermarkFree).toBe(false);
+
+    const shown = await serve(userId, "");
+    expect(shown.status).toBe(200);
+    expect(shown.bytes.equals(original)).toBe(false);
+    expect((await serve(userId, "?variant=clean")).status).toBe(402);
+    const free = await serve(userId, "?variant=watermarked&download=1");
+    expect(free.status).toBe(200);
+    expect(free.bytes.equals(original)).toBe(false);
   });
 
-  it("paid users get the provider output untouched", async () => {
+  it("paid users get clean results and clean downloads", async () => {
     const userId = await createUser(2);
     await db.insert(subscriptions).values({
       userId,
@@ -600,15 +631,35 @@ describe("generateImageAction — free-plan watermark", () => {
       priceId: process.env.STRIPE_PRICE_PRO_MONTHLY as string,
     });
     const original = await grayPng();
-    providerGenerate.mockResolvedValueOnce({
-      url: `data:image/png;base64,${original.toString("base64")}`,
-      width: 400,
-      height: 500,
-      model: "mock/placeholder",
+    expect(await runWith(original)).toMatchObject({
+      ok: true,
+      result: { watermarkFree: true },
     });
 
-    expect(await runAction(promptForm())).toMatchObject({ ok: true });
+    const clean = await serve(userId, "?variant=clean&download=1");
+    expect(clean.status).toBe(200);
+    expect(clean.bytes.equals(original)).toBe(true);
+    // The free version is still available on request.
+    const free = await serve(userId, "?variant=watermarked");
+    expect(free.bytes.equals(original)).toBe(false);
+  });
 
-    expect((await storedBytesFor(userId)).equals(original)).toBe(true);
+  it("runs made after buying credits are watermark-free", async () => {
+    const userId = await createUser(2);
+    await grantCredits({
+      userId,
+      amount: 100,
+      type: "topup",
+      idempotencyKey: `topup_${userId}`,
+    });
+    const original = await grayPng();
+    expect(await runWith(original)).toMatchObject({
+      ok: true,
+      result: { watermarkFree: true },
+    });
+    const clean = await serve(userId, "?variant=clean");
+    expect(clean.status).toBe(200);
+    expect(clean.bytes.equals(original)).toBe(true);
+    await expectInvariant(userId);
   });
 });
