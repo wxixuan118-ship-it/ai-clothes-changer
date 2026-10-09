@@ -8,11 +8,12 @@ import {
   ShirtIcon,
   LayoutDashboardIcon,
   SettingsIcon,
+  ShieldIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const items = [
+const baseItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
   { href: "/generate", label: "Hairstyle changer", icon: ScissorsIcon },
   {
@@ -22,14 +23,20 @@ const items = [
   },
   { href: "/billing", label: "Billing", icon: CreditCardIcon },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
-] as const;
+];
+
+const adminItem = { href: "/admin", label: "Admin", icon: ShieldIcon };
 
 export function SidebarNav({
   orientation = "vertical",
+  isAdmin = false,
 }: {
   /** "horizontal" = the scrollable bar shown under the header on phones. */
   orientation?: "vertical" | "horizontal";
+  /** Shows the Admin link. Display only — /admin re-checks on the server. */
+  isAdmin?: boolean;
 }) {
+  const items = isAdmin ? [...baseItems, adminItem] : baseItems;
   const pathname = usePathname();
   const searchParams = useSearchParams();
 

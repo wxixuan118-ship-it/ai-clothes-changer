@@ -190,6 +190,8 @@ export const generations = pgTable(
     imageUrl: text("image_url"),
     model: text("model").notNull(),
     status: generationsStatus("status").notNull().default("pending"),
+    // Why a run failed (provider error code / message) — admin diagnostics.
+    failureReason: text("failure_reason"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -203,3 +205,17 @@ export const generations = pgTable(
     ),
   ],
 );
+
+// ── App settings ─────────────────────────────────────────────────────────────
+
+// Runtime settings changed from the admin panel (e.g. the image model) —
+// take effect without a redeploy. Keys are validated in src/lib/settings.ts.
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedBy: text("updated_by"),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+

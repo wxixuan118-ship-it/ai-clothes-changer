@@ -63,9 +63,7 @@ const schema = z
 
     // ── Email via Resend (optional — emails no-op without it) ─────────────
     RESEND_API_KEY: z.string().optional(),
-    EMAIL_FROM: z
-      .string()
-      .default("StyleMirror AI <onboarding@resend.dev>"),
+    EMAIL_FROM: z.string().default("StyleMirror AI <onboarding@resend.dev>"),
 
     // ── Stripe ────────────────────────────────────────────────────────────
     // Optional in development so a fresh clone boots without a Stripe
@@ -98,6 +96,16 @@ const schema = z
     // both the hairstyle and clothes changers when the key is set. Keys are
     // per region: a Singapore key needs the international base URL.
     DASHSCOPE_API_KEY: z.string().optional(),
+    // Comma-separated emails allowed into /admin. Empty = nobody.
+    ADMIN_EMAILS: z
+      .string()
+      .optional()
+      .transform((value) =>
+        (value ?? "")
+          .split(",")
+          .map((email) => email.trim().toLowerCase())
+          .filter(Boolean),
+      ),
     DASHSCOPE_BASE_URL: z
       .url()
       .default("https://dashscope-intl.aliyuncs.com")

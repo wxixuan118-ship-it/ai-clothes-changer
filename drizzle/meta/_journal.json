@@ -29,6 +29,13 @@
       "when": 1783959501657,
       "tag": "0003_flat_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791539072673,
+      "tag": "0004_boring_christian_walker",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { ZapIcon } from "lucide-react";
 
 import { SidebarNav } from "@/components/app/sidebar-nav";
 import { UserMenu } from "@/components/app/user-menu";
+import { isAdminEmail } from "@/lib/admin/auth";
 import { requireSession } from "@/lib/auth/session";
 import { siteConfig } from "@/config/site";
 import { Sparkle } from "@/components/atelier/sparkle";
@@ -18,6 +19,7 @@ export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = await requireSession();
+  const isAdmin = isAdminEmail(session.user.email);
 
   return (
     <div className="flex min-h-dvh w-full">
@@ -34,7 +36,7 @@ export default async function AppLayout({
           </Link>
         </div>
         <div className="p-3">
-          <SidebarNav />
+          <SidebarNav isAdmin={isAdmin} />
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
@@ -69,7 +71,7 @@ export default async function AppLayout({
           </div>
         </header>
         <div className="border-b px-3 py-2 md:hidden">
-          <SidebarNav orientation="horizontal" />
+          <SidebarNav orientation="horizontal" isAdmin={isAdmin} />
         </div>
         <main className="flex-1 p-4 sm:p-6">{children}</main>
       </div>

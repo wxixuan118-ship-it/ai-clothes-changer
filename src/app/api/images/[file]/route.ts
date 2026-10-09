@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { generations } from "@/db/schema";
+import { isAdminEmail } from "@/lib/admin/auth";
 import { getSession } from "@/lib/auth/session";
 import { mediaTypeByExtension, readStoredImage } from "@/lib/ai/storage";
 
@@ -27,14 +28,18 @@ export async function GET(
   if (!session) {
     return new Response("Unauthorized", { status: 401 });
   }
+  // Owners see their own results; admins can review any (/admin).
+  const admin = isAdminEmail(session.user.email);
   const [owned] = await db
     .select({ id: generations.id })
     .from(generations)
     .where(
-      and(
-        eq(generations.id, match[1]),
-        eq(generations.userId, session.user.id),
-      ),
+      admin
+        ? eq(generations.id, match[1])
+        : and(
+            eq(generations.id, match[1]),
+            eq(generations.userId, session.user.id),
+          ),
     )
     .limit(1);
   if (!owned) {

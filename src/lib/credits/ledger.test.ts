@@ -9,6 +9,7 @@ import { closeDb, ensureTestDatabase } from "@/test/db";
 
 import {
   InsufficientCreditsError,
+  adjustCredits,
   getBalance,
   getHistory,
   grantCredits,
@@ -382,6 +383,39 @@ describe("refunds", () => {
       }),
     ).rejects.toThrow(/no spend/i);
     await expectInvariant(userId);
+  });
+});
+
+describe("admin adjustments", () => {
+  it("add and remove credits with a reason, keeping the invariant", async () => {
+    const userId = await createUser();
+    await adjustCredits({ userId, amount: 20, note: "admin@x: goodwill" });
+    await adjustCredits({ userId, amount: -5, note: "admin@x: correction" });
+    expect(await getBalance(userId)).toBe(15);
+    const rows = await ledgerRows(userId);
+    expect(rows.map((r) => r.type)).toEqual(["admin_adjust", "admin_adjust"]);
+    expect(rows.map((r) => r.refId).sort()).toEqual([
+      "admin@x: correction",
+      "admin@x: goodwill",
+    ]);
+    await expectInvariant(userId);
+  });
+
+  it("never push a balance below zero", async () => {
+    const userId = await createUser();
+    await adjustCredits({ userId, amount: 3, note: "seed" });
+    await expect(
+      adjustCredits({ userId, amount: -4, note: "too much" }),
+    ).rejects.toBeInstanceOf(InsufficientCreditsError);
+    expect(await getBalance(userId)).toBe(3);
+    expect(await ledgerRows(userId)).toHaveLength(1);
+    await expectInvariant(userId);
+  });
+
+  it.each([0, 1.5])("reject amount %s", async (amount) => {
+    await expect(
+      adjustCredits({ userId: "nobody", amount, note: "x" }),
+    ).rejects.toThrow();
   });
 });
 

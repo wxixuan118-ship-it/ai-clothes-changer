@@ -8,6 +8,10 @@ vi.mock("@/lib/env", () => ({
   },
 }));
 
+vi.mock("@/lib/settings", () => ({
+  getEditModel: async () => "qwen-image-edit-plus",
+}));
+
 import { buildMessageContent, dashscopeProvider } from "./dashscope";
 import { ContentBlockedError, ProviderBusyError } from "./errors";
 

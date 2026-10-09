@@ -345,6 +345,17 @@ export async function generateImageAction(
       "[generate] provider/storage failed:",
       error instanceof Error ? error.message : error,
     );
+    // Shown in /admin → Generations. Codes for known cases, else the
+    // (secret-free) error message, truncated.
+    const failureReason =
+      error instanceof ContentBlockedError
+        ? `blocked: ${error.code}`
+        : error instanceof ProviderBusyError
+          ? `busy: ${error.code}`
+          : (error instanceof Error ? error.message : String(error)).slice(
+              0,
+              300,
+            );
     try {
       await refundCredits({ userId: session.user.id, ref });
     } catch (refundError) {
@@ -358,13 +369,16 @@ export async function generateImageAction(
       );
       await db
         .update(generations)
-        .set({ status: "failed" })
+        .set({
+          status: "failed",
+          failureReason: `refund failed — ${failureReason}`,
+        })
         .where(eq(generations.id, generation.id));
       throw refundError;
     }
     await db
       .update(generations)
-      .set({ status: "failed" })
+      .set({ status: "failed", failureReason })
       .where(eq(generations.id, generation.id));
     revalidatePath("/", "layout");
     if (error instanceof ProviderBusyError) {

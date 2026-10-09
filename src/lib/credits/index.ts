@@ -277,3 +277,71 @@ export async function getRefundedGenerationIds(
     );
   return new Set(rows.map((row) => row.key.slice("refund_".length)));
 }
+
+type AdjustCreditsInput = {
+  userId: string;
+  /** Non-zero integer: positive adds, negative deducts. */
+  amount: number;
+  /** Who and why — stored on the ledger row (ref_id) for the audit trail. */
+  note: string;
+};
+
+/**
+ * Admin correction, as one append-only `admin_adjust` row. Deductions use
+ * the same conditional UPDATE as spends, so a balance never goes negative
+ * (InsufficientCreditsError). Each call is a new operation (fresh key).
+ */
+export async function adjustCredits({
+  userId,
+  amount,
+  note,
+}: AdjustCreditsInput): Promise<void> {
+  if (!Number.isInteger(amount) || amount === 0) {
+    throw new Error(
+      `adjustCredits: amount must be a non-zero integer, got ${amount}`,
+    );
+  }
+  const idempotencyKey = `admin_${crypto.randomUUID()}`;
+  const ref = { type: "admin", id: note.slice(0, 200) };
+  if (amount > 0) {
+    await grantCredits({
+      userId,
+      amount,
+      type: "admin_adjust",
+      ref,
+      idempotencyKey,
+    });
+    return;
+  }
+  await db.transaction(async (tx) => {
+    await tx.insert(creditTransactions).values({
+      userId,
+      amount,
+      type: "admin_adjust",
+      refType: ref.type,
+      refId: ref.id,
+      idempotencyKey,
+    });
+    const updated = await tx
+      .update(users)
+      .set({ creditBalance: sql`${users.creditBalance} + ${amount}` })
+      .where(and(eq(users.id, userId), gte(users.creditBalance, -amount)))
+      .returning({ id: users.id });
+    if (updated.length === 0) throw new InsufficientCreditsError();
+  });
+}
+
+/** Ledger totals by type since a date — admin overview. */
+export async function getCreditTotals(
+  since: Date,
+): Promise<Record<string, number>> {
+  const rows = await db
+    .select({
+      type: creditTransactions.type,
+      total: sql<number>`coalesce(sum(${creditTransactions.amount}), 0)::int`,
+    })
+    .from(creditTransactions)
+    .where(gte(creditTransactions.createdAt, since))
+    .groupBy(creditTransactions.type);
+  return Object.fromEntries(rows.map((row) => [row.type, row.total]));
+}
