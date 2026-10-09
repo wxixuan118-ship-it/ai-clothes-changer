@@ -1,8 +1,11 @@
 import { env, features } from "@/lib/env";
 
+import { providerOf } from "@/lib/settings";
+
 import { dashscopeProvider } from "./dashscope";
 import { gatewayProvider } from "./gateway";
 import { mockProvider } from "./mock";
+import { nbilityProvider } from "./nbility";
 
 export { ContentBlockedError } from "./errors";
 
@@ -34,6 +37,8 @@ export type GenerateImageInput = {
   /** Reference photo — a garment (clothes) or a hairstyle (hair). */
   referenceImage?: InputImage;
   garmentType?: GarmentType;
+  /** Model id resolved by the caller (admin setting); providers default. */
+  model?: string;
 };
 
 export type GeneratedImage = {
@@ -54,5 +59,18 @@ export interface ImageProvider {
 /** Env-driven selection — no provider conditionals in UI or actions. */
 export function getImageProvider(): ImageProvider {
   if (env.AI_MOCK) return mockProvider;
-  return features.dashscope ? dashscopeProvider : gatewayProvider;
+  if (features.dashscope || features.nbility) return editRouter;
+  return gatewayProvider;
 }
+
+/** Sends each run to the provider that serves its model (input.model). */
+const editRouter: ImageProvider = {
+  modelId: env.AI_EDIT_MODEL,
+  generateImage(input) {
+    const provider =
+      input.model && providerOf(input.model) === "nbility"
+        ? nbilityProvider
+        : dashscopeProvider;
+    return provider.generateImage(input);
+  },
+};

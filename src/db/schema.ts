@@ -195,6 +195,8 @@ export const generations = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    // When the run finished (completed or failed) — admin latency stats.
+    completedAt: timestamp("completed_at", { withTimezone: true }),
   },
   (t) => [
     // Composite: powers the history grid (newest-first per user); the

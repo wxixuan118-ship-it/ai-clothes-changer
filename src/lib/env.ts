@@ -114,6 +114,13 @@ const schema = z
       .default("https://dashscope-intl.aliyuncs.com")
       .transform((url) => url.replace(/\/+$/, "")),
     AI_EDIT_MODEL: z.string().default("qwen-image-edit-plus"),
+    // Nbility AI gateway (OpenAI-compatible, new-api) — gpt-image-2 image
+    // editing. When set it becomes the default provider; /admin can switch.
+    NBILITY_API_KEY: z.string().optional(),
+    NBILITY_BASE_URL: z
+      .url()
+      .default("https://api.nbility.ai")
+      .transform((url) => url.replace(/\/+$/, "")),
 
     // ── Rate limiting via Upstash (optional — in-memory fallback) ─────────
     UPSTASH_REDIS_REST_URL: z.url().optional(),
@@ -289,8 +296,11 @@ export function deriveFeatures(e: Env) {
     blobStorage: Boolean(e.BLOB_READ_WRITE_TOKEN),
     /** Real image editing via DashScope; otherwise AI Gateway (no try-on). */
     dashscope: Boolean(e.DASHSCOPE_API_KEY),
+    /** gpt-image-2 editing via the Nbility gateway. */
+    nbility: Boolean(e.NBILITY_API_KEY),
     /** Some provider can actually edit a person photo (mock counts in dev). */
-    imageEditing: e.AI_MOCK || Boolean(e.DASHSCOPE_API_KEY),
+    imageEditing:
+      e.AI_MOCK || Boolean(e.DASHSCOPE_API_KEY) || Boolean(e.NBILITY_API_KEY),
     /** Private S3-compatible storage; takes precedence over Blob/local. */
     s3Storage: S3_VARS.every((key) => Boolean(e[key])),
   } as const;

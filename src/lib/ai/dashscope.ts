@@ -77,7 +77,7 @@ export const dashscopeProvider: ImageProvider = {
       throw new Error("DashScope is not configured — set DASHSCOPE_API_KEY.");
     }
     // The admin panel can switch models at runtime (falls back to env).
-    const model = await getEditModel();
+    const model = input.model ?? (await getEditModel());
     const payload = JSON.stringify({
       model,
       input: {

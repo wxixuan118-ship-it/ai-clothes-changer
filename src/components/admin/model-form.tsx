@@ -17,7 +17,12 @@ export function ModelForm({
   models,
   current,
 }: {
-  models: readonly { id: string; label: string; note: string }[];
+  models: readonly {
+    id: string;
+    label: string;
+    note: string;
+    disabled?: boolean;
+  }[];
   current: string;
 }) {
   const [state, action, pending] = React.useActionState(
@@ -40,6 +45,7 @@ export function ModelForm({
             key={model.id}
             className={cn(
               "flex cursor-pointer items-start gap-3 rounded-[14px] border p-3",
+              model.disabled && "cursor-not-allowed opacity-50",
               selected === model.id &&
                 "border-[var(--brand)] bg-[var(--brand-soft)]",
             )}
@@ -49,6 +55,7 @@ export function ModelForm({
               name="model"
               value={model.id}
               checked={selected === model.id}
+              disabled={model.disabled}
               onChange={() => setSelected(model.id)}
               className="mt-1 accent-[var(--brand)]"
             />

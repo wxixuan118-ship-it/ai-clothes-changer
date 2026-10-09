@@ -1,7 +1,6 @@
-import { ModelForm } from "@/components/admin/model-form";
 import { requireAdmin } from "@/lib/admin/auth";
 import { env, features } from "@/lib/env";
-import { EDIT_MODELS, getEditModel } from "@/lib/settings";
+import { getEditModel } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -29,20 +28,7 @@ export default async function AdminSettingsPage() {
   const current = await getEditModel();
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-      <section className="space-y-4 rounded-[20px] border bg-[var(--paper-2)] p-5">
-        <div>
-          <h2 className="font-sans text-base font-medium tracking-normal">
-            Image model
-          </h2>
-          <p className="text-sm text-[var(--muted-ink)]">
-            Used by both the hairstyle and clothes changers. Takes effect within
-            30 seconds — no redeploy. Default from env:{" "}
-            <code>{env.AI_EDIT_MODEL}</code>
-          </p>
-        </div>
-        <ModelForm models={EDIT_MODELS} current={current} />
-      </section>
+    <div className="max-w-2xl">
       <section className="space-y-2 rounded-[20px] border bg-[var(--paper-2)] p-5">
         <h2 className="font-sans text-base font-medium tracking-normal">
           Service status
@@ -52,15 +38,25 @@ export default async function AdminSettingsPage() {
         </p>
         <ul className="divide-y">
           <Row
-            label="AI model key (DASHSCOPE_API_KEY)"
+            label="Image model in use (change under AI)"
+            value={current}
+            ok={features.imageEditing}
+          />
+          <Row
+            label="Nbility key (NBILITY_API_KEY)"
+            value={features.nbility ? "Connected" : "Not set"}
+            ok={features.nbility}
+          />
+          <Row
+            label="DashScope key (DASHSCOPE_API_KEY)"
             value={
               features.dashscope
                 ? "Connected"
                 : env.AI_MOCK
                   ? "Mock mode"
-                  : "Missing"
+                  : "Not set"
             }
-            ok={features.imageEditing}
+            ok={features.dashscope}
           />
           <Row
             label="AI region"

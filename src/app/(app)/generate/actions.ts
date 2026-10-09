@@ -24,9 +24,10 @@ import {
 } from "@/lib/credits";
 import { ContentBlockedError, ProviderBusyError } from "@/lib/ai/errors";
 import { hasPaidPlan } from "@/lib/entitlements";
-import { features } from "@/lib/env";
+import { env, features } from "@/lib/env";
 import { screenPrompt } from "@/lib/moderation";
 import { limitGeneration } from "@/lib/rate-limit";
+import { getEditModel } from "@/lib/settings";
 
 const promptSchema = z
   .string()
@@ -282,12 +283,14 @@ export async function generateImageAction(
   }
 
   const provider = getImageProvider();
+  // Resolved once so the record, the provider call and admin stats agree.
+  const model = env.AI_MOCK ? provider.modelId : await getEditModel();
   const [generation] = await db
     .insert(generations)
     .values({
       userId: session.user.id,
       prompt: request.label,
-      model: provider.modelId,
+      model,
     })
     .returning({ id: generations.id });
   if (!generation) {
@@ -327,6 +330,7 @@ export async function generateImageAction(
       personImage: request.personImage,
       referenceImage: request.referenceImage,
       garmentType: request.garmentType,
+      model,
     });
     storedUrl = await storeGeneratedImage({
       generationId: generation.id,
@@ -338,7 +342,12 @@ export async function generateImageAction(
     });
     await db
       .update(generations)
-      .set({ imageUrl: storedUrl, status: "completed", model: image.model })
+      .set({
+        imageUrl: storedUrl,
+        status: "completed",
+        model: image.model,
+        completedAt: new Date(),
+      })
       .where(eq(generations.id, generation.id));
   } catch (error) {
     console.error(
@@ -372,13 +381,14 @@ export async function generateImageAction(
         .set({
           status: "failed",
           failureReason: `refund failed — ${failureReason}`,
+          completedAt: new Date(),
         })
         .where(eq(generations.id, generation.id));
       throw refundError;
     }
     await db
       .update(generations)
-      .set({ status: "failed", failureReason })
+      .set({ status: "failed", failureReason, completedAt: new Date() })
       .where(eq(generations.id, generation.id));
     revalidatePath("/", "layout");
     if (error instanceof ProviderBusyError) {

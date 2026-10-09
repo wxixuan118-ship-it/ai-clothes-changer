@@ -36,6 +36,13 @@
       "when": 1791539072673,
       "tag": "0004_boring_christian_walker",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791546549562,
+      "tag": "0005_minor_satana",
+      "breakpoints": true
     }
   ]
 }

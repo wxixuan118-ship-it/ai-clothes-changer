@@ -1,0 +1,1 @@
+ALTER TABLE "generations" ADD COLUMN "completed_at" timestamp with time zone;

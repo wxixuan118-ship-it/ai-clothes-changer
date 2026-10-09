@@ -168,6 +168,7 @@ describe("deriveFeatures", () => {
       facebookOAuth: false,
       socialProviders: [],
       dashscope: false,
+      nbility: false,
       imageEditing: false,
     });
   });

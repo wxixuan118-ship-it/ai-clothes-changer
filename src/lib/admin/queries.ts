@@ -234,3 +234,96 @@ export async function listGenerations({
   ]);
   return { rows, total: totalRow?.total ?? 0 };
 }
+
+/** Per-model health and spend for /admin/ai. */
+export async function getModelUsage() {
+  const now = new Date();
+  const dayAgo = new Date(now.getTime() - DAY);
+  const monthAgo = new Date(now.getTime() - 30 * DAY);
+  const chartStart = new Date(startOfUtcDay(now).getTime() - 13 * DAY);
+  const seconds = sql`extract(epoch from (${generations.completedAt} - ${generations.createdAt}))`;
+
+  const [byModel, byDay, recentFailures, lastRuns] = await Promise.all([
+    db
+      .select({
+        model: generations.model,
+        day: sql<number>`count(*) filter (where ${generations.createdAt} >= ${dayAgo})::int`,
+        dayCompleted: sql<number>`count(*) filter (where ${generations.createdAt} >= ${dayAgo} and ${generations.status} = 'completed')::int`,
+        dayFailed: sql<number>`count(*) filter (where ${generations.createdAt} >= ${dayAgo} and ${generations.status} = 'failed')::int`,
+        total: count(),
+        completed: sql<number>`count(*) filter (where ${generations.status} = 'completed')::int`,
+        failed: sql<number>`count(*) filter (where ${generations.status} = 'failed')::int`,
+        blocked: sql<number>`count(*) filter (where ${generations.failureReason} like 'blocked:%')::int`,
+        pending: sql<number>`count(*) filter (where ${generations.status} = 'pending')::int`,
+        avgSeconds: sql<
+          number | null
+        >`round(avg(${seconds}) filter (where ${generations.status} = 'completed'))::int`,
+        maxSeconds: sql<
+          number | null
+        >`round(max(${seconds}) filter (where ${generations.status} = 'completed'))::int`,
+        lastSuccessAt: sql<Date | null>`max(${generations.createdAt}) filter (where ${generations.status} = 'completed')`,
+      })
+      .from(generations)
+      .where(gte(generations.createdAt, monthAgo))
+      .groupBy(generations.model)
+      .orderBy(desc(count())),
+    db
+      .select({
+        day: sql<string>`to_char(date_trunc('day', ${generations.createdAt} at time zone 'UTC'), 'YYYY-MM-DD')`,
+        model: generations.model,
+        completed: sql<number>`count(*) filter (where ${generations.status} = 'completed')::int`,
+        failed: sql<number>`count(*) filter (where ${generations.status} = 'failed')::int`,
+      })
+      .from(generations)
+      .where(gte(generations.createdAt, chartStart))
+      .groupBy(sql`1`, generations.model),
+    db
+      .select({
+        id: generations.id,
+        userId: generations.userId,
+        model: generations.model,
+        failureReason: generations.failureReason,
+        createdAt: generations.createdAt,
+      })
+      .from(generations)
+      .where(eq(generations.status, "failed"))
+      .orderBy(desc(generations.createdAt))
+      .limit(12),
+    // Last 10 finished runs, newest first — "is it failing right now?"
+    db
+      .select({ model: generations.model, status: generations.status })
+      .from(generations)
+      .where(
+        or(
+          eq(generations.status, "completed"),
+          eq(generations.status, "failed"),
+        ),
+      )
+      .orderBy(desc(generations.createdAt))
+      .limit(10),
+  ]);
+
+  const keys = dayKeys(14);
+  const days = new Map<string, { completed: number; failed: number }>();
+  const completedByDayModel = new Map<string, number>();
+  for (const row of byDay) {
+    const entry = days.get(row.day) ?? { completed: 0, failed: 0 };
+    entry.completed += row.completed;
+    entry.failed += row.failed;
+    days.set(row.day, entry);
+    completedByDayModel.set(`${row.day}|${row.model}`, row.completed);
+  }
+  return {
+    byModel,
+    chart: keys.map((day) => ({
+      day,
+      completed: days.get(day)?.completed ?? 0,
+      failed: days.get(day)?.failed ?? 0,
+    })),
+    /** day → model → completed (for per-day spend). */
+    completedByDayModel,
+    chartDays: keys,
+    recentFailures,
+    lastRuns,
+  };
+}

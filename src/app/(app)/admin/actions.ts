@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/admin/auth";
 import { adjustCredits, InsufficientCreditsError } from "@/lib/credits";
-import { setSetting } from "@/lib/settings";
+import { findModel, isProviderConfigured, setSetting } from "@/lib/settings";
 
 export type AdminActionResult = { ok: boolean; message?: string };
 
@@ -59,11 +59,16 @@ export async function setModelAction(
 ): Promise<AdminActionResult> {
   const admin = await requireAdmin();
   const model = String(formData.get("model") ?? "");
-  try {
-    await setSetting("ai_edit_model", model, admin.user.email);
-  } catch {
-    return { ok: false, message: "Unknown model." };
+  const known = findModel(model);
+  if (!known) return { ok: false, message: "Unknown model." };
+  if (!isProviderConfigured(known.provider)) {
+    return {
+      ok: false,
+      message: "That model's provider has no API key set yet.",
+    };
   }
+  await setSetting("ai_edit_model", model, admin.user.email);
+  revalidatePath("/admin/ai");
   revalidatePath("/admin/settings");
   return { ok: true, message: `Model switched to ${model}.` };
 }
