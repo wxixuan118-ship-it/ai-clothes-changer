@@ -3,8 +3,8 @@
 [stylemirrorai.com](https://stylemirrorai.com) — try new hairstyles and outfits on your own photo with AI.
 
 - **AI Hairstyle Changer** (home page, `/`) — upload a selfie, then pick a
-  hairstyle photo, describe the cut and color, or choose one of 16 curated
-  hairstyles. Only the hair changes; face, features, and background stay.
+  hairstyle photo, describe the cut and color, or choose one of 50 curated
+  hairstyles (10 styles × 5). Only the hair changes; face, features, and background stay.
 - **AI Clothes Changer** (`/ai-clothes-changer`) — upload a photo, then pick a
   garment photo (top / bottom / dress / full outfit), describe the outfit, or
   choose a curated style.

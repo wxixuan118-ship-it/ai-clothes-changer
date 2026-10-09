@@ -140,7 +140,11 @@ const modeIcons: Record<Mode, typeof ShirtIcon> = {
   prompt: TypeIcon,
   style: SparklesIcon,
 };
-const modeOrder: Mode[] = ["reference", "prompt", "style"];
+// Tab order: the hairstyle tool leads with its style library.
+const modeOrders: Record<"hair" | "clothes", Mode[]> = {
+  hair: ["style", "reference", "prompt"],
+  clothes: ["reference", "prompt", "style"],
+};
 
 const MAX_EDGE = 1600;
 
@@ -369,10 +373,16 @@ export function GenerateForm({
   const [isPreparing, startPreparing] = React.useTransition();
   const person = usePhoto();
   const garment = usePhoto();
-  const [mode, setMode] = React.useState<Mode>("reference");
+  // The hairstyle tool opens on the style library (pick and go); the
+  // clothes tool on the garment upload.
+  const modeOrder = modeOrders[tool];
+  const [mode, setMode] = React.useState<Mode>(
+    tool === "hair" ? "style" : "reference",
+  );
   const [garmentType, setGarmentType] =
     React.useState<(typeof garmentTypes)[number]["id"]>("full");
   const [prompt, setPrompt] = React.useState("");
+  const [styleFilter, setStyleFilter] = React.useState<string>("All");
   const [styleId, setStyleId] = React.useState<string>(
     copy.presets[0]?.id ?? "",
   );
@@ -687,39 +697,68 @@ export function GenerateForm({
               ) : null}
 
               {mode === "style" ? (
-                <div className="grid max-h-[26rem] gap-5 overflow-y-auto pr-1">
-                  {copy.categories.map((category) => (
-                    <div key={category}>
-                      <p className="mb-2 text-sm text-[var(--muted-ink)]">
+                <div className="grid gap-3">
+                  <div
+                    role="group"
+                    aria-label="Filter by style"
+                    className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]"
+                  >
+                    {["All", ...copy.categories].map((category) => (
+                      <button
+                        key={category}
+                        type="button"
+                        aria-pressed={styleFilter === category}
+                        onClick={() => setStyleFilter(category)}
+                        className={cn(
+                          "shrink-0 rounded-full border px-3.5 py-1.5 text-sm whitespace-nowrap transition-colors",
+                          styleFilter === category
+                            ? "border-[var(--brand)] bg-[var(--brand)] text-[var(--ink-deep)]"
+                            : "text-[var(--muted-ink)] hover:text-[var(--ink)]",
+                        )}
+                      >
                         {category}
-                      </p>
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {copy.presets
-                          .filter((preset) => preset.category === category)
-                          .map((preset) => (
-                            <button
-                              key={preset.id}
-                              type="button"
-                              aria-pressed={styleId === preset.id}
-                              onClick={() => setStyleId(preset.id)}
-                              className={cn(
-                                "flex items-center gap-3 rounded-[14px] border p-2 text-left text-sm transition-colors",
-                                styleId === preset.id
-                                  ? "border-[var(--brand)] bg-[var(--brand-soft)]"
-                                  : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_95%)]",
-                              )}
-                            >
-                              <span
-                                aria-hidden
-                                className="h-10 w-7 shrink-0 rounded-t-full rounded-b-sm"
-                                style={{ background: preset.tint }}
-                              />
-                              {preset.name}
-                            </button>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid max-h-[26rem] gap-5 overflow-y-auto pr-1">
+                    {copy.categories
+                      .filter(
+                        (category) =>
+                          styleFilter === "All" || styleFilter === category,
+                      )
+                      .map((category) => (
+                        <div key={category}>
+                          <p className="mb-2 text-sm text-[var(--muted-ink)]">
+                            {category}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            {copy.presets
+                              .filter((preset) => preset.category === category)
+                              .map((preset) => (
+                                <button
+                                  key={preset.id}
+                                  type="button"
+                                  aria-pressed={styleId === preset.id}
+                                  onClick={() => setStyleId(preset.id)}
+                                  className={cn(
+                                    "flex items-center gap-3 rounded-[14px] border p-2 text-left text-sm transition-colors",
+                                    styleId === preset.id
+                                      ? "border-[var(--brand)] bg-[var(--brand-soft)]"
+                                      : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_95%)]",
+                                  )}
+                                >
+                                  <span
+                                    aria-hidden
+                                    className="h-10 w-7 shrink-0 rounded-t-full rounded-b-sm"
+                                    style={{ background: preset.tint }}
+                                  />
+                                  {preset.name}
+                                </button>
+                              ))}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
                 </div>
               ) : null}
             </div>
