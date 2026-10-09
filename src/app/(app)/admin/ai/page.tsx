@@ -193,9 +193,16 @@ export default async function AdminAiPage() {
     try {
       return await load();
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      // Drizzle wraps the driver error: the real reason is in `cause`.
+      const cause =
+        error instanceof Error && error.cause instanceof Error
+          ? ` — cause: ${error.cause.message}`
+          : "";
+      const message =
+        (error instanceof Error ? error.message : String(error)).slice(0, 160) +
+        cause;
       console.error(`[admin/ai] ${label} failed:`, error);
-      errors.push(`${label}: ${message}`.slice(0, 400));
+      errors.push(`${label}: ${message}`.slice(0, 600));
       return fallback;
     }
   };

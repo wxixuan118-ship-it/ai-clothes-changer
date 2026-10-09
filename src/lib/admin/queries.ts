@@ -241,6 +241,7 @@ export async function getModelUsage() {
   const dayAgo = new Date(now.getTime() - DAY);
   const monthAgo = new Date(now.getTime() - 30 * DAY);
   const chartStart = new Date(startOfUtcDay(now).getTime() - 13 * DAY);
+  const utcDay = sql<string>`to_char(date_trunc('day', ${generations.createdAt} at time zone 'UTC'), 'YYYY-MM-DD')`;
   const seconds = sql`extract(epoch from (${generations.completedAt} - ${generations.createdAt}))`;
 
   const [byModel, byDay, recentFailures, lastRuns] = await Promise.all([
@@ -269,14 +270,14 @@ export async function getModelUsage() {
       .orderBy(desc(count())),
     db
       .select({
-        day: sql<string>`to_char(date_trunc('day', ${generations.createdAt} at time zone 'UTC'), 'YYYY-MM-DD')`,
+        day: utcDay,
         model: generations.model,
         completed: sql<number>`count(*) filter (where ${generations.status} = 'completed')::int`,
         failed: sql<number>`count(*) filter (where ${generations.status} = 'failed')::int`,
       })
       .from(generations)
       .where(gte(generations.createdAt, chartStart))
-      .groupBy(sql`1`, generations.model),
+      .groupBy(utcDay, generations.model),
     db
       .select({
         id: generations.id,
