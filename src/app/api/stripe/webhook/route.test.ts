@@ -184,7 +184,7 @@ describe("credit side-effects", () => {
     await POST(signedRequest(invoicePaidEvent()));
     expect(grantCredits).toHaveBeenCalledExactlyOnceWith({
       userId: "user_1",
-      amount: 200, // pro — price_vitest_pro
+      amount: 2000, // pro — price_vitest_pro
       type: "subscription_grant",
       ref: { type: "invoice", id: "in_test_1" },
       idempotencyKey: "grant_in_test_1",

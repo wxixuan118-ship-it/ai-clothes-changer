@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GENERATION_COST_CREDITS } from "@/config/plans";
 import Link from "next/link";
 import { eq, sql } from "drizzle-orm";
 
@@ -80,8 +81,9 @@ export default async function DashboardPage() {
               <Link href="/generate" className="link-pop">
                 studio
               </Link>{" "}
-              to try your first new look — each result costs 1 credit and failed
-              runs are refunded automatically. Plans and top-ups live in{" "}
+              to try your first new look — each result costs{" "}
+              {GENERATION_COST_CREDITS} credits and failed runs are refunded
+              automatically. Plans and top-ups live in{" "}
               <Link href="/billing" className="link-pop">
                 Billing
               </Link>

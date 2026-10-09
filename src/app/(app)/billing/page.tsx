@@ -254,7 +254,7 @@ export default async function BillingPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm">
-          {GENERATION_COST_CREDITS} credit per image generation. Failed
+          {GENERATION_COST_CREDITS} credits per image generation. Failed
           generations are refunded.
         </CardContent>
       </Card>

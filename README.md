@@ -18,9 +18,9 @@ continues with the visitor's photo still selected.
 - Real image editing with Alibaba Cloud Model Studio (Qwen image edit),
   content moderation before any credit is spent (plus the provider's own
   checks), and a watermark on free-plan results.
-- Email + password and Google / Facebook sign-in (Better Auth), 10 free credits
+- Email + password and Google / Facebook sign-in (Better Auth), 20 free credits (2 images)
   on sign-up.
-- Credits: 1 credit per image, failed runs refunded automatically. An
+- Credits: 10 credits per image, failed runs refunded automatically. An
   append-only ledger with idempotency keys keeps balances correct under
   retries and races.
 - Stripe subscriptions (Pro / Ultra, monthly credits) and one-time credit

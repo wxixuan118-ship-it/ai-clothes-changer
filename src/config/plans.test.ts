@@ -51,13 +51,15 @@ describe("plans config", () => {
   });
 
   it("locks the agreed amounts — changing these requires owner approval", () => {
-    expect(WELCOME_CREDITS).toBe(10);
-    expect(GENERATION_COST_CREDITS).toBe(1);
+    // Owner-approved 2026-10-09: 10 credits per image, 20 on sign-up,
+    // plan credits scaled ×10 (same number of images per plan).
+    expect(WELCOME_CREDITS).toBe(20);
+    expect(GENERATION_COST_CREDITS).toBe(10);
     expect(plans.pro.priceMonthlyCents).toBe(900);
-    expect(plans.pro.monthlyCredits).toBe(200);
+    expect(plans.pro.monthlyCredits).toBe(2000);
     expect(plans.ultra.priceMonthlyCents).toBe(2900);
-    expect(plans.ultra.monthlyCredits).toBe(1000);
-    expect(topupPack.credits).toBe(100);
+    expect(plans.ultra.monthlyCredits).toBe(10000);
+    expect(topupPack.credits).toBe(1000);
     expect(topupPack.priceCents).toBe(500);
   });
 

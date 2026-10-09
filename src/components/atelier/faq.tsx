@@ -8,7 +8,7 @@ type Faq = { q: string; a: string };
 const shared: Faq[] = [
   {
     q: "Is it free to try?",
-    a: `Yes. New accounts get ${WELCOME_CREDITS} free credits. Each result costs ${GENERATION_COST_CREDITS} credit, and failed runs are refunded automatically.`,
+    a: `Yes. New accounts get ${WELCOME_CREDITS} free credits. Each result costs ${GENERATION_COST_CREDITS} credits, and failed runs are refunded automatically.`,
   },
   {
     q: "Can I use the images commercially?",

@@ -1,4 +1,4 @@
-import { WELCOME_CREDITS } from "@/config/plans";
+import { GENERATION_COST_CREDITS, WELCOME_CREDITS } from "@/config/plans";
 
 import { EmailButton } from "./components/button";
 import {
@@ -25,7 +25,8 @@ export default function WelcomeEmail({
           {WELCOME_CREDITS} welcome credits
         </span>{" "}
         are already on it — enough to try your first new looks. Each result
-        costs 1 credit; failed runs are refunded automatically.
+        costs {GENERATION_COST_CREDITS} credits; failed runs are refunded
+        automatically.
       </EmailText>
       <EmailButton href={`${appUrl}/generate`}>
         Try your first new look

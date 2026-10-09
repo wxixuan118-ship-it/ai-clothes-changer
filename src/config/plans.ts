@@ -20,10 +20,10 @@ export type Plan = {
 };
 
 /** Credits granted once at signup, through the ledger (`welcome_{userId}`). */
-export const WELCOME_CREDITS = 10;
+export const WELCOME_CREDITS = 20;
 
-/** Credits spent per image generation (the spend lands in M5). */
-export const GENERATION_COST_CREDITS = 1;
+/** Credits spent per image generation. */
+export const GENERATION_COST_CREDITS = 10;
 
 export const plans: Record<PlanId, Plan> = {
   free: {
@@ -34,7 +34,7 @@ export const plans: Record<PlanId, Plan> = {
     priceEnvKey: null,
     features: [
       `${WELCOME_CREDITS} welcome credits`,
-      `${GENERATION_COST_CREDITS} credit per image`,
+      `${GENERATION_COST_CREDITS} credits per image`,
       "Personal use, watermarked downloads",
     ],
   },
@@ -42,7 +42,7 @@ export const plans: Record<PlanId, Plan> = {
     id: "pro",
     name: "Pro",
     priceMonthlyCents: 900,
-    monthlyCredits: 200,
+    monthlyCredits: 2000,
     priceEnvKey: "STRIPE_PRICE_PRO_MONTHLY",
     features: [
       "200 images every month",
@@ -54,7 +54,7 @@ export const plans: Record<PlanId, Plan> = {
     id: "ultra",
     name: "Ultra",
     priceMonthlyCents: 2900,
-    monthlyCredits: 1000,
+    monthlyCredits: 10000,
     priceEnvKey: "STRIPE_PRICE_ULTRA_MONTHLY",
     features: [
       "1,000 images every month",
@@ -67,7 +67,7 @@ export const plans: Record<PlanId, Plan> = {
 /** One-time credit pack (Checkout mode "payment"). */
 export const topupPack = {
   name: "Top-up",
-  credits: 100,
+  credits: 1000,
   priceCents: 500,
   priceEnvKey: "STRIPE_PRICE_TOPUP_100",
 } as const;

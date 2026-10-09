@@ -45,6 +45,7 @@ vi.mock("@/lib/credits", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/credits")>()),
 }));
 
+import { GENERATION_COST_CREDITS } from "@/config/plans";
 import { db } from "@/db";
 import {
   creditTransactions,
@@ -88,7 +89,9 @@ beforeEach(() => {
   });
 });
 
-async function createUser(startingCredits: number): Promise<string> {
+/** Creates a user holding enough purchased credits for `images` runs. */
+async function createUser(images: number): Promise<string> {
+  const startingCredits = images * GENERATION_COST_CREDITS;
   const id = `gen_test_${randomUUID()}`;
   await db.insert(users).values({
     id,
@@ -162,13 +165,13 @@ async function rowsFor(userId: string) {
 }
 
 describe("generateImageAction", () => {
-  it("happy path: spends 1 credit, stores the image, marks completed", async () => {
+  it("happy path: spends one image's credits, stores the image, marks completed", async () => {
     const userId = await createUser(5);
 
     const result = await runAction(promptForm());
 
     expect(result).toMatchObject({ ok: true });
-    expect(await balanceOf(userId)).toBe(4);
+    expect(await balanceOf(userId)).toBe(4 * GENERATION_COST_CREDITS);
     const { generations: rows, spends } = await rowsFor(userId);
     expect(rows).toHaveLength(1);
     expect(rows[0]?.status).toBe("completed");
@@ -199,7 +202,7 @@ describe("generateImageAction", () => {
     const result = await runAction(promptForm());
 
     expect(result).toEqual({ ok: false, error: "generation_failed" });
-    expect(await balanceOf(userId)).toBe(3); // spend + refund cancel out
+    expect(await balanceOf(userId)).toBe(3 * GENERATION_COST_CREDITS); // spend + refund cancel out
     const { generations: rows, spends, refunds } = await rowsFor(userId);
     expect(rows).toHaveLength(1);
     expect(rows[0]?.status).toBe("failed");
@@ -221,7 +224,7 @@ describe("generateImageAction", () => {
     const { generations: rows, spends } = await rowsFor(userId);
     expect(rows).toHaveLength(10); // no 11th record either
     expect(spends).toHaveLength(10);
-    expect(await balanceOf(userId)).toBe(10);
+    expect(await balanceOf(userId)).toBe(10 * GENERATION_COST_CREDITS);
     await expectInvariant(userId);
   });
 
@@ -237,7 +240,7 @@ describe("generateImageAction", () => {
     const result = await runAction(promptForm("a suit, but make it FAIL"));
 
     expect(result).toEqual({ ok: false, error: "generation_failed" });
-    expect(await balanceOf(userId)).toBe(5); // round-trip: unchanged
+    expect(await balanceOf(userId)).toBe(5 * GENERATION_COST_CREDITS); // round-trip: unchanged
     const { generations: rows, spends, refunds } = await rowsFor(userId);
     expect(rows).toHaveLength(1);
     expect(rows[0]?.status).toBe("failed");
@@ -550,7 +553,7 @@ describe("generateImageAction — content safety", () => {
     const result = await runAction(promptForm());
 
     expect(result).toEqual({ ok: false, error: "blocked_result" });
-    expect(await balanceOf(userId)).toBe(3);
+    expect(await balanceOf(userId)).toBe(3 * GENERATION_COST_CREDITS);
     const { generations: rows, refunds } = await rowsFor(userId);
     expect(rows[0]?.status).toBe("failed");
     expect(refunds).toHaveLength(1);

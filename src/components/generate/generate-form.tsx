@@ -491,7 +491,7 @@ export function GenerateForm({
       toast.error(errorMessages[state.error]);
       return;
     }
-    toast.success(`New look ready! ${cost} credit spent.`);
+    toast.success(`New look ready! ${cost} credits spent.`);
     resultRef.current?.focus();
   }, [state, cost, auth, pathname, router]);
 
@@ -882,7 +882,7 @@ export function GenerateForm({
           disabled={outOfCredits || !ready}
           className="h-auto min-h-12 w-full rounded-full px-6 py-2 text-base whitespace-normal sm:w-auto sm:px-8"
         >
-          {`${tools[tool].action} — ${cost} credit`}
+          {`${tools[tool].action} — ${cost} credits`}
         </BusyButton>
         {outOfCredits ? (
           <p className="text-sm text-[var(--muted-ink)]">
