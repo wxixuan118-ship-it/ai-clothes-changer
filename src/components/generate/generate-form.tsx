@@ -446,6 +446,17 @@ export function GenerateForm({
         ? prompt.trim().length >= 3
         : Boolean(styleId));
 
+  // Tells the visitor why the button is still disabled.
+  const missing = !person.file
+    ? "Upload your photo to start."
+    : mode === "reference" && !garment.file
+      ? `${copy.referenceTitle} too — or switch to “${copy.modeLabels.style.label}” to pick one.`
+      : mode === "prompt" && prompt.trim().length < 3
+        ? `${copy.promptLabel} (at least 3 characters).`
+        : mode === "style" && !styleId
+          ? `${copy.step2} — tap one above.`
+          : null;
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!signedIn && auth) {
@@ -734,6 +745,10 @@ export function GenerateForm({
               top up in Billing
             </Link>
             .
+          </p>
+        ) : missing ? (
+          <p className="text-sm text-[var(--brand)]" aria-live="polite">
+            {missing}
           </p>
         ) : (
           <p className="text-sm text-[var(--muted-ink)]">
