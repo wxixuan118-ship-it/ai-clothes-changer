@@ -5,7 +5,13 @@ import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
 import { siteUrl } from "@/lib/site-url";
 
-const APP_PREFIXES = ["/dashboard", "/generate", "/billing", "/settings"];
+const APP_PREFIXES = [
+  "/dashboard",
+  "/generate",
+  "/billing",
+  "/settings",
+  "/admin",
+];
 
 /**
  * One canonical host for search engines and sessions. www always goes to
