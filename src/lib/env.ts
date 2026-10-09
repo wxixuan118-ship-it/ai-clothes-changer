@@ -71,7 +71,10 @@ const schema = z
     // enforced in superRefine below.
     STRIPE_SECRET_KEY: z
       .string()
-      .startsWith("sk_", "expected a Stripe secret key (sk_...)")
+      .regex(
+        /^(sk|rk)_/,
+        "expected a Stripe secret or restricted key (sk_... or rk_...)",
+      )
       .optional(),
     STRIPE_WEBHOOK_SECRET: z
       .string()

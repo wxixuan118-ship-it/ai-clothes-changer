@@ -209,6 +209,16 @@ describe("parseEnvForBuild", () => {
     expect(env.STRIPE_SECRET_KEY).toBe("sk_test_123");
   });
 
+  it("accepts a Stripe restricted key and rejects a publishable key", () => {
+    expect(
+      parseEnv({ ...validEnv, STRIPE_SECRET_KEY: "rk_live_123" })
+        .STRIPE_SECRET_KEY,
+    ).toBe("rk_live_123");
+    expect(() =>
+      parseEnv({ ...validEnv, STRIPE_SECRET_KEY: "pk_live_123" }),
+    ).toThrow(/STRIPE_SECRET_KEY/);
+  });
+
   it("keeps the runtime parse strict — the build fallback is build-only", () => {
     expect(() => parseEnv({ NODE_ENV: "production" })).toThrowError(
       /DATABASE_URL/,

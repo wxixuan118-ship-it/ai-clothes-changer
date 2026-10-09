@@ -75,7 +75,7 @@ export default async function AdminSettingsPage() {
             label="Stripe"
             value={
               features.billing
-                ? env.STRIPE_SECRET_KEY?.startsWith("sk_live")
+                ? /^(sk|rk)_live_/.test(env.STRIPE_SECRET_KEY ?? "")
                   ? "Live mode"
                   : "Test mode"
                 : "Missing"
