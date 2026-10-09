@@ -1,5 +1,4 @@
 import { env } from "@/lib/env";
-import { getEditModel } from "@/lib/settings";
 
 import { ContentBlockedError, ProviderBusyError } from "./errors";
 import type { GenerateImageInput, ImageProvider, InputImage } from "./provider";
@@ -77,7 +76,7 @@ export const dashscopeProvider: ImageProvider = {
       throw new Error("DashScope is not configured — set DASHSCOPE_API_KEY.");
     }
     // The admin panel can switch models at runtime (falls back to env).
-    const model = input.model ?? (await getEditModel());
+    const model = input.model ?? env.AI_EDIT_MODEL;
     const payload = JSON.stringify({
       model,
       input: {

@@ -5,7 +5,13 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/admin/auth";
 import { adjustCredits, InsufficientCreditsError } from "@/lib/credits";
-import { findModel, isProviderConfigured, setSetting } from "@/lib/settings";
+import {
+  findModel,
+  isProviderConfigured,
+  isProviderEnabled,
+  PROVIDERS,
+  setSetting,
+} from "@/lib/settings";
 
 export type AdminActionResult = { ok: boolean; message?: string };
 
@@ -67,8 +73,44 @@ export async function setModelAction(
       message: "That model's provider has no API key set yet.",
     };
   }
+  if (!(await isProviderEnabled(known.provider))) {
+    return {
+      ok: false,
+      message: "That provider is switched off — turn it on first.",
+    };
+  }
   await setSetting("ai_edit_model", model, admin.user.email);
   revalidatePath("/admin/ai");
   revalidatePath("/admin/settings");
-  return { ok: true, message: `Model switched to ${model}.` };
+  return { ok: true, message: `Now using ${known.label}.` };
+}
+
+const toggleSchema = z.object({
+  provider: z.enum(PROVIDERS.map((p) => p.id) as [string, ...string[]]),
+  state: z.enum(["on", "off"]),
+});
+
+/** Turns an image provider on or off for everyone (no redeploy). */
+export async function setProviderEnabledAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  const parsed = toggleSchema.safeParse({
+    provider: formData.get("provider"),
+    state: formData.get("state"),
+  });
+  if (!parsed.success) return { ok: false, message: "Invalid request." };
+  const { provider, state } = parsed.data as {
+    provider: (typeof PROVIDERS)[number]["id"];
+    state: "on" | "off";
+  };
+  await setSetting(`provider_${provider}`, state, admin.user.email);
+  revalidatePath("/admin/ai");
+  revalidatePath("/admin/settings");
+  const label = PROVIDERS.find((p) => p.id === provider)?.label ?? provider;
+  return {
+    ok: true,
+    message: `${label} switched ${state}.`,
+  };
 }

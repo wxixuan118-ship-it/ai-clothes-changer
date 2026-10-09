@@ -22,6 +22,8 @@ export function ModelForm({
     label: string;
     note: string;
     disabled?: boolean;
+    /** Why the option is disabled. */
+    reason?: string;
   }[];
   current: string;
 }) {

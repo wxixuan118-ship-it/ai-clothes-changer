@@ -4,6 +4,7 @@ import { providerOf } from "@/lib/settings";
 
 import { dashscopeProvider } from "./dashscope";
 import { gatewayProvider } from "./gateway";
+import { kieProvider } from "./kie";
 import { mockProvider } from "./mock";
 import { nbilityProvider } from "./nbility";
 
@@ -59,18 +60,21 @@ export interface ImageProvider {
 /** Env-driven selection — no provider conditionals in UI or actions. */
 export function getImageProvider(): ImageProvider {
   if (env.AI_MOCK) return mockProvider;
-  if (features.dashscope || features.nbility) return editRouter;
+  if (features.dashscope || features.nbility || features.kie) return editRouter;
   return gatewayProvider;
 }
+
+const byProvider = {
+  nbility: nbilityProvider,
+  kie: kieProvider,
+  dashscope: dashscopeProvider,
+} as const;
 
 /** Sends each run to the provider that serves its model (input.model). */
 const editRouter: ImageProvider = {
   modelId: env.AI_EDIT_MODEL,
   generateImage(input) {
-    const provider =
-      input.model && providerOf(input.model) === "nbility"
-        ? nbilityProvider
-        : dashscopeProvider;
-    return provider.generateImage(input);
+    const provider = input.model ? providerOf(input.model) : "dashscope";
+    return byProvider[provider].generateImage(input);
   },
 };

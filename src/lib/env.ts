@@ -121,6 +121,16 @@ const schema = z
       .url()
       .default("https://api.nbility.ai")
       .transform((url) => url.replace(/\/+$/, "")),
+    // kie.ai — Seedream 5.0 Flash image editing (task API + temp uploads).
+    KIE_API_KEY: z.string().optional(),
+    KIE_BASE_URL: z
+      .url()
+      .default("https://api.kie.ai")
+      .transform((url) => url.replace(/\/+$/, "")),
+    KIE_UPLOAD_URL: z
+      .url()
+      .default("https://kieai.redpandaai.co")
+      .transform((url) => url.replace(/\/+$/, "")),
 
     // ── Rate limiting via Upstash (optional — in-memory fallback) ─────────
     UPSTASH_REDIS_REST_URL: z.url().optional(),
@@ -298,9 +308,17 @@ export function deriveFeatures(e: Env) {
     dashscope: Boolean(e.DASHSCOPE_API_KEY),
     /** gpt-image-2 editing via the Nbility gateway. */
     nbility: Boolean(e.NBILITY_API_KEY),
-    /** Some provider can actually edit a person photo (mock counts in dev). */
+    /** Seedream editing via kie.ai. */
+    kie: Boolean(e.KIE_API_KEY),
+    /**
+     * Some provider has a key (mock counts in dev). Admins can still turn
+     * providers off at runtime — see getEditModel().
+     */
     imageEditing:
-      e.AI_MOCK || Boolean(e.DASHSCOPE_API_KEY) || Boolean(e.NBILITY_API_KEY),
+      e.AI_MOCK ||
+      Boolean(e.DASHSCOPE_API_KEY) ||
+      Boolean(e.NBILITY_API_KEY) ||
+      Boolean(e.KIE_API_KEY),
     /** Private S3-compatible storage; takes precedence over Blob/local. */
     s3Storage: S3_VARS.every((key) => Boolean(e[key])),
   } as const;

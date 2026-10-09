@@ -3,6 +3,7 @@ import Link from "next/link";
 import { RecheckButton } from "@/components/admin/health-check";
 import { ModelForm } from "@/components/admin/model-form";
 import { fmtDate } from "@/components/admin/pager";
+import { ProviderToggle } from "@/components/admin/provider-toggle";
 import { BarChart, Stat } from "@/components/admin/stat";
 import {
   Table,
@@ -14,14 +15,18 @@ import {
 } from "@/components/ui/table";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getModelUsage } from "@/lib/admin/queries";
-import { checkNbility } from "@/lib/ai/nbility";
-import { env, features } from "@/lib/env";
+import { checkKie, type KieStatus } from "@/lib/ai/kie";
+import { checkNbility, type NbilityStatus } from "@/lib/ai/nbility";
+import { features } from "@/lib/env";
 import {
   EDIT_MODELS,
   findModel,
   getEditModel,
   isProviderConfigured,
+  isProviderEnabled,
+  PROVIDERS,
   providerOf,
+  type ModelProvider,
 } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
@@ -62,26 +67,140 @@ function Badge({
     muted: "text-[var(--muted-ink)]",
   }[tone];
   return (
-    <span className={`rounded-full border px-2.5 py-0.5 text-xs ${styles}`}>
+    <span
+      className={`inline-block rounded-full border px-2.5 py-0.5 text-xs ${styles}`}
+    >
       {children}
     </span>
   );
 }
 
+function Line({
+  label,
+  children,
+}: {
+  label: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="flex items-center justify-between gap-4 py-2">
+      <span>{label}</span>
+      <span className="text-right tabular-nums">{children}</span>
+    </li>
+  );
+}
+
+type Checks = {
+  nbility: NbilityStatus | null;
+  kie: KieStatus | null;
+};
+
+/** Provider-specific live rows (key, balance, latency). */
+function LiveRows({
+  provider,
+  checks,
+}: {
+  provider: ModelProvider;
+  checks: Checks;
+}) {
+  if (provider === "nbility" && checks.nbility) {
+    const n = checks.nbility;
+    return (
+      <>
+        <Line label="API key">
+          {n.keyValid ? (
+            <Badge tone="good">Valid</Badge>
+          ) : (
+            <Badge tone="bad">Rejected</Badge>
+          )}
+        </Line>
+        {!n.keyValid && n.error ? (
+          <li className="py-2 text-xs break-words text-red-300">
+            {n.error.slice(0, 200)}
+          </li>
+        ) : null}
+        <Line label={<code>gpt-image-2</code>}>
+          {!n.keyValid ? (
+            <Badge tone="muted">—</Badge>
+          ) : n.imageModels.includes("gpt-image-2") ? (
+            <Badge tone="good">Available</Badge>
+          ) : (
+            <Badge tone="bad">Missing — use the image group</Badge>
+          )}
+        </Line>
+        <Line label="Balance left">
+          {n.unlimited
+            ? "Unlimited token"
+            : n.remaining !== null
+              ? money(n.remaining, "CNY")
+              : "—"}
+        </Line>
+        <Line label="Used by this key">
+          {n.used !== null ? money(n.used, "CNY") : "—"}
+        </Line>
+        <Line label="Response time">{n.latencyMs} ms</Line>
+      </>
+    );
+  }
+  if (provider === "kie" && checks.kie) {
+    const k = checks.kie;
+    return (
+      <>
+        <Line label="API key">
+          {k.keyValid ? (
+            <Badge tone="good">Valid</Badge>
+          ) : (
+            <Badge tone="bad">Rejected</Badge>
+          )}
+        </Line>
+        {!k.keyValid && k.error ? (
+          <li className="py-2 text-xs break-words text-red-300">
+            {k.error.slice(0, 200)}
+          </li>
+        ) : null}
+        <Line label="Credits left">
+          {k.credits !== null
+            ? `${k.credits.toFixed(1)} (≈ ${money(k.usd ?? 0, "USD")})`
+            : "—"}
+        </Line>
+        <Line label="Images left (Seedream 5 Flash)">
+          {k.credits !== null ? Math.floor(k.credits / 3.24) : "—"}
+        </Line>
+        <Line label="Response time">{k.latencyMs} ms</Line>
+      </>
+    );
+  }
+  if (provider === "dashscope" && isProviderConfigured("dashscope")) {
+    return (
+      <Line label="API key">
+        <Badge tone="muted">Set (no balance API)</Badge>
+      </Line>
+    );
+  }
+  return null;
+}
+
 export default async function AdminAiPage() {
   await requireAdmin();
-  const current = await getEditModel();
-  const provider = providerOf(current);
-  const [usage, nbility] = await Promise.all([
+  const [current, usage, nbility, kie, enabledList] = await Promise.all([
+    getEditModel(),
     getModelUsage(),
-    features.nbility ? checkNbility(current) : Promise.resolve(null),
+    features.nbility ? checkNbility("gpt-image-2") : Promise.resolve(null),
+    features.kie ? checkKie() : Promise.resolve(null),
+    Promise.all(PROVIDERS.map((p) => isProviderEnabled(p.id))),
   ]);
+  const checks: Checks = { nbility, kie };
+  const enabled = Object.fromEntries(
+    PROVIDERS.map((p, i) => [p.id, enabledList[i]]),
+  ) as Record<ModelProvider, boolean>;
+  const currentProvider = current ? providerOf(current) : null;
 
   // Live health of the current model from its last finished runs.
   const recent = usage.lastRuns.filter((run) => run.model === current);
   const recentFailed = recent.filter((run) => run.status === "failed").length;
-  const health =
-    recent.length === 0
+  const health = !current
+    ? { tone: "bad" as const, label: "No model available" }
+    : recent.length === 0
       ? { tone: "muted" as const, label: "No runs yet" }
       : recentFailed === recent.length && recent.length >= 3
         ? { tone: "bad" as const, label: "Failing" }
@@ -111,9 +230,11 @@ export default async function AdminAiPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat
           label="Model in use"
-          value={findModel(current)?.label ?? current}
+          value={current ? (findModel(current)?.label ?? current) : "None"}
           hint={
-            provider === "nbility" ? "via Nbility" : "via Alibaba DashScope"
+            currentProvider
+              ? `via ${PROVIDERS.find((p) => p.id === currentProvider)?.label}`
+              : "Every provider is off or has no key — the tools show “not available”."
           }
         />
         <div className="rounded-[20px] border bg-[var(--paper-2)] p-5">
@@ -139,111 +260,112 @@ export default async function AdminAiPage() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="space-y-3 rounded-[20px] border bg-[var(--paper-2)] p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="font-sans text-base font-medium tracking-normal">
-                Nbility account
-              </h2>
-              <p className="text-sm text-[var(--muted-ink)]">
-                {env.NBILITY_BASE_URL.replace("https://", "")} · checked live on
-                page load (free, no image is generated)
-              </p>
-            </div>
-            {features.nbility ? <RecheckButton /> : null}
-          </div>
-          {!nbility ? (
-            <p className="text-sm">
-              <Badge tone="muted">Not connected</Badge>{" "}
-              <span className="text-[var(--muted-ink)]">
-                Add <code>NBILITY_API_KEY</code> in AnySites and redeploy.
-              </span>
-            </p>
-          ) : (
-            <ul className="divide-y text-sm">
-              <li className="flex justify-between gap-4 py-2">
-                <span>API key</span>
-                {nbility.keyValid ? (
-                  <Badge tone="good">Valid</Badge>
-                ) : (
-                  <Badge tone="bad">{nbility.error ?? "Rejected"}</Badge>
-                )}
-              </li>
-              <li className="flex justify-between gap-4 py-2">
-                <span>
-                  <code>gpt-image-2</code> available to this key
-                </span>
-                {nbility.keyValid ? (
-                  nbility.imageModels.includes("gpt-image-2") ? (
-                    <Badge tone="good">Yes</Badge>
-                  ) : (
-                    <Badge tone="bad">No — check the token&apos;s group</Badge>
-                  )
-                ) : (
-                  <Badge tone="muted">—</Badge>
-                )}
-              </li>
-              <li className="flex justify-between gap-4 py-2">
-                <span>Balance left</span>
-                <span className="tabular-nums">
-                  {nbility.unlimited
-                    ? "Unlimited token (see Nbility console for account balance)"
-                    : nbility.remaining !== null
-                      ? money(nbility.remaining, "CNY")
-                      : "—"}
-                </span>
-              </li>
-              <li className="flex justify-between gap-4 py-2">
-                <span>Used by this key</span>
-                <span className="tabular-nums">
-                  {nbility.used !== null ? money(nbility.used, "CNY") : "—"}
-                </span>
-              </li>
-              <li className="flex justify-between gap-4 py-2">
-                <span>Response time</span>
-                <span className="tabular-nums">{nbility.latencyMs} ms</span>
-              </li>
-              {nbility.imageModels.length ? (
-                <li className="py-2 text-xs text-[var(--muted-ink)]">
-                  Image models on this key: {nbility.imageModels.join(", ")}
-                </li>
-              ) : null}
-            </ul>
-          )}
-          <p className="text-xs text-[var(--muted-ink)]">
-            Detailed per-request logs and top-ups:{" "}
-            <a
-              href="https://nbility.ai/console/log"
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-4"
-            >
-              Nbility console
-            </a>
-            .
-          </p>
-        </section>
-
-        <section className="space-y-4 rounded-[20px] border bg-[var(--paper-2)] p-5">
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-sans text-base font-medium tracking-normal">
-              Switch model
+              Providers
             </h2>
             <p className="text-sm text-[var(--muted-ink)]">
-              Applies to both tools within 30 seconds, no redeploy. Models whose
-              provider has no API key are skipped automatically.
+              Checked live on page load (free — no image is generated).
+              Switching a provider off takes effect within 30 seconds.
             </p>
           </div>
-          <ModelForm
-            models={EDIT_MODELS.map((model) => ({
-              ...model,
-              disabled: !isProviderConfigured(model.provider),
-            }))}
-            current={current}
-          />
-        </section>
-      </div>
+          <RecheckButton />
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {PROVIDERS.map((provider) => {
+            const configured = isProviderConfigured(provider.id);
+            const on = enabled[provider.id];
+            return (
+              <div
+                key={provider.id}
+                className={`space-y-3 rounded-[20px] border bg-[var(--paper-2)] p-5 ${
+                  currentProvider === provider.id ? "border-[var(--brand)]" : ""
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-sans text-base font-medium tracking-normal">
+                      {provider.label}
+                    </h3>
+                    <p className="mt-1 flex flex-wrap gap-1.5">
+                      {!configured ? (
+                        <Badge tone="muted">No key</Badge>
+                      ) : on ? (
+                        <Badge tone="good">On</Badge>
+                      ) : (
+                        <Badge tone="warn">Off</Badge>
+                      )}
+                      {currentProvider === provider.id ? (
+                        <Badge tone="good">in use</Badge>
+                      ) : null}
+                    </p>
+                  </div>
+                  {configured ? (
+                    <ProviderToggle
+                      provider={provider.id}
+                      enabled={on}
+                      label={provider.label}
+                    />
+                  ) : null}
+                </div>
+                {configured ? (
+                  <ul className="divide-y text-sm">
+                    <LiveRows provider={provider.id} checks={checks} />
+                  </ul>
+                ) : (
+                  <p className="text-sm text-[var(--muted-ink)]">
+                    Add <code>{provider.envKey}</code> in AnySites and redeploy.
+                  </p>
+                )}
+                <p className="text-xs text-[var(--muted-ink)]">
+                  Models:{" "}
+                  {EDIT_MODELS.filter((m) => m.provider === provider.id)
+                    .map((m) => m.label)
+                    .join(", ")}{" "}
+                  ·{" "}
+                  <a
+                    href={provider.console}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline underline-offset-4"
+                  >
+                    console
+                  </a>
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-[20px] border bg-[var(--paper-2)] p-5">
+        <div>
+          <h2 className="font-sans text-base font-medium tracking-normal">
+            Switch model
+          </h2>
+          <p className="text-sm text-[var(--muted-ink)]">
+            Used by both tools within 30 seconds, no redeploy. If the chosen
+            model&apos;s provider is switched off, the next provider that is on
+            takes over automatically.
+          </p>
+        </div>
+        <ModelForm
+          models={EDIT_MODELS.map((model) => ({
+            ...model,
+            label: `${model.label} · ${PROVIDERS.find((p) => p.id === model.provider)?.label}`,
+            disabled:
+              !isProviderConfigured(model.provider) || !enabled[model.provider],
+            reason: !isProviderConfigured(model.provider)
+              ? "API key not set"
+              : !enabled[model.provider]
+                ? "provider switched off"
+                : undefined,
+          }))}
+          current={current ?? ""}
+        />
+      </section>
 
       <BarChart
         title="Generations per day (14 days, UTC)"

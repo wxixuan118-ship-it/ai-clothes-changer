@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
-  stored: null as string | null,
-  features: { nbility: false, dashscope: true },
+  rows: [] as { key: string; value: string }[],
+  features: { nbility: false, kie: false, dashscope: true },
 }));
 
 vi.mock("@/lib/env", () => ({
@@ -10,48 +10,72 @@ vi.mock("@/lib/env", () => ({
   features: state.features,
 }));
 
-// Minimal stand-in for the one select getSetting runs.
+// Minimal stand-in for the one select allSettings() runs.
 vi.mock("@/db", () => ({
-  db: {
-    select: () => ({
-      from: () => ({
-        where: () => ({
-          limit: async () => (state.stored ? [{ value: state.stored }] : []),
-        }),
-      }),
-    }),
-  },
+  db: { select: () => ({ from: async () => state.rows }) },
 }));
 
-async function freshGetEditModel() {
+async function fresh() {
   vi.resetModules();
-  return (await import("./settings")).getEditModel();
+  return import("./settings");
+}
+
+function store(values: Record<string, string>) {
+  state.rows = Object.entries(values).map(([key, value]) => ({ key, value }));
 }
 
 beforeEach(() => {
-  state.stored = null;
+  state.rows = [];
   state.features.nbility = false;
+  state.features.kie = false;
   state.features.dashscope = true;
 });
 
 describe("getEditModel", () => {
   it("falls back to AI_EDIT_MODEL with only DashScope", async () => {
-    expect(await freshGetEditModel()).toBe("qwen-image-edit-plus");
+    expect(await (await fresh()).getEditModel()).toBe("qwen-image-edit-plus");
   });
 
-  it("defaults to gpt-image-2 once Nbility has a key", async () => {
+  it("prefers Nbility, then kie.ai, when no model was chosen", async () => {
     state.features.nbility = true;
-    expect(await freshGetEditModel()).toBe("gpt-image-2");
+    state.features.kie = true;
+    expect(await (await fresh()).getEditModel()).toBe("gpt-image-2");
+    store({ provider_nbility: "off" });
+    expect(await (await fresh()).getEditModel()).toBe(
+      "seedream/5-flash-image-to-image",
+    );
   });
 
-  it("uses the admin's choice when its provider is configured", async () => {
-    state.features.nbility = true;
-    state.stored = "qwen-image-edit-max";
-    expect(await freshGetEditModel()).toBe("qwen-image-edit-max");
+  it("uses the admin's choice when its provider is usable", async () => {
+    state.features.kie = true;
+    store({ ai_edit_model: "seedream/5-flash-image-to-image" });
+    expect(await (await fresh()).getEditModel()).toBe(
+      "seedream/5-flash-image-to-image",
+    );
   });
 
-  it("ignores a stored model whose provider lost its key", async () => {
-    state.stored = "gpt-image-2";
-    expect(await freshGetEditModel()).toBe("qwen-image-edit-plus");
+  it("skips a chosen model whose provider is off or has no key", async () => {
+    state.features.kie = true;
+    store({
+      ai_edit_model: "seedream/5-flash-image-to-image",
+      provider_kie: "off",
+    });
+    expect(await (await fresh()).getEditModel()).toBe("qwen-image-edit-plus");
+    // Nbility has no key → the next usable provider (kie.ai) takes over.
+    store({ ai_edit_model: "gpt-image-2" });
+    expect(await (await fresh()).getEditModel()).toBe(
+      "seedream/5-flash-image-to-image",
+    );
+  });
+
+  it("returns null when every provider is off", async () => {
+    state.features.kie = true;
+    store({ provider_kie: "off", provider_dashscope: "off" });
+    expect(await (await fresh()).getEditModel()).toBeNull();
+  });
+
+  it("ignores invalid stored values", async () => {
+    store({ ai_edit_model: "made-up-model", provider_dashscope: "maybe" });
+    expect(await (await fresh()).getEditModel()).toBe("qwen-image-edit-plus");
   });
 });

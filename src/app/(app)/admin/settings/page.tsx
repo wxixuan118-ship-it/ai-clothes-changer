@@ -39,8 +39,13 @@ export default async function AdminSettingsPage() {
         <ul className="divide-y">
           <Row
             label="Image model in use (change under AI)"
-            value={current}
+            value={current ?? "None — every provider is off"}
             ok={features.imageEditing}
+          />
+          <Row
+            label="kie.ai key (KIE_API_KEY)"
+            value={features.kie ? "Connected" : "Not set"}
+            ok={features.kie}
           />
           <Row
             label="Nbility key (NBILITY_API_KEY)"

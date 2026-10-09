@@ -284,7 +284,11 @@ export async function generateImageAction(
 
   const provider = getImageProvider();
   // Resolved once so the record, the provider call and admin stats agree.
+  // null = an admin switched every provider off.
   const model = env.AI_MOCK ? provider.modelId : await getEditModel();
+  if (!model) {
+    return { ok: false, error: "unavailable" };
+  }
   const [generation] = await db
     .insert(generations)
     .values({

@@ -169,6 +169,7 @@ describe("deriveFeatures", () => {
       socialProviders: [],
       dashscope: false,
       nbility: false,
+      kie: false,
       imageEditing: false,
     });
   });
