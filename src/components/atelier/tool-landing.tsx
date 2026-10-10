@@ -5,6 +5,7 @@ import { AtelierHowItWorks } from "@/components/atelier/how-it-works";
 import { OtherTool } from "@/components/atelier/other-tool";
 import { AtelierPricing } from "@/components/atelier/pricing";
 import { AtelierStyles } from "@/components/atelier/styles-section";
+import { HairLanding } from "@/components/atelier/hair-landing";
 import { tools, type ToolId } from "@/config/tools";
 import { absoluteUrl } from "@/lib/site-url";
 
@@ -35,11 +36,21 @@ export function ToolLanding({
           __html: JSON.stringify([appJsonLd, faqJsonLd(tool)]),
         }}
       />
-      <AtelierHero tool={tool} />
-      <AtelierHowItWorks tool={tool} />
-      <AtelierStyles tool={tool} />
-      <AtelierFeatures tool={tool} />
-      <OtherTool tool={tool === "hair" ? "clothes" : "hair"} />
+      {tool === "hair" ? (
+        <HairLanding />
+      ) : (
+        <>
+          <AtelierHero tool={tool} />
+          <AtelierHowItWorks tool={tool} />
+          <AtelierStyles tool={tool} />
+        </>
+      )}
+      {tool === "clothes" ? (
+        <>
+          <AtelierFeatures tool={tool} />
+          <OtherTool tool="hair" />
+        </>
+      ) : null}
       <AtelierPricing />
       <AtelierFaq tool={tool} />
     </>

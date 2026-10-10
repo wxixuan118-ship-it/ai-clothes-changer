@@ -15,10 +15,10 @@ import { cn } from "@/lib/utils";
 
 const baseItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
-  { href: "/generate", label: "Hairstyle changer", icon: ScissorsIcon },
+  { href: "/generate", label: "AI Hairstyle", icon: ScissorsIcon },
   {
     href: "/generate?tool=clothes",
-    label: "Clothes changer",
+    label: "AI Clothes",
     icon: ShirtIcon,
   },
   { href: "/billing", label: "Billing", icon: CreditCardIcon },

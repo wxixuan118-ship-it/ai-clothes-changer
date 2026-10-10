@@ -27,7 +27,7 @@ const shared: Faq[] = [
 const faqsByTool: Record<ToolId, Faq[]> = {
   hair: [
     {
-      q: "What is an AI hairstyle changer?",
+      q: "What is an AI hairstyle tool?",
       a: "It is a tool that gives the person in your photo a new haircut or hair color — from a hairstyle photo, a text description, or a preset style — while keeping their face, features, and background.",
     },
     {

@@ -5,7 +5,7 @@ export const siteConfig = {
   name: "StyleMirror AI",
   domain: "stylemirrorai.com",
   url: "https://stylemirrorai.com",
-  title: "AI Hairstyle Changer: Try New Hairstyles Online | StyleMirror AI",
+  title: "AI Hairstyle: Try On New Hairstyles Online | StyleMirror AI",
   description:
-    "Upload a selfie and try any hairstyle with AI: haircuts, colors, curls, and bangs from a reference photo, a text prompt, or a curated style. Your face stays yours.",
+    "Upload a selfie and try any AI hairstyle: haircuts, colors, curls, and bangs from a reference photo, a text prompt, or a curated style. Your face stays yours.",
 } as const;

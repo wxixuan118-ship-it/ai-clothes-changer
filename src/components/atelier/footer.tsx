@@ -9,7 +9,7 @@ const columns = [
   {
     title: "Product",
     links: [
-      { href: "/", label: "AI hairstyle changer" },
+      { href: "/", label: "AI hairstyle" },
       { href: "/ai-clothes-changer", label: "AI clothes changer" },
       { href: "/#styles", label: "Hairstyles" },
       { href: "/pricing", label: "Pricing" },

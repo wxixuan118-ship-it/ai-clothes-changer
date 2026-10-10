@@ -2,12 +2,10 @@ import Link from "next/link";
 
 import { getSession } from "@/lib/auth/session";
 import { siteConfig } from "@/config/site";
-import { MobileNav, NavLinks } from "./nav-links";
+import { MobileNav, NavLinks, ProductsDropdown } from "./nav-links";
 import { Sparkle } from "./sparkle";
 
 const links = [
-  { href: "/", label: "Hairstyle changer" },
-  { href: "/ai-clothes-changer", label: "Clothes changer" },
   { href: "/#styles", label: "Hairstyles" },
   { href: "/pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" },
@@ -33,7 +31,10 @@ export async function AtelierNav() {
             {siteConfig.name}
           </span>
         </Link>
-        <NavLinks links={links} />
+        <div className="hidden items-center gap-1 lg:flex">
+          <ProductsDropdown />
+          <NavLinks links={links} />
+        </div>
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
           {session ? (
             <Link
