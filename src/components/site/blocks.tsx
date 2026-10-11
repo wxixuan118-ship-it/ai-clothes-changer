@@ -61,8 +61,10 @@ export function Hero({
           <CheckIcon className="size-4 text-[var(--brand)]" aria-hidden />
           {eyebrow}
         </p>
-        <h1 className="text-display mt-5 max-w-[18ch]">{title}</h1>
-        <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-[var(--muted-ink)] sm:text-[19px]">
+        <h1 className="mt-5 max-w-[20ch] text-[clamp(2rem,1.3rem+2.4vw,3.25rem)] leading-[1.08] font-extrabold tracking-[-0.03em]">
+          {title}
+        </h1>
+        <p className="mt-4 max-w-[60ch] text-base leading-relaxed text-[var(--muted-ink)] sm:text-[17px]">
           {intro}
         </p>
         {badges?.length ? (
