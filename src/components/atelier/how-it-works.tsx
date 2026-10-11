@@ -6,7 +6,7 @@ import {
   SparklesIcon,
 } from "lucide-react";
 
-import type { ToolId } from "@/config/tools";
+import type { GeneratorToolId } from "@/config/tools";
 
 import { portraitSrc } from "./portraits";
 
@@ -19,7 +19,7 @@ type Step = {
   alt: string;
 };
 
-const stepsByTool: Record<ToolId, Step[]> = {
+const stepsByTool: Record<GeneratorToolId, Step[]> = {
   hair: [
     {
       n: "01",
@@ -74,7 +74,7 @@ const stepsByTool: Record<ToolId, Step[]> = {
   ],
 };
 
-export function AtelierHowItWorks({ tool }: { tool: ToolId }) {
+export function AtelierHowItWorks({ tool }: { tool: GeneratorToolId }) {
   const steps = stepsByTool[tool];
   return (
     <section

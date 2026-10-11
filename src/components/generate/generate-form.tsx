@@ -35,7 +35,7 @@ import {
   type HairGender,
 } from "@/config/hairstyles";
 import { getStylePreset, styleCategories, stylePresets } from "@/config/styles";
-import { tools, type ToolId } from "@/config/tools";
+import { tools, type GeneratorToolId } from "@/config/tools";
 import { cn } from "@/lib/utils";
 
 const initialState: GenerateResult = { ok: true };
@@ -416,7 +416,7 @@ export function GenerateForm({
   /** Home page: point at the studio's full history after a run. */
   showHistoryLink?: boolean;
   /** Which generator this form drives. */
-  tool?: ToolId;
+  tool?: GeneratorToolId;
 }) {
   const copy = toolCopy[tool];
   const router = useRouter();
@@ -1023,7 +1023,7 @@ export function GenerateForm({
             </h2>
             {showHistoryLink ? (
               <Link
-                href={tools[tool].studio}
+                href={tools[tool].studio!}
                 className="mr-auto text-sm text-[var(--muted-ink)] underline underline-offset-4 hover:text-[var(--ink)]"
               >
                 All my looks

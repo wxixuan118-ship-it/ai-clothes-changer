@@ -9,7 +9,7 @@ import {
   TypeIcon,
 } from "lucide-react";
 
-import type { ToolId } from "@/config/tools";
+import type { GeneratorToolId } from "@/config/tools";
 
 type Feature = { icon: typeof ShirtIcon; title: string; body: string };
 
@@ -24,7 +24,7 @@ const saved: Feature = {
   body: "Not quite right? Run it again — each result lands in your history.",
 };
 
-const featuresByTool: Record<ToolId, { title: string; items: Feature[] }> = {
+const featuresByTool: Record<GeneratorToolId, { title: string; items: Feature[] }> = {
   hair: {
     title: "Everything a hair makeover needs",
     items: [
@@ -81,7 +81,7 @@ const featuresByTool: Record<ToolId, { title: string; items: Feature[] }> = {
   },
 };
 
-export function AtelierFeatures({ tool }: { tool: ToolId }) {
+export function AtelierFeatures({ tool }: { tool: GeneratorToolId }) {
   const { title, items } = featuresByTool[tool];
   return (
     <section className="mx-auto w-full max-w-[1240px] px-4 py-24 sm:px-6">

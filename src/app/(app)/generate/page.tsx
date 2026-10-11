@@ -4,7 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 
 import { GENERATION_COST_CREDITS } from "@/config/plans";
-import { parseTool, tools, type ToolId } from "@/config/tools";
+import { parseTool, tools, type GeneratorToolId } from "@/config/tools";
 import { db } from "@/db";
 import { generations } from "@/db/schema";
 import { requireSession } from "@/lib/auth/session";
@@ -31,7 +31,9 @@ export default async function GeneratePage({
   searchParams: Promise<{ tool?: string }>;
 }) {
   const session = await requireSession();
-  const tool = parseTool((await searchParams).tool);
+  const rawTool = parseTool((await searchParams).tool);
+  // Studio only supports the two generators.
+  const tool: GeneratorToolId = rawTool === "clothes" ? "clothes" : "hair";
 
   const history = await db
     .select()
@@ -63,10 +65,10 @@ export default async function GeneratePage({
         aria-label="Generator"
         className="flex w-fit gap-1 rounded-full border bg-[var(--paper-2)] p-1"
       >
-        {(["hair", "clothes"] as ToolId[]).map((id) => (
+        {(["hair", "clothes"] as GeneratorToolId[]).map((id) => (
           <Link
             key={id}
-            href={tools[id].studio}
+            href={tools[id].studio!}
             aria-current={id === tool ? "page" : undefined}
             className={
               "rounded-full px-4 py-2 text-sm transition-colors " +

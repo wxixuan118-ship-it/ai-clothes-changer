@@ -59,6 +59,50 @@ const faqsByTool: Record<ToolId, Faq[]> = {
     },
     ...shared,
   ],
+  "face-shape": [
+    {
+      q: "Is the face shape detector really free?",
+      a: "Yes, completely free. No sign-up, no watermarks, no usage limits. The analysis runs entirely in your browser.",
+    },
+    {
+      q: "Does my photo get uploaded anywhere?",
+      a: "No. Everything runs locally in your browser using Google's MediaPipe AI. Your photo never leaves your device.",
+    },
+    {
+      q: "How accurate is it?",
+      a: "Our AI uses 478 facial landmarks to measure your proportions. Results are generally accurate for clear front-facing photos with good lighting.",
+    },
+    {
+      q: "What kind of photo works best?",
+      a: "Use a clear front-facing photo with your hair pulled back and good even lighting. Remove glasses if possible.",
+    },
+    {
+      q: "How many face shapes do you detect?",
+      a: "We detect 7 face shapes: oval, round, square, heart, diamond, oblong, and triangle.",
+    },
+  ],
+  foundation: [
+    {
+      q: "Is the foundation shade finder really free?",
+      a: "Yes, completely free. No sign-up, no paywalls, no usage limits. The analysis runs entirely in your browser.",
+    },
+    {
+      q: "Does my photo get uploaded to a server?",
+      a: "No. Everything runs locally in your browser using Google's MediaPipe AI. Your photo never leaves your device.",
+    },
+    {
+      q: "How accurate is the shade match?",
+      a: "Our AI uses CIELAB color space and CIEDE2000 color difference for matching. Lighting affects results — natural daylight works best.",
+    },
+    {
+      q: "What brands are included?",
+      a: "We match against popular brands including Fenty Beauty, MAC, NARS, Estée Lauder, and Maybelline.",
+    },
+    {
+      q: "What kind of photo works best?",
+      a: "Use natural daylight if possible. Remove heavy makeup and glasses. Face the camera directly with even lighting.",
+    },
+  ],
 };
 
 export function AtelierFaq({ tool }: { tool: ToolId }) {

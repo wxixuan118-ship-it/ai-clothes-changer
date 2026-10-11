@@ -4,12 +4,12 @@ import { ArrowUpRightIcon } from "lucide-react";
 
 import { hairPresets } from "@/config/hairstyles";
 import { stylePresets } from "@/config/styles";
-import { tools, type ToolId } from "@/config/tools";
+import { tools, type GeneratorToolId } from "@/config/tools";
 
 import { portraitSrc } from "./portraits";
 
 const sectionCopy: Record<
-  ToolId,
+  GeneratorToolId,
   { eyebrow: string; title: string; sub: string }
 > = {
   hair: {
@@ -25,7 +25,7 @@ const sectionCopy: Record<
 };
 
 // Curated looks; each card preselects its preset in the hero tool.
-export function AtelierStyles({ tool }: { tool: ToolId }) {
+export function AtelierStyles({ tool }: { tool: GeneratorToolId }) {
   const presets: readonly {
     id: string;
     name: string;

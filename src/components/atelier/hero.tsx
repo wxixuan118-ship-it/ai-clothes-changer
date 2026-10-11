@@ -4,7 +4,7 @@ import { GENERATION_COST_CREDITS, WELCOME_CREDITS } from "@/config/plans";
 import { getSession } from "@/lib/auth/session";
 import { env, features } from "@/lib/env";
 import { GenerateForm } from "@/components/generate/generate-form";
-import { tools, type ToolId } from "@/config/tools";
+import { tools, type GeneratorToolId } from "@/config/tools";
 
 import { hairPortraits, portraits, portraitSrc } from "./portraits";
 import { Crown, Sparkle } from "./sparkle";
@@ -19,7 +19,7 @@ const archOffsets = [
   "mt-0",
 ] as const;
 
-const heroCopy: Record<ToolId, { sub: string; badges: string[] }> = {
+const heroCopy: Record<GeneratorToolId, { sub: string; badges: string[] }> = {
   hair: {
     sub: "Upload a selfie and try any haircut or color in seconds — from a hairstyle photo, a few words, or a curated style.",
     badges: [
@@ -40,7 +40,7 @@ const heroCopy: Record<ToolId, { sub: string; badges: string[] }> = {
 
 // The tool IS the hero: visitors upload and pick a look right here; signing
 // up happens in a dialog only when they press the action button.
-export async function AtelierHero({ tool }: { tool: ToolId }) {
+export async function AtelierHero({ tool }: { tool: GeneratorToolId }) {
   const session = await getSession();
   const copy = heroCopy[tool];
   const arches = tool === "hair" ? hairPortraits : portraits;
