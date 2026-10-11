@@ -15,7 +15,8 @@ RUN npm install -g pnpm@10.34.6
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN pnpm build
+# Type checking runs in CI; inside the 1.5GB build cap it gets OOM-killed.
+RUN SKIP_TYPECHECK=1 pnpm build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
