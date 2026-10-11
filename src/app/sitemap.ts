@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/", priority: 1 },
     { path: "/ai-clothes-changer", priority: 0.9 },
     { path: "/face-shape-detector", priority: 0.8 },
+    { path: "/hairstyles-for-face-shape", priority: 0.8 },
     { path: "/foundation-shade-finder", priority: 0.8 },
     { path: "/pricing", priority: 0.8 },
     { path: "/privacy", priority: 0.3 },

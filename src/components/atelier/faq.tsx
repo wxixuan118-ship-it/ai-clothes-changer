@@ -81,6 +81,10 @@ const faqsByTool: Record<ToolId, Faq[]> = {
       a: "We detect 7 face shapes: oval, round, square, heart, diamond, oblong, and triangle.",
     },
   ],
+  "hairstyle-face-shape": [
+    { q: "How do I find my face shape?", a: "Upload a clear front-facing photo. The face analysis runs in your browser and recommends hairstyles for the shape it finds." },
+    { q: "Is the hairstyle finder free?", a: "Yes. Face shape analysis and recommendations are free. Trying a hairstyle on your photo uses the AI hairstyle changer." },
+  ],
   foundation: [
     {
       q: "Is the foundation shade finder really free?",

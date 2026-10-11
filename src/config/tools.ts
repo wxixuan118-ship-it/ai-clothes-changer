@@ -1,7 +1,7 @@
 // Four tools: two AI generators (hair, clothes) that cost credits, and two
 // browser-side analyzers (face-shape, foundation) that are free and run
 // entirely on the client with MediaPipe.
-export type ToolId = "hair" | "clothes" | "face-shape" | "foundation";
+export type ToolId = "hair" | "clothes" | "face-shape" | "hairstyle-face-shape" | "foundation";
 
 export type ToolType = "generator" | "analyzer";
 
@@ -43,6 +43,14 @@ export const tools: Record<
     icon: "face",
     desc: "Find your face shape & best looks",
   },
+  "hairstyle-face-shape": {
+    name: "Hairstyles for Face Shape",
+    landing: "/hairstyles-for-face-shape",
+    action: "Find my hairstyles",
+    type: "analyzer",
+    icon: "scissors",
+    desc: "Discover cuts that suit your face",
+  },
   foundation: {
     name: "Foundation Shade Finder",
     landing: "/foundation-shade-finder",
@@ -54,17 +62,18 @@ export const tools: Record<
 };
 
 // Order for navigation — generators first, analyzers after.
-export const toolOrder: ToolId[] = ["hair", "clothes", "face-shape", "foundation"];
+export const toolOrder: ToolId[] = ["hair", "clothes", "hairstyle-face-shape", "face-shape", "foundation"];
 
 export function parseTool(value: string | null | undefined): ToolId {
   if (value === "clothes") return "clothes";
   if (value === "face-shape") return "face-shape";
+  if (value === "hairstyle-face-shape") return "hairstyle-face-shape";
   if (value === "foundation") return "foundation";
   return "hair";
 }
 
 export type GeneratorToolId = "hair" | "clothes";
-export type AnalyzerToolId = "face-shape" | "foundation";
+export type AnalyzerToolId = "face-shape" | "hairstyle-face-shape" | "foundation";
 
 export function isGenerator(tool: ToolId): tool is GeneratorToolId {
   return tools[tool].type === "generator";

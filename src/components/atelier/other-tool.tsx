@@ -29,6 +29,12 @@ const promo: Record<ToolId, { pitch: string; image: string; alt: string; eyebrow
     image: "1586266195531-76cfa365cb43",
     alt: "Face shape analysis illustration",
   },
+  "hairstyle-face-shape": {
+    eyebrow: "Free Analyzer",
+    pitch: "Find hairstyles that complement your face shape, then preview your favorites on your photo.",
+    image: "1586266195531-76cfa365cb43",
+    alt: "Portrait showing a hairstyle",
+  },
   foundation: {
     eyebrow: "Free Analyzer",
     pitch:
