@@ -7,40 +7,73 @@ import { ArrowRightIcon, RotateCcwIcon } from "lucide-react";
 import {
   bodyShapeInfo,
   calculateBodyShape,
+  calculateMaleBodyShape,
   convertMeasurement,
-  type BodyMeasurements,
-  type BodyShape,
+  maleBodyShapeInfo,
   type MeasurementUnit,
 } from "@/lib/body-shape";
 
-const fields = [
+const femaleFields = [
   { key: "bust", label: "Bust", help: "Around the fullest part of your bust" },
   { key: "waist", label: "Waist", help: "Around your natural waist" },
   { key: "hips", label: "Hips", help: "Around the fullest part of your hips" },
 ] as const;
 
-type FieldKey = (typeof fields)[number]["key"];
-type FormValues = Record<FieldKey, string>;
-const emptyValues: FormValues = { bust: "", waist: "", hips: "" };
+const maleFields = [
+  {
+    key: "shoulders",
+    label: "Shoulders",
+    help: "Wrap the tape around the widest part of your shoulders",
+  },
+  {
+    key: "chest",
+    label: "Chest",
+    help: "Around the fullest part of your chest",
+  },
+  { key: "waist", label: "Waist", help: "Around your natural waist" },
+  { key: "hips", label: "Hips", help: "Around the fullest part of your hips" },
+] as const;
 
-export function BodyShapeCalculator() {
+type FieldKey = "bust" | "shoulders" | "chest" | "waist" | "hips";
+type FormValues = Record<FieldKey, string>;
+const emptyValues: FormValues = {
+  bust: "",
+  shoulders: "",
+  chest: "",
+  waist: "",
+  hips: "",
+};
+type ShapeInfo = {
+  label: string;
+  description: string;
+  ideas: readonly string[];
+};
+
+export function BodyShapeCalculator({
+  audience,
+}: {
+  audience: "female" | "male";
+}) {
+  const fields = audience === "female" ? femaleFields : maleFields;
   const [unit, setUnit] = React.useState<MeasurementUnit>("in");
   const [values, setValues] = React.useState<FormValues>(emptyValues);
-  const [result, setResult] = React.useState<BodyShape | null>(null);
+  const [result, setResult] = React.useState<{
+    audience: "female" | "male";
+    info: ShapeInfo;
+  } | null>(null);
   const [error, setError] = React.useState("");
+  const activeResult = result?.audience === audience ? result.info : null;
 
   function changeUnit(nextUnit: MeasurementUnit) {
     if (nextUnit === unit) return;
+    const convert = (value: string) =>
+      value ? convertMeasurement(Number(value), unit, nextUnit).toFixed(1) : "";
     setValues((current) => ({
-      bust: current.bust
-        ? convertMeasurement(Number(current.bust), unit, nextUnit).toFixed(1)
-        : "",
-      waist: current.waist
-        ? convertMeasurement(Number(current.waist), unit, nextUnit).toFixed(1)
-        : "",
-      hips: current.hips
-        ? convertMeasurement(Number(current.hips), unit, nextUnit).toFixed(1)
-        : "",
+      bust: convert(current.bust),
+      shoulders: convert(current.shoulders),
+      chest: convert(current.chest),
+      waist: convert(current.waist),
+      hips: convert(current.hips),
     }));
     setUnit(nextUnit);
     setError("");
@@ -48,23 +81,36 @@ export function BodyShapeCalculator() {
 
   function calculate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const measurements: BodyMeasurements = {
-      bust: Number(values.bust),
-      waist: Number(values.waist),
-      hips: Number(values.hips),
-    };
     const min = unit === "in" ? 15 : 38;
     const max = unit === "in" ? 100 : 254;
     if (
-      Object.values(measurements).some(
-        (value) => !Number.isFinite(value) || value < min || value > max,
+      fields.some(
+        ({ key }) =>
+          !Number.isFinite(Number(values[key])) ||
+          Number(values[key]) < min ||
+          Number(values[key]) > max,
       )
     ) {
       setResult(null);
       setError(`Enter each measurement between ${min} and ${max} ${unit}.`);
       return;
     }
-    setResult(calculateBodyShape(measurements));
+    if (audience === "female") {
+      const shape = calculateBodyShape({
+        bust: Number(values.bust),
+        waist: Number(values.waist),
+        hips: Number(values.hips),
+      });
+      setResult(shape ? { audience, info: bodyShapeInfo[shape] } : null);
+    } else {
+      const shape = calculateMaleBodyShape({
+        shoulders: Number(values.shoulders),
+        chest: Number(values.chest),
+        waist: Number(values.waist),
+        hips: Number(values.hips),
+      });
+      setResult(shape ? { audience, info: maleBodyShapeInfo[shape] } : null);
+    }
     setError("");
   }
 
@@ -136,7 +182,7 @@ export function BodyShapeCalculator() {
                   }}
                   aria-describedby={`body-${key}-help`}
                   className="w-full rounded-xl border bg-[var(--canvas)] px-4 py-3 pr-12 text-lg outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/25"
-                  placeholder={unit === "in" ? "e.g. 36" : "e.g. 92"}
+                  placeholder={unit === "in" ? "e.g. 40" : "e.g. 102"}
                 />
                 <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[var(--muted-ink)]">
                   {unit}
@@ -175,14 +221,12 @@ export function BodyShapeCalculator() {
         className="rounded-[28px] border bg-[var(--paper-2)] p-6 sm:p-8"
         aria-live="polite"
       >
-        {result ? (
+        {activeResult ? (
           <>
             <p className="eyebrow text-[var(--brand)]">Your styling guide</p>
-            <h2 className="mt-3 text-4xl font-bold">
-              {bodyShapeInfo[result].label}
-            </h2>
+            <h2 className="mt-3 text-4xl font-bold">{activeResult.label}</h2>
             <p className="mt-4 text-[var(--muted-ink)]">
-              {bodyShapeInfo[result].description}
+              {activeResult.description}
             </p>
             <div className="mt-7 grid grid-cols-3 gap-2 border-y py-5 text-center">
               {fields.map(({ key, label }) => (
@@ -196,7 +240,7 @@ export function BodyShapeCalculator() {
             </div>
             <h3 className="mt-7 text-lg font-bold">Outfit ideas to explore</h3>
             <ul className="mt-3 space-y-2">
-              {bodyShapeInfo[result].ideas.map((idea) => (
+              {activeResult.ideas.map((idea) => (
                 <li key={idea} className="flex items-center gap-2">
                   <span className="size-1.5 shrink-0 rounded-full bg-[var(--brand)]" />
                   {idea}
@@ -224,8 +268,9 @@ export function BodyShapeCalculator() {
             </p>
             <h2 className="mt-3 text-2xl font-bold">Find your proportions</h2>
             <p className="mx-auto mt-3 max-w-sm text-[var(--muted-ink)]">
-              Enter your bust, waist, and hip measurements to get a simple
-              styling guide.
+              {audience === "female"
+                ? "Enter your bust, waist, and hip measurements to get a simple styling guide."
+                : "Enter your shoulder, chest, waist, and hip measurements to get a simple styling guide."}
             </p>
           </div>
         )}

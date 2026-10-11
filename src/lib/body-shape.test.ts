@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateBodyShape, convertMeasurement } from "./body-shape";
+import {
+  calculateBodyShape,
+  calculateMaleBodyShape,
+  convertMeasurement,
+} from "./body-shape";
 
 describe("body shape styling calculator", () => {
   it.each([
@@ -31,5 +35,23 @@ describe("body shape styling calculator", () => {
     expect(convertMeasurement(centimeters.bust, "cm", "in")).toBeCloseTo(
       inches.bust,
     );
+  });
+});
+
+describe("men's body shape styling calculator", () => {
+  it.each([
+    [{ shoulders: 44, chest: 42, waist: 36, hips: 40 }, "trapezoid"],
+    [{ shoulders: 48, chest: 44, waist: 34, hips: 38 }, "inverted-triangle"],
+    [{ shoulders: 40, chest: 39, waist: 37, hips: 39 }, "rectangle"],
+    [{ shoulders: 38, chest: 39, waist: 35, hips: 42 }, "triangle"],
+    [{ shoulders: 40, chest: 40, waist: 42, hips: 40 }, "oval"],
+  ] as const)("classifies %j as %s", (measurements, expected) => {
+    expect(calculateMaleBodyShape(measurements)).toBe(expected);
+  });
+
+  it("rejects invalid measurements", () => {
+    expect(
+      calculateMaleBodyShape({ shoulders: 0, chest: 40, waist: 34, hips: 39 }),
+    ).toBeNull();
   });
 });

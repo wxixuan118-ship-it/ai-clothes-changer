@@ -5,7 +5,8 @@ export type ToolId =
   | "face-shape"
   | "hairstyle-face-shape"
   | "foundation"
-  | "body-shape";
+  | "body-shape"
+  | "body-shape-men";
 
 export type ToolType = "generator" | "analyzer" | "calculator";
 
@@ -64,8 +65,16 @@ export const tools: Record<
     desc: "Match your perfect foundation",
   },
   "body-shape": {
-    name: "Body Shape Calculator",
+    name: "Body Shape Calculator for Women",
     landing: "/body-shape-calculator-female",
+    action: "Calculate body shape",
+    type: "calculator",
+    icon: "ruler",
+    desc: "Find your shape from measurements",
+  },
+  "body-shape-men": {
+    name: "Body Shape Calculator for Men",
+    landing: "/body-shape-calculator-men",
     action: "Calculate body shape",
     type: "calculator",
     icon: "ruler",
@@ -81,6 +90,7 @@ export const toolOrder: ToolId[] = [
   "face-shape",
   "foundation",
   "body-shape",
+  "body-shape-men",
 ];
 
 export function parseTool(value: string | null | undefined): ToolId {
@@ -89,6 +99,7 @@ export function parseTool(value: string | null | undefined): ToolId {
   if (value === "hairstyle-face-shape") return "hairstyle-face-shape";
   if (value === "foundation") return "foundation";
   if (value === "body-shape") return "body-shape";
+  if (value === "body-shape-men") return "body-shape-men";
   return "hair";
 }
 

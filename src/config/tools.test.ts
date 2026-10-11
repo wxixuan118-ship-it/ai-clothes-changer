@@ -13,9 +13,12 @@ describe("hairstyles for face shape product", () => {
 });
 
 describe("body shape calculator product", () => {
-  it("appears among free tools at its public route", () => {
+  it("exposes distinct women and men routes among free tools", () => {
     expect(toolOrder).toContain("body-shape");
+    expect(toolOrder).toContain("body-shape-men");
     expect(tools["body-shape"].landing).toBe("/body-shape-calculator-female");
+    expect(tools["body-shape-men"].landing).toBe("/body-shape-calculator-men");
     expect(tools["body-shape"].type).toBe("calculator");
+    expect(tools["body-shape-men"].type).toBe("calculator");
   });
 });

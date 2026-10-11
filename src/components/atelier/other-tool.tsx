@@ -53,6 +53,13 @@ const promo: Record<
     image: "1515886657613-9f3515b0c78f",
     alt: "Fashion portrait in an outfit",
   },
+  "body-shape-men": {
+    eyebrow: "Free Calculator",
+    pitch:
+      "Use shoulder, chest, waist, and hip measurements to explore menswear shapes and outfit ideas.",
+    image: "1515886657613-9f3515b0c78f",
+    alt: "Fashion portrait in an outfit",
+  },
 };
 
 // Cross-link to another tool. Used on landing pages to guide visitors

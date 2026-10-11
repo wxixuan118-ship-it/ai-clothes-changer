@@ -127,6 +127,20 @@ const faqsByTool: Record<ToolId, Faq[]> = {
       a: "No. This calculator runs in your browser and does not send or save your measurements.",
     },
   ],
+  "body-shape-men": [
+    {
+      q: "What measurements do I need?",
+      a: "Measure around your shoulders, chest, natural waist, and hips. Use the same unit for all four measurements.",
+    },
+    {
+      q: "Is the result exact?",
+      a: "No. Body shape labels are approximate styling guides and cannot capture every detail of your silhouette.",
+    },
+    {
+      q: "Are my measurements saved?",
+      a: "No. This calculator runs in your browser and does not upload or save your measurements.",
+    },
+  ],
 };
 
 export function AtelierFaq({ tool }: { tool: ToolId }) {
