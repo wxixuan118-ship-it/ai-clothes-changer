@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210" width="200" height="210" role="img" aria-label="square face shape outline">
+<rect width="200" height="210" fill="#ffffff"/>
+<path d="M100.0,16.0 C119.0,16.0 147.2,26.0 157.0,40.0 C166.8,54.0 158.8,81.7 159.0,100.0 C159.2,118.3 162.5,136.7 158.0,150.0 C153.5,163.3 141.6,174.3 131.9,180.0 C122.2,185.7 110.6,184.0 100.0,184.0 C89.4,184.0 77.8,185.7 68.1,180.0 C58.4,174.3 46.5,163.3 42.0,150.0 C37.5,136.7 40.8,118.3 41.0,100.0 C41.2,81.7 33.2,54.0 43.0,40.0 C52.8,26.0 81.0,16.0 100.0,16.0 Z" fill="#f3dcc8" stroke="#0e1318" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="82" cy="96" rx="6" ry="3.5" fill="#0e1318"/><ellipse cx="118" cy="96" rx="6" ry="3.5" fill="#0e1318"/>
+<path d="M90 154 q10 6 20 0" fill="none" stroke="#0e1318" stroke-width="2.5" stroke-linecap="round"/>
+<line x1="43" y1="40" x2="157" y2="40" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="41" y1="100" x2="159" y2="100" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="42" y1="150" x2="158" y2="150" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/>
+</svg>

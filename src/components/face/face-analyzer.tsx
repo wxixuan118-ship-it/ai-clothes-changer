@@ -11,9 +11,10 @@ import { getFaceLandmarker, type NormalizedLandmark } from "@/lib/face/mediapipe
 type AnalyzerStatus = "idle" | "loading" | "ready" | "analyzing" | "error" | "no-face";
 
 interface BaseAnalyzerProps {
-  title: string;
-  description: string;
-  badges: string[];
+  /** Optional in-card header. Landing pages put the copy in their hero. */
+  title?: string;
+  description?: string;
+  badges?: string[];
   onAnalyze: (
     landmarks: NormalizedLandmark[],
     imageData: ImageData,
@@ -26,7 +27,7 @@ interface BaseAnalyzerProps {
 export function FaceAnalyzer({
   title,
   description,
-  badges,
+  badges = [],
   onAnalyze,
   children,
 }: BaseAnalyzerProps) {
@@ -213,20 +214,24 @@ export function FaceAnalyzer({
   return (
     <div
       className={cn(
-        "mx-auto mt-8 max-w-4xl scroll-mt-6 rounded-[28px] border bg-[color-mix(in_oklch,var(--canvas),var(--ink)_3%)] p-4 sm:p-6",
+        "card mx-auto mt-10 max-w-4xl scroll-mt-6 p-4 shadow-[0_8px_24px_rgba(14,19,24,0.06)] sm:p-6",
       )}
     >
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold sm:text-3xl">{title}</h2>
-        <p className="mt-2 text-[var(--muted-ink)]">{description}</p>
-        <ul className="mt-4 flex flex-wrap justify-center gap-2">
-          {badges.map((badge) => (
-            <li key={badge} className="badge-brand">
-              {badge}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {title ? (
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold sm:text-3xl">{title}</h2>
+          {description ? (
+            <p className="mt-2 text-[var(--muted-ink)]">{description}</p>
+          ) : null}
+          <ul className="mt-4 flex flex-wrap justify-center gap-2">
+            {badges.map((badge) => (
+              <li key={badge} className="badge-brand">
+                {badge}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <canvas ref={canvasRef} className="hidden" />
 

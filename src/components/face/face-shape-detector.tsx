@@ -17,13 +17,6 @@ export function FaceShapeDetector() {
 
   return (
     <FaceAnalyzer
-      title="What shape is your face?"
-      description="Upload a selfie and our AI will analyze your facial proportions to find your face shape — plus the best hairstyles and glasses for you."
-      badges={[
-        "100% free",
-        "Runs in your browser",
-        "Photo stays private",
-      ]}
       onAnalyze={handleAnalyze}
     >
       {result ? <FaceShapeResultCard result={result} /> : null}

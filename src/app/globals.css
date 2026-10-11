@@ -7,13 +7,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-instrument-sans);
+  --font-sans: var(--font-jakarta);
   --font-mono: var(--font-martian-mono);
   /* v4 four faces, four jobs: Archivo Black = display (H1 + section
      titles ONLY), Bricolage = subheads/cards, Instrument = body,
      Martian Mono = data. */
-  --font-display: var(--font-familjen);
-  --font-heading: var(--font-familjen);
+  --font-display: var(--font-jakarta);
+  --font-heading: var(--font-jakarta);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -825,60 +825,65 @@
   }
 }
 
-/* ══ Atelier theme — AI Clothes Changer ═══════════════════════════════════
-   Dark fashion-editorial skin layered over the starter's token system.
-   Night-only: near-black canvas, soft white ink, hairline borders, pill
-   buttons, NO hard offset shadows, and a fashion palette (teal, rose,
-   emerald, mustard, peach) for arch portraits and accents. Unlayered, so
-   it wins over the starter's tokens and @utility definitions. */
+/* ══ Canvas theme — StyleMirror AI (2026-10) ═════════════════════════════
+   Light, Canva-like skin layered over the starter's token system: white
+   canvas, near-black ink, hairline borders, rounded cards, one violet
+   brand accent. No large color blocks — color lives in buttons, icon
+   tiles and small badges. --ink-deep is the inverse of --ink (white
+   here): it is the text color on brand/ink fills. Unlayered, so it wins
+   over the starter's tokens and @utility definitions. */
 :root,
 .dark,
 .loud {
-  color-scheme: dark;
-  --canvas: oklch(0.13 0.004 60);
-  --ink: oklch(0.97 0.004 90);
-  --ink-deep: oklch(0.15 0.004 60);
-  --paper-2: oklch(0.19 0.005 60);
-  --pop-yellow-bold: oklch(0.8 0.14 75);
-  --pop-mint-bold: oklch(0.45 0.08 170);
-  --pop-sky-bold: oklch(0.78 0.06 205);
-  --pop-pink-bold: oklch(0.72 0.12 5);
-  --pop-orange-bold: oklch(0.86 0.06 60);
-  --pop-yellow: color-mix(in oklch, var(--canvas), var(--pop-yellow-bold) 10%);
-  --pop-mint: color-mix(in oklch, var(--canvas), var(--pop-mint-bold) 18%);
-  --pop-sky: color-mix(in oklch, var(--canvas), var(--pop-sky-bold) 12%);
-  --pop-pink: color-mix(in oklch, var(--canvas), var(--pop-pink-bold) 12%);
-  --pop-orange: color-mix(in oklch, var(--canvas), var(--pop-orange-bold) 10%);
-  /* Brand accent: electric lime. ALWAYS paired with --ink-deep text when
-     used as a fill; on the dark canvas it works as text/icon color too. */
-  --brand: oklch(0.91 0.2 124);
-  --brand-soft: color-mix(in oklch, var(--brand), transparent 88%);
-  --brand-line: color-mix(in oklch, var(--brand), transparent 55%);
-  --credit: oklch(0.8 0.15 150);
-  --debit: oklch(0.72 0.19 27);
-  --credit-text: var(--credit);
-  --debit-text: var(--debit);
-  --muted-ink: color-mix(in oklch, var(--ink), var(--canvas) 38%);
-  --radius: 18px;
+  color-scheme: light;
+  --canvas: #ffffff;
+  --ink: #0e1318;
+  --ink-deep: #ffffff;
+  --paper-2: #f6f7f8;
+  --pop-yellow-bold: #b45309;
+  --pop-mint-bold: #0f766e;
+  --pop-sky-bold: #2563eb;
+  --pop-pink-bold: #be185d;
+  --pop-orange-bold: #c2410c;
+  --pop-yellow: #fdf3d8;
+  --pop-mint: #dff7f8;
+  --pop-sky: #e3edff;
+  --pop-pink: #ffe6ee;
+  --pop-orange: #fff0e0;
+  --pop-green-bold: #15803d;
+  --pop-green: #e2f6e8;
+  /* "FREE" badge text on --pop-mint. */
+  --free-text: #0b6b74;
+  /* Brand accent: violet. Fill text is --ink-deep (white). */
+  --brand: #7d2ae8;
+  --brand-strong: #5b1fb0;
+  --brand-soft: #f1eafe;
+  --brand-line: #d9c6fb;
+  --credit: #15803d;
+  --debit: #dc2626;
+  --credit-text: #15803d;
+  --debit-text: #b91c1c;
+  --muted-ink: #4a5560;
+  --radius: 16px;
   --border-w: 1px;
   --border-w-emph: 1px;
   --shadow-hard-sm: none;
   --shadow-hard-md: none;
-  --shadow-hard-lg: 0 24px 60px -20px oklch(0 0 0 / 0.7);
+  --shadow-hard-lg: 0 16px 40px rgba(14, 19, 24, 0.12);
   --shadow-hover: none;
   --title-shadow: transparent;
   --action: var(--brand);
   --on-accent: var(--ink-deep);
   --primary: var(--brand);
   --primary-foreground: var(--ink-deep);
-  --primary-text: var(--ink);
-  --border: color-mix(in oklch, var(--ink), transparent 84%);
-  --input: color-mix(in oklch, var(--ink), transparent 80%);
+  --primary-text: var(--brand-strong);
+  --border: #e3e6ea;
+  --input: #d5d9de;
   --ring: var(--brand);
   --hairline: var(--border);
   --rule: var(--border);
-  --card: var(--paper-2);
-  --popover: var(--paper-2);
+  --card: var(--canvas);
+  --popover: var(--canvas);
   --secondary: var(--paper-2);
   --muted: var(--paper-2);
   --sidebar: var(--canvas);
@@ -888,22 +893,22 @@
   --band-bg: var(--paper-2);
   --band-fg: var(--ink);
   --band-muted: var(--muted-ink);
-  --accent-soft: color-mix(in oklch, var(--ink), transparent 94%);
+  --accent-soft: #f1f2f4;
 }
 .loud {
   font-size: 1rem;
   font-weight: 400;
 }
 ::selection {
-  background-color: var(--brand);
-  color: var(--ink-deep);
+  background-color: var(--brand-soft);
+  color: var(--ink);
 }
 @layer base {
   h1,
   h2,
   h3 {
     font-family: var(--font-heading);
-    font-weight: 600;
+    font-weight: 800;
     letter-spacing: -0.025em;
   }
 }
@@ -911,7 +916,7 @@
 .text-display,
 .text-title {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 800;
   text-transform: none;
   text-shadow: none;
   letter-spacing: -0.03em;
@@ -966,16 +971,18 @@
 
   /* ── Atelier marketing primitives ── */
   .atelier-frame {
-    border: 1px solid color-mix(in oklch, var(--ink), transparent 70%);
-    border-radius: 28px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
   }
   .pill {
     display: inline-flex;
     white-space: nowrap;
     align-items: center;
-    gap: 0.6rem;
-    border-radius: 9999px;
-    font-weight: 500;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    border-radius: 12px;
+    font-weight: 600;
     transition:
       background-color 160ms ease,
       color 160ms ease,
@@ -991,10 +998,10 @@
   .pill-brand {
     background: var(--brand);
     color: var(--ink-deep);
-    font-weight: 600;
+    font-weight: 700;
   }
   .pill-brand:hover {
-    filter: brightness(0.94);
+    background: var(--brand-strong);
   }
   /* Outlined lime badge — hero proof chips, section labels. */
   .badge-brand {
@@ -1004,21 +1011,48 @@
     border: 1px solid var(--brand-line);
     border-radius: 9999px;
     background: var(--brand-soft);
-    color: var(--brand);
+    color: var(--brand-strong);
+    font-weight: 600;
     padding: 0.25rem 0.75rem;
     font-size: 0.8125rem;
     white-space: nowrap;
   }
   .pill-dark {
-    background: color-mix(in oklch, var(--ink), transparent 92%);
+    background: var(--canvas);
+    border: 1px solid var(--input);
     color: var(--ink);
   }
   .pill-dark:hover {
-    background: color-mix(in oklch, var(--ink), transparent 84%);
+    background: var(--accent-soft);
   }
   .pill-outline {
-    border: 1px solid color-mix(in oklch, var(--ink), transparent 65%);
+    border: 1px solid var(--input);
     color: var(--ink);
+  }
+  .pill-outline:hover {
+    background: var(--accent-soft);
+  }
+  /* Canvas theme cards: white, hairline border, soft hover lift. */
+  .card {
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
+  a.card {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+  a.card:hover {
+    border-color: var(--brand-line);
+    box-shadow: 0 8px 24px rgba(14, 19, 24, 0.06);
+  }
+  .tile {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
   }
   .arch {
     border-radius: 9999px 9999px 6px 6px;
@@ -1032,7 +1066,7 @@
 
 /* Overrides the eyebrow @utility, so it must stay unlayered. */
 .loud .eyebrow {
-  color: var(--brand);
+  color: var(--brand-strong);
   font-weight: 600;
   letter-spacing: 0.14em;
 }

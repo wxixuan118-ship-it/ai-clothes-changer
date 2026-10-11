@@ -1,160 +1,221 @@
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 
 import { FaceShapeDetector } from "@/components/face/face-shape-detector";
-import { OtherTool } from "@/components/atelier/other-tool";
+import {
+  appSchema,
+  Container,
+  CtaPanel,
+  FaqList,
+  faqSchema,
+  Hero,
+  JsonLd,
+  MoreTools,
+  SectionHeader,
+  SourceLink,
+  StepCards,
+  type FaqItem,
+} from "@/components/site/blocks";
+import { faceShapeInfo, type FaceShape } from "@/lib/face/face-shape-info";
+import { absoluteUrl } from "@/lib/site-url";
 
-const title = "Face Shape Detector: Find Your Face Shape Free | StyleMirror AI";
+const title = "Face Shape Detector: Find Your Face Shape Free | StyleMirror";
 const description =
-  "Upload a photo and find your face shape in seconds — free, private, and powered by AI. Get personalized hairstyle and glasses recommendations for oval, round, square, heart, and more.";
+  "Free face shape detector: upload a selfie to find out if your face is oval, round, square, heart, diamond, oblong or triangle, plus haircuts and glasses.";
 
-export async function generateMetadata(
-  _props: unknown,
-  parent: ResolvingMetadata,
-): Promise<Metadata> {
-  const previous = await parent;
-  return {
-    title: { absolute: title },
-    description,
-    alternates: { canonical: "/face-shape-detector" },
-    openGraph: {
-      ...previous.openGraph,
-      title,
-      description,
-      url: "/face-shape-detector",
-    },
-    twitter: { ...previous.twitter, title, description },
-  };
-}
+export const metadata: Metadata = {
+  title: { absolute: title },
+  description,
+  alternates: { canonical: "/face-shape-detector" },
+  openGraph: { title, description, url: "/face-shape-detector" },
+  twitter: { title, description },
+};
+
+const shapes = Object.keys(faceShapeInfo) as FaceShape[];
+
+const steps = [
+  {
+    title: "Upload a selfie",
+    body: "Take a clear front-facing photo, or use your camera. Pull your hair back and remove glasses if you can.",
+  },
+  {
+    title: "Landmarks are measured",
+    body: "The detector maps 478 facial landmarks in your browser and measures face length, forehead, cheekbones and jaw.",
+  },
+  {
+    title: "Get your face shape",
+    body: "See the closest of seven face shapes, with haircuts and glasses frames that suit your proportions.",
+  },
+] as const;
+
+const measure = [
+  ["Forehead", "Measure across your forehead, halfway between your eyebrows and hairline."],
+  ["Cheekbones", "Measure across the widest point of your cheekbones, just below the outer corners of your eyes."],
+  ["Jawline", "Measure from the tip of your chin to below your ear, then double it."],
+  ["Face length", "Measure from the center of your hairline down to the tip of your chin."],
+] as const;
+
+const faqs: FaqItem[] = [
+  {
+    q: "Is the face shape detector free?",
+    a: "Yes, completely free. No sign-up, no watermarks and no usage limits. The analysis runs entirely in your browser.",
+  },
+  {
+    q: "Does my photo get uploaded anywhere?",
+    a: "No. The face shape detector runs locally in your browser using Google's MediaPipe model. Your photo never leaves your device.",
+  },
+  {
+    q: "How accurate is the face shape detector?",
+    a: "It measures 478 facial landmarks and compares your proportions to seven reference shapes. Results are most reliable with a clear, front-facing photo in even light. Many faces sit between two shapes, so treat the result as a guide.",
+  },
+  {
+    q: "What kind of photo works best?",
+    a: "A straight-on photo at eye level, hair pulled back, glasses off and a neutral expression. Avoid wide-angle selfies held very close to the face.",
+  },
+  {
+    q: "How many face shapes can it detect?",
+    a: "Seven: oval, round, square, heart, diamond, oblong and triangle.",
+  },
+];
 
 export default function FaceShapeDetectorPage() {
   return (
     <>
-      <section className="mx-auto w-full max-w-[1240px] px-4 pt-12 sm:px-6 sm:pt-16">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="eyebrow text-[var(--brand)]">Free Face Shape Analyzer</p>
-          <h1 className="text-display mt-3">What shape is your face?</h1>
-          <p className="mt-4 max-w-[52ch] text-[var(--muted-ink)] sm:text-lg">
-            Upload a selfie and discover your face shape in seconds. Get
-            personalized recommendations for hairstyles, glasses, and makeup
-            that flatter your unique features.
-          </p>
-          <ul className="mt-6 flex flex-wrap justify-center gap-2">
-            <li className="badge-brand">100% Free</li>
-            <li className="badge-brand">No sign-up</li>
-            <li className="badge-brand">Photo stays private</li>
-            <li className="badge-brand">Powered by AI</li>
-          </ul>
-        </div>
+      <JsonLd
+        data={[
+          appSchema({
+            name: "Face Shape Detector",
+            description,
+            url: absoluteUrl("/face-shape-detector"),
+            category: "LifestyleApplication",
+          }),
+          faqSchema(faqs),
+        ]}
+      />
 
+      <Hero
+        eyebrow="100% free · No sign-up · Photo stays on your device"
+        title={
+          <>
+            Face shape detector:{" "}
+            <span className="text-[var(--brand)]">what shape is your face?</span>
+          </>
+        }
+        intro="Upload a selfie and the free face shape detector finds your face shape in seconds, from oval and round to heart and diamond. Each face shape result comes with haircuts and glasses frames that flatter it."
+      >
         <FaceShapeDetector />
-      </section>
+      </Hero>
 
-      {/* How it works */}
-      <section className="mx-auto w-full max-w-[1240px] px-4 py-16 sm:px-6">
-        <p className="eyebrow text-center text-[var(--brand)]">How it works</p>
-        <h2 className="text-title mt-3 text-center">Three easy steps</h2>
-        <div className="mt-10 grid gap-6 sm:grid-cols-3">
-          {[
-            {
-              step: "01",
-              title: "Upload your photo",
-              desc: "Take a clear front-facing selfie or upload one from your camera roll.",
-            },
-            {
-              step: "02",
-              title: "AI analyzes your face",
-              desc: "Our AI maps 478 facial landmarks and measures your proportions.",
-            },
-            {
-              step: "03",
-              title: "Get your results",
-              desc: "See your face shape plus hairstyle, glasses, and makeup recommendations.",
-            },
-          ].map((item) => (
-            <div
-              key={item.step}
-              className="rounded-2xl border bg-[var(--paper-2)] p-6"
-            >
-              <span className="chip-mono">{item.step}</span>
-              <h3 className="mt-3 text-xl font-bold">{item.title}</h3>
-              <p className="mt-2 text-[var(--muted-ink)]">{item.desc}</p>
-            </div>
+      <Container id="how-it-works" className="pt-20">
+        <SectionHeader
+          title="How the face shape detector works"
+          sub={
+            <>
+              Detection uses Google&apos;s{" "}
+              <SourceLink href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker">
+                MediaPipe Face Landmarker
+              </SourceLink>
+              , running on your device.
+            </>
+          }
+        />
+        <StepCards steps={steps} />
+      </Container>
+
+      <Container id="face-shapes" className="pt-20">
+        <SectionHeader
+          title="7 face shapes the detector recognizes"
+          sub="Find yours below, with the haircuts and frames that tend to suit it."
+        />
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {shapes.map((shape) => {
+            const info = faceShapeInfo[shape];
+            return (
+              <li key={shape} className="card flex gap-4 p-5">
+                <Image
+                  src={`/guides/face-shapes/${shape}.svg`}
+                  alt={`${info.label} face shape reference outline used by the face shape detector`}
+                  width={200}
+                  height={210}
+                  unoptimized
+                  loading="lazy"
+                  className="h-auto w-24 shrink-0 self-start rounded-xl bg-[var(--paper-2)]"
+                />
+                <div>
+                  <p className="text-lg font-extrabold">{info.label}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--muted-ink)]">
+                    {info.description}
+                  </p>
+                  <p className="mt-2 text-sm">
+                    <span className="font-bold">Haircuts:</span>{" "}
+                    {info.hairstyles.slice(0, 3).join(", ")}
+                  </p>
+                  <p className="mt-1 text-sm">
+                    <span className="font-bold">Glasses:</span>{" "}
+                    {info.glasses.slice(0, 2).join(", ")}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </Container>
+
+      <Container className="pt-20">
+        <SectionHeader
+          title="Check your face shape by hand"
+          sub="No photo handy? Four measurements with a soft tape give you the same comparison the detector makes."
+        />
+        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {measure.map(([name, how], i) => (
+            <li key={name} className="card p-6">
+              <span className="tile size-10 rounded-full bg-[var(--pop-mint)] font-extrabold text-[var(--free-text)]">
+                {i + 1}
+              </span>
+              <p className="mt-3 text-lg font-extrabold">{name}</p>
+              <p className="mt-1 leading-relaxed text-[var(--muted-ink)]">{how}</p>
+            </li>
           ))}
-        </div>
-      </section>
+        </ol>
+        <p className="mt-5 max-w-3xl leading-relaxed text-[var(--muted-ink)]">
+          Then compare: if face length is clearly the largest number, your face
+          is oval or oblong. If width and length are close, it is round or
+          square — a sharp jaw points to square. A forehead wider than the jaw
+          suggests heart, cheekbones wider than both suggest diamond, and a jaw
+          wider than the forehead suggests triangle.
+        </p>
+      </Container>
 
-      {/* Face shapes */}
-      <section className="mx-auto w-full max-w-[1240px] px-4 py-12 sm:px-6">
-        <p className="eyebrow text-center text-[var(--brand)]">7 Face Shapes</p>
-        <h2 className="text-title mt-3 text-center">Which one are you?</h2>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { name: "Oval", desc: "Longer than wide, rounded jaw" },
-            { name: "Round", desc: "Equal width and length, soft angles" },
-            { name: "Square", desc: "Strong jaw, similar width all over" },
-            { name: "Heart", desc: "Wide forehead, narrow chin" },
-            { name: "Diamond", desc: "Wide cheekbones, narrow forehead & jaw" },
-            { name: "Oblong", desc: "Much longer than wide, straight sides" },
-            { name: "Triangle", desc: "Narrow forehead, wide jaw" },
-          ].map((shape) => (
-            <div
-              key={shape.name}
-              className="rounded-2xl border bg-[var(--paper-2)] p-5 text-center"
-            >
-              <div className="mx-auto flex size-16 items-center justify-center rounded-full border-2 border-[var(--brand)]/30 bg-[var(--brand)]/5">
-                <span className="text-xl font-bold text-[var(--brand)]">
-                  {shape.name.charAt(0)}
-                </span>
-              </div>
-              <h3 className="mt-3 font-bold">{shape.name}</h3>
-              <p className="mt-1 text-sm text-[var(--muted-ink)]">{shape.desc}</p>
-            </div>
-          ))}
+      <Container id="faq" className="pt-20">
+        <div className="grid gap-8 lg:grid-cols-[1fr_1.7fr]">
+          <SectionHeader
+            title="Face shape detector FAQ"
+            sub={
+              <>
+                Know your shape? See the{" "}
+                <Link
+                  href="/hairstyles-for-face-shape"
+                  className="font-semibold text-[var(--brand-strong)] underline underline-offset-4"
+                >
+                  best hairstyles for your face shape
+                </Link>
+                .
+              </>
+            }
+          />
+          <FaqList items={faqs} />
         </div>
-      </section>
+      </Container>
 
-      {/* Cross-link to other tools */}
-      <OtherTool tool="hair" />
-      <OtherTool tool="clothes" />
+      <MoreTools current="face-shape" />
 
-      {/* FAQ */}
-      <section className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
-        <p className="eyebrow text-center text-[var(--brand)]">FAQ</p>
-        <h2 className="text-title mt-3 text-center">Questions</h2>
-        <div className="mt-8 space-y-3">
-          {[
-            {
-              q: "Is the face shape detector really free?",
-              a: "Yes, completely free. No sign-up, no watermarks, no usage limits. The analysis runs entirely in your browser.",
-            },
-            {
-              q: "Does my photo get uploaded anywhere?",
-              a: "No. Everything runs locally in your browser using Google's MediaPipe AI. Your photo never leaves your device.",
-            },
-            {
-              q: "How accurate is it?",
-              a: "Our AI uses 478 facial landmarks to measure your proportions. Results are generally accurate for clear front-facing photos with good lighting.",
-            },
-            {
-              q: "What kind of photo works best?",
-              a: "Use a clear front-facing photo with your hair pulled back and good even lighting. Remove glasses if possible.",
-            },
-          ].map((item) => (
-            <details
-              key={item.q}
-              className="group rounded-2xl border bg-[var(--paper-2)] p-5"
-            >
-              <summary className="flex cursor-pointer items-center justify-between font-semibold list-none">
-                {item.q}
-                <span className="ml-4 text-[var(--muted-ink)] transition-transform group-open:rotate-45">
-                  +
-                </span>
-              </summary>
-              <p className="mt-3 text-[var(--muted-ink)]">{item.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <CtaPanel
+        title="Found your face shape? Try a haircut that suits it"
+        sub="Preview any of 65 hairstyles on your own photo with the AI hairstyle changer."
+        href="/#studio"
+        label="Try a hairstyle"
+      />
     </>
   );
 }

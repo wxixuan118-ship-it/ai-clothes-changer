@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/foundation-shade-finder", priority: 0.8 },
     { path: "/body-shape-calculator-female", priority: 0.8 },
     { path: "/body-shape-calculator-men", priority: 0.8 },
+    { path: "/style-guides", priority: 0.7 },
     { path: "/pricing", priority: 0.8 },
     { path: "/privacy", priority: 0.3 },
     { path: "/terms", priority: 0.3 },

@@ -22,13 +22,6 @@ export function FoundationShadeFinder() {
 
   return (
     <FaceAnalyzer
-      title="Find your perfect foundation shade"
-      description="Upload a selfie and our AI will analyze your skin tone and undertone to find your perfect foundation match from top brands."
-      badges={[
-        "100% free",
-        "Runs in your browser",
-        "Photo stays private",
-      ]}
       onAnalyze={handleAnalyze}
     >
       {result ? <FoundationResultCard result={result} /> : null}

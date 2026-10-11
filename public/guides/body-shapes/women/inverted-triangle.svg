@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 280" width="160" height="280">
+<rect width="160" height="280" fill="#ffffff"/>
+<path d="M128,70 Q138,120 134,172" fill="none" stroke="#0e1318" stroke-width="10" stroke-linecap="round" opacity="0.18"/><path d="M32,70 Q22,120 26,172" fill="none" stroke="#0e1318" stroke-width="10" stroke-linecap="round" opacity="0.18"/>
+<circle cx="80" cy="28" r="17" fill="#f3dcc8" stroke="#0e1318" stroke-width="3"/>
+<path d="M89.0,52.0 C98.5,54.3 122.2,58.3 128.0,66.0 C133.8,73.7 126.9,85.7 124.1,98.0 C121.3,110.3 112.8,126.7 111.0,140.0 C109.2,153.3 113.9,165.5 113.0,178.0 C112.1,190.5 108.5,201.0 105.7,215.0 C103.0,229.0 99.8,254.2 96.5,262.0 C93.2,269.8 88.4,271.3 86.0,262.0 C83.6,252.7 83.3,215.3 82.0,206.0 C80.7,196.7 79.3,196.7 78.0,206.0 C76.7,215.3 76.4,252.7 74.0,262.0 C71.6,271.3 66.8,269.8 63.5,262.0 C60.2,254.2 57.0,229.0 54.3,215.0 C51.5,201.0 47.9,190.5 47.0,178.0 C46.1,165.5 50.9,153.3 49.0,140.0 C47.1,126.7 38.7,110.3 35.9,98.0 C33.1,85.7 26.1,73.7 32.0,66.0 C37.9,58.3 61.5,54.3 71.0,52.0 C80.5,49.7 79.5,49.7 89.0,52.0 Z" fill="#f3dcc8" stroke="#0e1318" stroke-width="3" stroke-linejoin="round"/>
+<line x1="24" y1="66" x2="136" y2="66" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="27" y1="98" x2="133" y2="98" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="41" y1="140" x2="119" y2="140" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="39" y1="178" x2="121" y2="178" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/>
+</svg>

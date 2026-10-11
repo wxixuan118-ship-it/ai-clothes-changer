@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210" width="200" height="210" role="img" aria-label="oval face shape outline">
+<rect width="200" height="210" fill="#ffffff"/>
+<path d="M100.0,15.0 C116.0,15.0 138.7,30.8 148.0,45.0 C157.3,59.2 156.7,82.5 156.0,100.0 C155.3,117.5 153.3,135.3 144.0,150.0 C134.7,164.7 114.7,188.0 100.0,188.0 C85.3,188.0 65.3,164.7 56.0,150.0 C46.7,135.3 44.7,117.5 44.0,100.0 C43.3,82.5 42.7,59.2 52.0,45.0 C61.3,30.8 84.0,15.0 100.0,15.0 Z" fill="#f3dcc8" stroke="#0e1318" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="82" cy="96" rx="6" ry="3.5" fill="#0e1318"/><ellipse cx="118" cy="96" rx="6" ry="3.5" fill="#0e1318"/>
+<path d="M90 156 q10 6 20 0" fill="none" stroke="#0e1318" stroke-width="2.5" stroke-linecap="round"/>
+<line x1="52" y1="45" x2="148" y2="45" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="44" y1="100" x2="156" y2="100" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="56" y1="150" x2="144" y2="150" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/>
+</svg>

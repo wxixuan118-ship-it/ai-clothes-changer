@@ -5,14 +5,16 @@ paths:
   - "src/app/(app)/**"
 ---
 
-> **SUPERSEDED — Atelier theme (2026-10).** This product (AI Clothes
-> Changer) now uses a dark fashion-editorial skin: near-black canvas, soft
-> white ink, 1px hairline borders, pill buttons, arch-shaped portraits,
-> NO hard offset shadows, Familjen Grotesk for headings, gold sparkle
-> ornament. Tokens live in the "Atelier theme" block at the end of
-> `src/app/globals.css`; marketing components live in
-> `src/components/atelier/`. Where the rules below conflict with that,
-> the Atelier theme wins. The loud/ledger rules remain only as history.
+> **SUPERSEDED — Canvas theme (2026-10).** StyleMirror AI now uses a light,
+> Canva-like skin: white canvas, near-black ink, hairline borders, rounded
+> cards (`.card`), 12px-radius buttons (`.pill`), one violet brand accent,
+> Plus Jakarta Sans for everything. No large color blocks — color lives in
+> buttons, small icon tiles (`.tile`) and badges. Tokens live in the
+> "Canvas theme" block in `src/app/globals.css`; marketing building blocks
+> live in `src/components/site/`. Every marketing page targets one keyword:
+> keep it in the title, H1, first paragraph and H2s, and use styled `<p>`
+> (not headings) for card titles and promo blocks. Where the rules below
+> conflict with that, the Canvas theme wins. They remain only as history.
 
 # Design rules — "The Ledger", LOUD MODE (v4)
 

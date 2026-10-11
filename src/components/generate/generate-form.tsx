@@ -869,7 +869,9 @@ export function GenerateForm({
                                       {/* eslint-disable-next-line @next/next/no-img-element -- bundled preview JPEG */}
                                       <img
                                         src={`/hairstyles/${preset.id}.jpg`}
-                                        alt=""
+                                        alt={`${preset.name} hairstyle`}
+                                        width={360}
+                                        height={480}
                                         loading="lazy"
                                         className="absolute inset-0 size-full object-cover"
                                       />

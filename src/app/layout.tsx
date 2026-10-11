@@ -6,13 +6,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
 import { siteUrl } from "@/lib/site-url";
 
-const instrumentSans = localFont({
-  src: "./fonts/instrument-sans-latin.woff2",
-  weight: "400 700",
-  variable: "--font-instrument-sans",
-  display: "swap",
-});
-
 const martianMono = localFont({
   src: "./fonts/martian-mono-latin.woff2",
   weight: "100 800",
@@ -20,11 +13,11 @@ const martianMono = localFont({
   display: "swap",
 });
 
-// Atelier theme: one editorial grotesk for display and headings.
-const familjen = localFont({
-  src: "./fonts/familjen-grotesk-latin.woff2",
-  weight: "400 700",
-  variable: "--font-familjen",
+// Canvas theme: one geometric sans for headings and body.
+const jakarta = localFont({
+  src: "./fonts/plus-jakarta-sans-latin.woff2",
+  weight: "200 800",
+  variable: "--font-jakarta",
   display: "swap",
 });
 
@@ -49,12 +42,9 @@ export const metadata: Metadata = {
   },
 };
 
-// Browser chrome matches the canvas in both themes (Dark Mode v2).
+// Browser chrome matches the white canvas.
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0B0A09" },
-    { media: "(prefers-color-scheme: dark)", color: "#0B0A09" },
-  ],
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -66,7 +56,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${instrumentSans.variable} ${martianMono.variable} ${familjen.variable} dark h-full antialiased`}
+      className={`${jakarta.variable} ${martianMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         {children}

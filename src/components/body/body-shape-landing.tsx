@@ -1,207 +1,338 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRightIcon } from "lucide-react";
 
+import {
+  appSchema,
+  Container,
+  CtaPanel,
+  FaqList,
+  faqSchema,
+  Hero,
+  JsonLd,
+  MoreTools,
+  SectionHeader,
+  SourceLink,
+  StepCards,
+  type FaqItem,
+} from "@/components/site/blocks";
+import { cn } from "@/lib/utils";
 import { bodyShapeInfo, maleBodyShapeInfo } from "@/lib/body-shape";
+import { absoluteUrl } from "@/lib/site-url";
 
 import { BodyShapeCalculator } from "./body-shape-calculator";
 
 type Audience = "female" | "male";
 
-const copy = {
+type PageCopy = {
+  name: string;
+  path: string;
+  description: string;
+  eyebrow: string;
+  h1: React.ReactNode;
+  intro: string;
+  steps: { title: string; body: string }[];
+  h2: { measure: string; shapes: string; rules: string; faq: string };
+  shapesSub: string;
+  rules: string[];
+  rulesSub: React.ReactNode;
+  faq: FaqItem[];
+  folder: "women" | "men";
+  altSuffix: string;
+};
+
+const shared: FaqItem[] = [
+  {
+    q: "Is the result exact?",
+    a: "No. Body shape labels are approximate styling categories. A tape measure cannot capture every detail of a silhouette, and many people sit between two shapes.",
+  },
+  {
+    q: "Are my measurements saved?",
+    a: "No. The calculation runs in your browser and does not upload or save your measurements.",
+  },
+];
+
+const copy: Record<Audience, PageCopy> = {
   female: {
-    title: "Body shape calculator for women",
+    name: "Body Shape Calculator",
+    path: "/body-shape-calculator-female",
+    description:
+      "Free body shape calculator for women: enter bust, waist and hip measurements to find your body shape and outfit ideas.",
+    eyebrow: "Free · No sign-up · Inches or centimeters",
+    h1: (
+      <>
+        Body shape calculator{" "}
+        <span className="text-[var(--brand)]">for women</span>
+      </>
+    ),
     intro:
-      "Enter three measurements to explore your proportions and discover outfit ideas. This free women's body shape calculator works in inches or centimeters.",
-    measurements: [
-      [
-        "Bust",
-        "Wrap the tape around the fullest part of your bust. Keep it level.",
-      ],
-      ["Waist", "Measure your natural waist without pulling the tape tight."],
-      ["Hips", "Measure around the fullest part of your hips and seat."],
+      "Enter your bust, waist and hip measurements and this free body shape calculator finds your closest shape — hourglass, pear, apple, rectangle or inverted triangle — with outfit ideas for each body shape.",
+    steps: [
+      {
+        title: "Measure your bust",
+        body: "Wrap the tape around the fullest part of your bust, keeping it level across your back.",
+      },
+      {
+        title: "Measure your waist",
+        body: "Measure your natural waist — the narrowest point, usually just above the belly button — without pulling tight.",
+      },
+      {
+        title: "Measure your hips",
+        body: "Measure around the fullest part of your hips and seat, with your feet together.",
+      },
     ],
-    shapes: bodyShapeInfo,
+    h2: {
+      measure: "How to use the body shape calculator",
+      shapes: "Body shapes the calculator can find",
+      rules: "How the body shape calculator decides",
+      faq: "Body shape calculator FAQ",
+    },
+    shapesSub:
+      "Five common styling categories, each with a few outfit ideas to start from.",
+    rules: [
+      "Apple — your waist is at least 90% of your larger bust or hip measurement.",
+      "Pear — your hips are at least 5% wider than your bust.",
+      "Inverted triangle — your bust is at least 5% wider than your hips.",
+      "Hourglass — bust and hips are close, and your waist is 80% or less of the smaller one.",
+      "Rectangle — bust and hips are close, with a gentler waist difference.",
+    ],
+    rulesSub: (
+      <>
+        The rules follow the common five-category system described in{" "}
+        <SourceLink href="https://en.wikipedia.org/wiki/Female_body_shape">
+          female body shape
+        </SourceLink>{" "}
+        references, checked in this order.
+      </>
+    ),
     faq: [
-      [
-        "What measurements do I need?",
-        "Bust, natural waist, and hips. Use the same unit for all three measurements.",
-      ],
-      [
-        "How does the calculator work?",
-        "It compares the relative sizes of your three measurements and chooses the closest of five common styling categories.",
-      ],
+      {
+        q: "What measurements do I need?",
+        a: "Bust, natural waist and hips. Use the same unit for all three — inches or centimeters both work.",
+      },
+      {
+        q: "How does it work?",
+        a: "It compares the relative sizes of your three measurements and picks the closest of five common styling categories, using the rules listed above.",
+      },
+      ...shared,
     ],
+    folder: "women",
+    altSuffix: "body shape calculator result",
   },
   male: {
-    title: "Body shape calculator for men",
+    name: "Male Body Shape Calculator",
+    path: "/body-shape-calculator-men",
+    description:
+      "Free male body shape calculator: enter shoulder, chest, waist and hip measurements to find your build — trapezoid, rectangle, oval and more.",
+    eyebrow: "Free · No sign-up · Inches or centimeters",
+    h1: (
+      <>
+        Male body shape calculator{" "}
+        <span className="text-[var(--brand)]">for your build</span>
+      </>
+    ),
     intro:
-      "Enter shoulder, chest, waist, and hip measurements to explore your proportions and find outfit ideas. Use inches or centimeters.",
-    measurements: [
-      [
-        "Shoulders",
-        "Wrap the tape around the widest part of your shoulders. Ask someone to help keep it level.",
-      ],
-      [
-        "Chest",
-        "Measure around the fullest part of your chest, under your arms.",
-      ],
-      ["Waist", "Measure your natural waist without pulling the tape tight."],
-      ["Hips", "Measure around the fullest part of your hips and seat."],
+      "Enter four measurements and this free male body shape calculator finds your closest build — trapezoid, inverted triangle, rectangle, triangle or oval — with outfit ideas for each male body shape.",
+    steps: [
+      {
+        title: "Measure your shoulders",
+        body: "Wrap the tape all the way around the widest part of your shoulders. Ask someone to keep it level.",
+      },
+      {
+        title: "Measure your chest",
+        body: "Measure around the fullest part of your chest, under your arms, after a normal breath out.",
+      },
+      {
+        title: "Measure your waist",
+        body: "Measure your natural waist without pulling the tape tight or holding your breath.",
+      },
+      {
+        title: "Measure your hips",
+        body: "Measure around the fullest part of your hips and seat, with your feet together.",
+      },
     ],
-    shapes: maleBodyShapeInfo,
+    h2: {
+      measure: "How to use the male body shape calculator",
+      shapes: "Five male body shapes and builds",
+      rules: "How the male body shape calculator decides",
+      faq: "Male body shape calculator FAQ",
+    },
+    shapesSub:
+      "Five common menswear categories, each with a few outfit ideas to start from.",
+    rules: [
+      "Oval — your waist is at least 95% of your larger chest or hip measurement.",
+      "Triangle — your hips are at least 5% wider than your shoulders and chest.",
+      "Inverted triangle — shoulders or chest at least 15% wider than both waist and hips.",
+      "Trapezoid — shoulders or chest at least 5% wider than both waist and hips.",
+      "Rectangle — shoulders, waist and hips stay close in size.",
+    ],
+    rulesSub: (
+      <>
+        Shoulders are a circumference, not the straight-line{" "}
+        <SourceLink href="https://en.wikipedia.org/wiki/Biacromial_breadth">
+          biacromial breadth
+        </SourceLink>{" "}
+        between shoulder points. Rules are checked in this order.
+      </>
+    ),
     faq: [
-      [
-        "What measurements do I need?",
-        "Shoulder circumference, chest, natural waist, and hips. Use the same unit for all four.",
-      ],
-      [
-        "Is shoulder width the same as shoulder circumference?",
-        "No. Wrap the tape all the way around your shoulders. Do not enter the straight-line distance between shoulder points.",
-      ],
-      [
-        "How does the calculator work?",
-        "It compares the relative sizes of four circumferences and chooses the closest of five common menswear styling categories.",
-      ],
+      {
+        q: "What measurements do I need?",
+        a: "Shoulder circumference, chest, natural waist and hips. Use the same unit for all four measurements.",
+      },
+      {
+        q: "Is shoulder width the same as shoulder circumference?",
+        a: "No. Wrap the tape all the way around your shoulders. Do not enter the straight-line distance between your shoulder points.",
+      },
+      {
+        q: "How does it work?",
+        a: "It compares the relative sizes of four circumferences and picks the closest of five menswear styling categories, using the rules listed above.",
+      },
+      ...shared,
     ],
+    folder: "men",
+    altSuffix: "male body shape calculator result",
   },
-} as const;
+};
 
 export function BodyShapeLanding({ audience }: { audience: Audience }) {
   const page = copy[audience];
-  const shapeCards = Object.values(page.shapes);
+  const shapes = Object.entries(
+    audience === "female" ? bodyShapeInfo : maleBodyShapeInfo,
+  );
 
   return (
     <>
-      <section className="mx-auto w-full max-w-[1240px] px-4 pt-12 sm:px-6 sm:pt-16">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="eyebrow text-[var(--brand)]">Free style tool</p>
-          <h1 className="text-display mt-3">{page.title}</h1>
-          <p className="mx-auto mt-4 max-w-[55ch] text-[var(--muted-ink)] sm:text-lg">
-            {page.intro}
-          </p>
-          <nav
-            aria-label="Choose calculator"
-            className="mt-7 inline-flex rounded-full border bg-[var(--paper-2)] p-1.5"
-          >
-            <Link
-              href="/body-shape-calculator-female"
-              aria-current={audience === "female" ? "page" : undefined}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${audience === "female" ? "bg-[var(--brand)] text-[var(--ink-deep)]" : "text-[var(--muted-ink)] hover:text-[var(--ink)]"}`}
-            >
-              Women
-            </Link>
-            <Link
-              href="/body-shape-calculator-men"
-              aria-current={audience === "male" ? "page" : undefined}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${audience === "male" ? "bg-[var(--brand)] text-[var(--ink-deep)]" : "text-[var(--muted-ink)] hover:text-[var(--ink)]"}`}
-            >
-              Men
-            </Link>
-          </nav>
-          <ul className="mt-6 flex flex-wrap justify-center gap-2">
-            <li className="badge-brand">Free to use</li>
-            <li className="badge-brand">Inches or centimeters</li>
-            <li className="badge-brand">No sign-up</li>
-            <li className="badge-brand">Measurements stay private</li>
-          </ul>
-        </div>
-        <BodyShapeCalculator audience={audience} />
-      </section>
+      <JsonLd
+        data={[
+          appSchema({
+            name: page.name,
+            description: page.description,
+            url: absoluteUrl(page.path),
+            category: "LifestyleApplication",
+          }),
+          faqSchema(page.faq),
+        ]}
+      />
 
-      <section className="mx-auto w-full max-w-[1240px] px-4 py-16 sm:px-6">
-        <p className="eyebrow text-center text-[var(--brand)]">
-          Before you begin
-        </p>
-        <h2 className="text-title mt-3 text-center">How to measure</h2>
-        <div
-          className={`mt-10 grid gap-5 sm:grid-cols-2 ${audience === "female" ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}
+      <Hero eyebrow={page.eyebrow} title={page.h1} intro={page.intro}>
+        <nav
+          aria-label="Choose calculator"
+          className="mx-auto mt-7 flex w-fit rounded-[12px] border border-[var(--border)] p-1"
         >
-          {page.measurements.map(([title, description], index) => (
-            <div
-              key={title}
-              className="rounded-2xl border bg-[var(--paper-2)] p-6"
+          {(
+            [
+              ["female", "/body-shape-calculator-female", "Women"],
+              ["male", "/body-shape-calculator-men", "Men"],
+            ] as const
+          ).map(([id, href, label]) => (
+            <Link
+              key={id}
+              href={href}
+              aria-current={audience === id ? "page" : undefined}
+              className={cn(
+                "inline-flex min-h-11 items-center rounded-[9px] px-6 text-sm font-bold transition-colors",
+                audience === id
+                  ? "bg-[var(--ink)] text-[var(--ink-deep)]"
+                  : "text-[var(--muted-ink)] hover:text-[var(--ink)]",
+              )}
             >
-              <span className="chip-mono">
-                {String(index + 1).padStart(2, "0")}
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <BodyShapeCalculator audience={audience} />
+      </Hero>
+
+      <Container id="how-to-measure" className="pt-20">
+        <SectionHeader
+          title={page.h2.measure}
+          sub="Use a soft tape measure over light clothing, standing relaxed. Then enter the numbers above."
+        />
+        <StepCards steps={page.steps} />
+      </Container>
+
+      <Container id="shapes" className="pt-20">
+        <SectionHeader title={page.h2.shapes} sub={page.shapesSub} />
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {shapes.map(([id, shape]) => (
+            <li key={id} className="card flex gap-4 p-5">
+              <Image
+                src={`/guides/body-shapes/${page.folder}/${id}.svg`}
+                alt={`${shape.label} silhouette, a ${page.altSuffix}`}
+                width={160}
+                height={280}
+                unoptimized
+                loading="lazy"
+                className="h-auto w-20 shrink-0 self-start rounded-xl bg-[var(--paper-2)]"
+              />
+              <div>
+                <p className="text-lg font-extrabold">{shape.label}</p>
+                <p className="mt-1 text-sm leading-relaxed text-[var(--muted-ink)]">
+                  {shape.description}
+                </p>
+                <p className="mt-2 text-sm">
+                  <span className="font-bold">Try:</span>{" "}
+                  {shape.ideas.join(", ")}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-5 max-w-3xl text-sm text-[var(--muted-ink)]">
+          These are approximate styling categories, not rules about what you
+          can wear or a measure of health.
+        </p>
+      </Container>
+
+      <Container id="rules" className="pt-20">
+        <SectionHeader title={page.h2.rules} sub={page.rulesSub} />
+        <ol className="card divide-y divide-[var(--border)] px-6">
+          {page.rules.map((rule, i) => (
+            <li key={rule} className="flex gap-4 py-4 leading-relaxed">
+              <span className="tile size-8 rounded-full bg-[var(--pop-sky)] text-sm font-extrabold text-[var(--pop-sky-bold)]">
+                {i + 1}
               </span>
-              <h3 className="mt-3 text-xl font-bold">{title}</h3>
-              <p className="mt-2 text-[var(--muted-ink)]">{description}</p>
-            </div>
+              {rule}
+            </li>
           ))}
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-[1240px] px-4 py-12 sm:px-6">
-        <p className="eyebrow text-center text-[var(--brand)]">
-          Five common guides
+        </ol>
+        <p className="mt-5 max-w-3xl leading-relaxed text-[var(--muted-ink)]">
+          Sitting right on a boundary is common. If two results feel close,
+          read both descriptions and use the outfit ideas that match how your
+          clothes actually fit. Measurements shift with training, weight and
+          posture, so measure again every few months.
         </p>
-        <h2 className="text-title mt-3 text-center">Explore body shapes</h2>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {shapeCards.map((shape) => (
-            <div
-              key={shape.label}
-              className="rounded-2xl border bg-[var(--paper-2)] p-6"
-            >
-              <h3 className="text-xl font-bold">{shape.label}</h3>
-              <p className="mt-2 text-[var(--muted-ink)]">
-                {shape.description}
-              </p>
-            </div>
-          ))}
-        </div>
-        <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-[var(--muted-ink)]">
-          These are approximate styling categories, not rules about what you can
-          wear or a measure of health.
-        </p>
-      </section>
+      </Container>
 
-      <section className="mx-auto w-full max-w-[1240px] px-4 py-12 sm:px-6">
-        <div className="rounded-[28px] border bg-[var(--paper-2)] p-8 text-center sm:p-12">
-          <p className="eyebrow text-[var(--brand)]">Try your next look</p>
-          <h2 className="text-title mt-3">See an outfit on your photo</h2>
-          <p className="mx-auto mt-4 max-w-[52ch] text-[var(--muted-ink)]">
-            Pick a style you like and preview it with the AI Clothes Changer.
-          </p>
-          <Link
-            href="/ai-clothes-changer#studio"
-            className="pill pill-brand mt-7 inline-flex items-center gap-2 px-6 py-3"
-          >
-            Try AI Clothes Changer{" "}
-            <ArrowRightIcon className="size-4" aria-hidden />
-          </Link>
+      <Container id="faq" className="pt-20">
+        <div className="grid gap-8 lg:grid-cols-[1fr_1.7fr]">
+          <SectionHeader
+            title={page.h2.faq}
+            sub={
+              <>
+                Want to see an outfit on you? Try the{" "}
+                <Link
+                  href="/ai-clothes-changer"
+                  className="font-semibold text-[var(--brand-strong)] underline underline-offset-4"
+                >
+                  AI clothes changer
+                </Link>
+                .
+              </>
+            }
+          />
+          <FaqList items={page.faq} />
         </div>
-      </section>
+      </Container>
 
-      <section className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
-        <p className="eyebrow text-center text-[var(--brand)]">FAQ</p>
-        <h2 className="text-title mt-3 text-center">Questions</h2>
-        <div className="mt-8 space-y-3">
-          {[
-            ...page.faq,
-            [
-              "Is the result exact?",
-              "No. Body shape labels are approximate, and a tape measure cannot capture every detail of a silhouette.",
-            ],
-            [
-              "Are my measurements saved?",
-              "No. The calculation runs in your browser and does not upload or save your measurements.",
-            ],
-          ].map(([question, answer]) => (
-            <details
-              key={question}
-              className="group rounded-2xl border bg-[var(--paper-2)] p-5"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between font-semibold">
-                {question}
-                <span className="ml-4 text-[var(--muted-ink)] transition-transform group-open:rotate-45">
-                  +
-                </span>
-              </summary>
-              <p className="mt-3 text-[var(--muted-ink)]">{answer}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <MoreTools current={audience === "female" ? "body-shape" : "body-shape-men"} />
+
+      <CtaPanel
+        title="Know your shape? See an outfit on you"
+        sub="Pick a style you like and preview it on your own photo with the AI clothes changer."
+        href="/ai-clothes-changer#studio"
+        label="Try an outfit"
+      />
     </>
   );
 }

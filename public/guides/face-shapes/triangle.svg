@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210" width="200" height="210" role="img" aria-label="triangle face shape outline">
+<rect width="200" height="210" fill="#ffffff"/>
+<path d="M100.0,18.0 C112.0,18.0 127.3,32.3 136.0,46.0 C144.7,59.7 147.5,82.7 152.0,100.0 C156.5,117.3 165.9,136.7 163.0,150.0 C160.1,163.3 145.2,174.3 134.7,180.0 C124.2,185.7 111.5,184.0 100.0,184.0 C88.5,184.0 75.8,185.7 65.3,180.0 C54.8,174.3 39.9,163.3 37.0,150.0 C34.1,136.7 43.5,117.3 48.0,100.0 C52.5,82.7 55.3,59.7 64.0,46.0 C72.7,32.3 88.0,18.0 100.0,18.0 Z" fill="#f3dcc8" stroke="#0e1318" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="82" cy="96" rx="6" ry="3.5" fill="#0e1318"/><ellipse cx="118" cy="96" rx="6" ry="3.5" fill="#0e1318"/>
+<path d="M90 154 q10 6 20 0" fill="none" stroke="#0e1318" stroke-width="2.5" stroke-linecap="round"/>
+<line x1="64" y1="46" x2="136" y2="46" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="48" y1="100" x2="152" y2="100" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/><line x1="37" y1="150" x2="163" y2="150" stroke="#7d2ae8" stroke-width="2" stroke-dasharray="5 4"/>
+</svg>
