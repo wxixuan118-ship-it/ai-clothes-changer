@@ -82,8 +82,14 @@ const faqsByTool: Record<ToolId, Faq[]> = {
     },
   ],
   "hairstyle-face-shape": [
-    { q: "How do I find my face shape?", a: "Upload a clear front-facing photo. The face analysis runs in your browser and recommends hairstyles for the shape it finds." },
-    { q: "Is the hairstyle finder free?", a: "Yes. Face shape analysis and recommendations are free. Trying a hairstyle on your photo uses the AI hairstyle changer." },
+    {
+      q: "How do I find my face shape?",
+      a: "Upload a clear front-facing photo. The face analysis runs in your browser and recommends hairstyles for the shape it finds.",
+    },
+    {
+      q: "Is the hairstyle finder free?",
+      a: "Yes. Face shape analysis and recommendations are free. Trying a hairstyle on your photo uses the AI hairstyle changer.",
+    },
   ],
   foundation: [
     {
@@ -105,6 +111,20 @@ const faqsByTool: Record<ToolId, Faq[]> = {
     {
       q: "What kind of photo works best?",
       a: "Use natural daylight if possible. Remove heavy makeup and glasses. Face the camera directly with even lighting.",
+    },
+  ],
+  "body-shape": [
+    {
+      q: "What measurements do I need?",
+      a: "Measure around the fullest part of your bust and hips, plus your natural waist. Use the same unit for all three.",
+    },
+    {
+      q: "Is my result exact?",
+      a: "No. Body shape labels are approximate styling guides. Measurements do not capture every detail of your silhouette or personal style.",
+    },
+    {
+      q: "Are my measurements saved?",
+      a: "No. This calculator runs in your browser and does not send or save your measurements.",
     },
   ],
 };

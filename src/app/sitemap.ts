@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/face-shape-detector", priority: 0.8 },
     { path: "/hairstyles-for-face-shape", priority: 0.8 },
     { path: "/foundation-shade-finder", priority: 0.8 },
+    { path: "/body-shape-calculator-female", priority: 0.8 },
     { path: "/pricing", priority: 0.8 },
     { path: "/privacy", priority: 0.3 },
     { path: "/terms", priority: 0.3 },

@@ -8,6 +8,7 @@ import {
   ChevronDownIcon,
   DropletIcon,
   MenuIcon,
+  RulerIcon,
   ScanFaceIcon,
   ScissorsIcon,
   ShirtIcon,
@@ -30,6 +31,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   shirt: ShirtIcon,
   face: ScanFaceIcon,
   droplet: DropletIcon,
+  ruler: RulerIcon,
 };
 
 const products = toolOrder.map((id) => ({
@@ -93,10 +95,10 @@ export function ProductsDropdown() {
             );
           })}
         <div className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted-ink)]">
-          Free Analyzers
+          Free Tools
         </div>
         {products
-          .filter((p) => p.type === "analyzer")
+          .filter((p) => p.type !== "generator")
           .map((product) => {
             const current = product.href === pathname;
             const Icon = product.icon;
@@ -243,10 +245,10 @@ export function MobileNav({ links }: { links: readonly NavLink[] }) {
                 );
               })}
             <li className="px-4 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted-ink)]">
-              Free Analyzers
+              Free Tools
             </li>
             {products
-              .filter((p) => p.type === "analyzer")
+              .filter((p) => p.type !== "generator")
               .map((product) => {
                 const current = product.href === pathname;
                 const Icon = product.icon;

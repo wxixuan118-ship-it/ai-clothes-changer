@@ -1,9 +1,13 @@
-// Four tools: two AI generators (hair, clothes) that cost credits, and two
-// browser-side analyzers (face-shape, foundation) that are free and run
-// entirely on the client with MediaPipe.
-export type ToolId = "hair" | "clothes" | "face-shape" | "hairstyle-face-shape" | "foundation";
+// Generators use credits; analyzers and calculators run in the browser for free.
+export type ToolId =
+  | "hair"
+  | "clothes"
+  | "face-shape"
+  | "hairstyle-face-shape"
+  | "foundation"
+  | "body-shape";
 
-export type ToolType = "generator" | "analyzer";
+export type ToolType = "generator" | "analyzer" | "calculator";
 
 export const tools: Record<
   ToolId,
@@ -59,21 +63,38 @@ export const tools: Record<
     icon: "droplet",
     desc: "Match your perfect foundation",
   },
+  "body-shape": {
+    name: "Body Shape Calculator",
+    landing: "/body-shape-calculator-female",
+    action: "Calculate body shape",
+    type: "calculator",
+    icon: "ruler",
+    desc: "Find your shape from measurements",
+  },
 };
 
-// Order for navigation — generators first, analyzers after.
-export const toolOrder: ToolId[] = ["hair", "clothes", "hairstyle-face-shape", "face-shape", "foundation"];
+// Order for navigation — generators first, free tools after.
+export const toolOrder: ToolId[] = [
+  "hair",
+  "clothes",
+  "hairstyle-face-shape",
+  "face-shape",
+  "foundation",
+  "body-shape",
+];
 
 export function parseTool(value: string | null | undefined): ToolId {
   if (value === "clothes") return "clothes";
   if (value === "face-shape") return "face-shape";
   if (value === "hairstyle-face-shape") return "hairstyle-face-shape";
   if (value === "foundation") return "foundation";
+  if (value === "body-shape") return "body-shape";
   return "hair";
 }
 
 export type GeneratorToolId = "hair" | "clothes";
-export type AnalyzerToolId = "face-shape" | "hairstyle-face-shape" | "foundation";
+export type AnalyzerToolId =
+  "face-shape" | "hairstyle-face-shape" | "foundation";
 
 export function isGenerator(tool: ToolId): tool is GeneratorToolId {
   return tools[tool].type === "generator";

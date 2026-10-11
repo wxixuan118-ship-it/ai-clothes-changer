@@ -7,7 +7,10 @@ import { tools, type ToolId } from "@/config/tools";
 import { portraitSrc } from "./portraits";
 
 // Cross-promotion content for each tool — what to show when linking TO it.
-const promo: Record<ToolId, { pitch: string; image: string; alt: string; eyebrow: string }> = {
+const promo: Record<
+  ToolId,
+  { pitch: string; image: string; alt: string; eyebrow: string }
+> = {
   hair: {
     eyebrow: "AI Generator",
     pitch:
@@ -31,7 +34,8 @@ const promo: Record<ToolId, { pitch: string; image: string; alt: string; eyebrow
   },
   "hairstyle-face-shape": {
     eyebrow: "Free Analyzer",
-    pitch: "Find hairstyles that complement your face shape, then preview your favorites on your photo.",
+    pitch:
+      "Find hairstyles that complement your face shape, then preview your favorites on your photo.",
     image: "1586266195531-76cfa365cb43",
     alt: "Portrait showing a hairstyle",
   },
@@ -41,6 +45,13 @@ const promo: Record<ToolId, { pitch: string; image: string; alt: string; eyebrow
       "Match your perfect foundation shade. Discover your skin tone, undertone, and the best shades from top brands.",
     image: "1515886657613-9f3515b0c78f",
     alt: "Foundation shade matching illustration",
+  },
+  "body-shape": {
+    eyebrow: "Free Calculator",
+    pitch:
+      "Use three measurements to find a body shape guide and outfit ideas for your proportions.",
+    image: "1515886657613-9f3515b0c78f",
+    alt: "Fashion portrait in an outfit",
   },
 };
 
