@@ -1,29 +1,31 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Familjen_Grotesk,
-  Instrument_Sans,
-  Martian_Mono,
-} from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
 import { siteUrl } from "@/lib/site-url";
 
-const instrumentSans = Instrument_Sans({
+const instrumentSans = localFont({
+  src: "./fonts/instrument-sans-latin.woff2",
+  weight: "400 700",
   variable: "--font-instrument-sans",
-  subsets: ["latin"],
+  display: "swap",
 });
 
-const martianMono = Martian_Mono({
+const martianMono = localFont({
+  src: "./fonts/martian-mono-latin.woff2",
+  weight: "100 800",
   variable: "--font-martian-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 // Atelier theme: one editorial grotesk for display and headings.
-const familjen = Familjen_Grotesk({
+const familjen = localFont({
+  src: "./fonts/familjen-grotesk-latin.woff2",
+  weight: "400 700",
   variable: "--font-familjen",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
