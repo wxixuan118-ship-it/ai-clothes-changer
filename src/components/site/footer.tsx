@@ -1,8 +1,20 @@
 import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
-import { toolOrder, tools } from "@/config/tools";
+import { toolOrder, tools, type ToolId } from "@/config/tools";
 import { Sparkle } from "@/components/atelier/sparkle";
+
+const footerFree: ToolId[] = [
+  "face-shape",
+  "face-analyzer",
+  "hairstyle-face-shape",
+  "skin-tone",
+  "foundation",
+  "color-analysis",
+  "attractiveness",
+  "body-shape",
+  "kibbe-test",
+];
 
 const columns = [
   {
@@ -13,9 +25,13 @@ const columns = [
   },
   {
     title: "Free tools",
-    links: toolOrder
-      .filter((id) => tools[id].type !== "generator")
-      .map((id) => ({ href: tools[id].landing, label: tools[id].name })),
+    links: [
+      ...footerFree.map((id) => ({
+        href: tools[id].landing,
+        label: tools[id].name,
+      })),
+      { href: "/free-tools", label: "All free tools" },
+    ],
   },
   {
     title: "Company",

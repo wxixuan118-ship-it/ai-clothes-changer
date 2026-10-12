@@ -7,7 +7,15 @@ import { usePathname } from "next/navigation";
 import { ChevronDownIcon, MenuIcon, XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { toolOrder, tools, type ToolId } from "@/config/tools";
+import {
+  categoryLabels,
+  freeCategories,
+  toolOrder,
+  tools,
+  toolsInCategory,
+  type ToolCategory,
+  type ToolId,
+} from "@/config/tools";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,15 +30,40 @@ export type NavLink = { href: string; label: string };
 const paid = toolOrder.filter((id) => tools[id].type === "generator");
 const free = toolOrder.filter((id) => tools[id].type !== "generator");
 
-function ToolTile({ id, size = "md" }: { id: ToolId; size?: "sm" | "md" }) {
+// Mega-menu columns, balanced by item count.
+const freeColumns: ToolCategory[][] = [
+  ["face-shape", "fun"],
+  ["features", "proportions"],
+  ["makeup", "color"],
+  ["body", "privacy"],
+];
+
+function NewBadge() {
+  return (
+    <span className="rounded-full bg-[var(--brand)] px-1.5 py-px text-[10px] font-bold text-[var(--ink-deep)]">
+      NEW
+    </span>
+  );
+}
+
+function ToolTile({
+  id,
+  size = "md",
+}: {
+  id: ToolId;
+  size?: "xs" | "sm" | "md";
+}) {
   const Icon = toolIcon[id];
   const [bg, fg] = toolTint[id];
   return (
     <span
-      className={cn("tile", size === "sm" ? "size-10" : "size-11")}
+      className={cn(
+        "tile",
+        size === "xs" ? "size-8 rounded-lg" : size === "sm" ? "size-10" : "size-11",
+      )}
       style={{ background: bg, color: fg }}
     >
-      <Icon className="size-5" aria-hidden />
+      <Icon className={size === "xs" ? "size-4" : "size-5"} aria-hidden />
     </span>
   );
 }
@@ -107,33 +140,57 @@ export function FreeToolsMenu() {
       <MenuTrigger
         label="Free Tools"
         free
-        active={free.some((id) => tools[id].landing === pathname)}
+        active={
+          pathname === "/free-tools" ||
+          free.some((id) => tools[id].landing === pathname)
+        }
       />
       <DropdownMenuContent
         align="start"
-        className="w-[min(620px,92vw)] rounded-2xl p-3"
+        className="max-h-[calc(100vh-96px)] w-[min(1120px,96vw)] overflow-y-auto rounded-2xl p-4"
       >
-        <p className="px-3 pt-1 pb-2 text-xs font-bold tracking-[0.08em] text-[var(--muted-ink)] uppercase">
-          Free · runs in your browser
-        </p>
-        <div className="grid gap-1 sm:grid-cols-2">
-          {free.map((id) => (
-            <DropdownMenuItem key={id} asChild className="p-0">
-              <Link
-                href={tools[id].landing}
-                className="flex items-center gap-3 rounded-xl p-3"
-              >
-                <ToolTile id={id} size="sm" />
-                <span className="flex flex-col">
-                  <span className="text-sm font-bold">{tools[id].name}</span>
-                  <span className="text-[13px] text-[var(--muted-ink)]">
-                    {tools[id].desc}
-                  </span>
-                </span>
-              </Link>
-            </DropdownMenuItem>
+        <div className="grid grid-cols-4 gap-x-4 gap-y-2">
+          {freeColumns.map((column) => (
+            <div key={column.join()} className="flex flex-col gap-3">
+              {column.map((category) => (
+                <div key={category}>
+                  <p className="border-b border-[var(--border)] px-2 pb-2 text-[13px] font-bold">
+                    {categoryLabels[category]}
+                  </p>
+                  <div className="mt-1 flex flex-col">
+                    {toolsInCategory(category).map((id) => (
+                      <DropdownMenuItem key={id} asChild className="p-0">
+                        <Link
+                          href={tools[id].landing}
+                          className="flex items-start gap-2.5 rounded-xl px-2 py-1.5"
+                        >
+                          <ToolTile id={id} size="xs" />
+                          <span className="flex min-w-0 flex-col">
+                            <span className="flex flex-wrap items-center gap-1.5 text-[13px] leading-snug font-bold">
+                              {tools[id].name}
+                              {tools[id].isNew ? <NewBadge /> : null}
+                            </span>
+                            <span className="text-xs leading-snug text-[var(--muted-ink)]">
+                              {tools[id].desc}
+                            </span>
+                          </span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           ))}
         </div>
+        <DropdownMenuItem asChild className="mt-3 p-0">
+          <Link
+            href="/free-tools"
+            className="flex items-center justify-center rounded-xl border border-[var(--border)] px-3 py-2.5 text-sm font-bold"
+          >
+            See all {free.length} free tools
+          </Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -197,7 +254,10 @@ export function MobileNav({
         >
           {[
             { title: "Products", ids: paid },
-            { title: "Free tools", ids: free },
+            ...freeCategories.map((category) => ({
+              title: `Free · ${categoryLabels[category]}`,
+              ids: toolsInCategory(category),
+            })),
           ].map((group) => (
             <div key={group.title} className="py-2">
               <p className="px-2 pb-1 text-xs font-bold tracking-[0.08em] text-[var(--muted-ink)] uppercase">

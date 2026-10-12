@@ -204,7 +204,16 @@ export function ToolCard({ id, compact = false }: { id: ToolId; compact?: boolea
   );
 }
 
-/** Cross-links to the other tools. A promo block, so no heading. */
+const popular: ToolId[] = [
+  "hair",
+  "face-shape",
+  "face-analyzer",
+  "skin-tone",
+  "foundation",
+  "attractiveness",
+];
+
+/** Cross-links: same-category tools first, then popular ones. A promo block, so no heading. */
 export function MoreTools({
   current,
   label = "More from StyleMirror",
@@ -212,10 +221,26 @@ export function MoreTools({
   current: ToolId;
   label?: string;
 }) {
-  const ids = toolOrder.filter((id) => id !== current);
+  const category = tools[current].category;
+  const ids = [
+    ...toolOrder.filter((id) => tools[id].category === category),
+    ...popular,
+    ...toolOrder,
+  ]
+    .filter((id, i, all) => id !== current && all.indexOf(id) === i)
+    .slice(0, 6);
   return (
     <Container className="py-14">
-      <p className="mb-6 text-2xl font-extrabold tracking-[-0.02em]">{label}</p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <p className="text-2xl font-extrabold tracking-[-0.02em]">{label}</p>
+        <Link
+          href="/free-tools"
+          className="inline-flex items-center gap-1.5 font-semibold text-[var(--brand-strong)]"
+        >
+          All free tools
+          <ArrowRightIcon className="size-4" aria-hidden />
+        </Link>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {ids.map((id) => (
           <ToolCard key={id} id={id} compact />

@@ -75,7 +75,7 @@ const foundationDatabase: FoundationShade[] = [
   { brand: "Maybelline", product: "Fit Me Matte + Poreless", shade: "360 Mocha", hex: "#5E3B20", deltaE: 0 },
 ];
 
-const skinToneLabels: Record<SkinToneLevel, string> = {
+export const skinToneLabels: Record<SkinToneLevel, string> = {
   fair: "Fair",
   light: "Light",
   "light-medium": "Light Medium",
@@ -84,7 +84,7 @@ const skinToneLabels: Record<SkinToneLevel, string> = {
   deep: "Deep",
 };
 
-const undertoneLabels: Record<Undertone, string> = {
+export const undertoneLabels: Record<Undertone, string> = {
   warm: "Warm",
   cool: "Cool",
   neutral: "Neutral",
@@ -190,7 +190,7 @@ function getSkinSamplePoints(
   return points;
 }
 
-function isSkinPixel(r: number, g: number, b: number): boolean {
+export function isSkinPixel(r: number, g: number, b: number): boolean {
   // RGB-based skin detection (simplified)
   // More robust methods use HSV/YCrCb, but RGB is fine for initial filtering
   return (
@@ -205,7 +205,7 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
 }
 
 // RGB to CIELAB conversion
-function rgbToLab(r: number, g: number, b: number): { l: number; a: number; b: number } {
+export function rgbToLab(r: number, g: number, b: number): { l: number; a: number; b: number } {
   // sRGB to XYZ
   let rn = r / 255;
   let gn = g / 255;
@@ -243,7 +243,7 @@ function rgbToLab(r: number, g: number, b: number): { l: number; a: number; b: n
 }
 
 // CIEDE2000 color difference
-function ciede2000(
+export function ciede2000(
   lab1: { l: number; a: number; b: number },
   lab2: { l: number; a: number; b: number },
 ): number {
@@ -330,7 +330,7 @@ function ciede2000(
 }
 
 // Hex to RGB
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
@@ -341,7 +341,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
     : { r: 0, g: 0, b: 0 };
 }
 
-function rgbToHex(r: number, g: number, b: number): string {
+export function rgbToHex(r: number, g: number, b: number): string {
   return (
     "#" +
     [r, g, b]
@@ -354,12 +354,12 @@ function rgbToHex(r: number, g: number, b: number): string {
 }
 
 // Calculate ITA (Individual Typology Angle)
-function calculateITA(l: number, b: number): number {
+export function calculateITA(l: number, b: number): number {
   return (Math.atan2(l - 50, b) * 180) / Math.PI;
 }
 
 // Classify skin tone from ITA
-function classifySkinTone(ita: number): SkinToneLevel {
+export function classifySkinTone(ita: number): SkinToneLevel {
   if (ita > 55) return "fair";
   if (ita > 41) return "light";
   if (ita > 28) return "light-medium";
@@ -369,7 +369,7 @@ function classifySkinTone(ita: number): SkinToneLevel {
 }
 
 // Classify undertone from a* and b* values
-function classifyUndertone(lab: { l: number; a: number; b: number }): Undertone {
+export function classifyUndertone(lab: { l: number; a: number; b: number }): Undertone {
   const { a, b } = lab;
 
   // Olive undertone: relatively low a*, moderate b*, and specific a/b ratio

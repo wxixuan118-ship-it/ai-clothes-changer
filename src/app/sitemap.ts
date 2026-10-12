@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { toolOrder, tools } from "@/config/tools";
 import { absoluteUrl } from "@/lib/site-url";
 
 // Rendered per request: the canonical origin comes from runtime env, which
@@ -17,6 +18,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/foundation-shade-finder", priority: 0.8 },
     { path: "/body-shape-calculator-female", priority: 0.8 },
     { path: "/body-shape-calculator-men", priority: 0.8 },
+    ...toolOrder
+      .filter((id) => tools[id].isNew)
+      .map((id) => ({ path: tools[id].landing, priority: 0.7 })),
+    { path: "/free-tools", priority: 0.8 },
     { path: "/style-guides", priority: 0.7 },
     { path: "/pricing", priority: 0.8 },
     { path: "/privacy", priority: 0.3 },

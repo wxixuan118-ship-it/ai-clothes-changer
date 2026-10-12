@@ -22,3 +22,20 @@ describe("body shape calculator product", () => {
     expect(tools["body-shape-men"].type).toBe("calculator");
   });
 });
+
+describe("free tool pages", () => {
+  it("gives every new free tool a page config and a route", async () => {
+    const { existsSync } = await import("node:fs");
+    const { freeToolPages } = await import("./free-tool-pages");
+    const newIds = toolOrder.filter((id) => tools[id].isNew);
+    expect(newIds.length).toBeGreaterThanOrEqual(26);
+    for (const id of newIds) {
+      expect(freeToolPages.some((p) => p.id === id)).toBe(true);
+      expect(
+        existsSync(`src/app/(marketing)${tools[id].landing}/page.tsx`),
+      ).toBe(true);
+    }
+    const landings = toolOrder.map((id) => tools[id].landing);
+    expect(new Set(landings).size).toBe(landings.length);
+  });
+});

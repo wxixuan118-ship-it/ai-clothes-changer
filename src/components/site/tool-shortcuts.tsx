@@ -4,15 +4,19 @@ import { toolOrder, tools, type ToolId } from "@/config/tools";
 
 import { toolIcon, toolTint } from "./tool-style";
 
-const short: Record<ToolId, string> = {
+const short: Partial<Record<ToolId, string>> = {
   hair: "Hairstyle",
   clothes: "Outfit",
   "face-shape": "Face shape",
   "hairstyle-face-shape": "Cuts for you",
+  "face-analyzer": "Face analysis",
   foundation: "Foundation",
+  "skin-tone": "Skin tone",
   "body-shape": "Body · Women",
   "body-shape-men": "Body · Men",
 };
+
+const shortcutIds = toolOrder.filter((id) => short[id]);
 
 /** Canva-style row of round tool shortcuts under a hero. */
 export function ToolShortcuts() {
@@ -21,7 +25,7 @@ export function ToolShortcuts() {
       aria-label="StyleMirror tools"
       className="mt-9 flex flex-wrap justify-center gap-x-5 gap-y-5"
     >
-      {toolOrder.map((id) => {
+      {shortcutIds.map((id) => {
         const Icon = toolIcon[id];
         const [bg, fg] = toolTint[id];
         return (
