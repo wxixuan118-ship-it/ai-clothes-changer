@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import {
   appSchema,
@@ -13,6 +14,7 @@ import {
   SourceLink,
   StepCards,
 } from "@/components/site/blocks";
+import { freeToolGuides } from "@/config/free-tool-guides";
 import { freeToolPage, type FreeToolPage, type Widget } from "@/config/free-tool-pages";
 import { tools, type ToolId } from "@/config/tools";
 import { absoluteUrl } from "@/lib/site-url";
@@ -80,6 +82,8 @@ function TypeCards({ types }: { types: NonNullable<FreeToolPage["types"]> }) {
 export function FreeToolLanding({ id }: { id: ToolId }) {
   const page = freeToolPage(id);
   const tool = tools[id];
+  const guide = freeToolGuides[id];
+  const faqs = guide ? [...page.faqs, ...guide.faqs] : page.faqs;
   const usesPhoto = page.widget.kind === "landmark" || page.widget.kind === "blur";
   return (
     <>
@@ -91,7 +95,7 @@ export function FreeToolLanding({ id }: { id: ToolId }) {
             url: absoluteUrl(tool.landing),
             category: "LifestyleApplication",
           }),
-          faqSchema(page.faqs),
+          faqSchema(faqs),
         ]}
       />
 
@@ -120,6 +124,11 @@ export function FreeToolLanding({ id }: { id: ToolId }) {
                 </SourceLink>
                 , running on your device.
               </>
+            ) : page.source ? (
+              <>
+                {page.source.lead}{" "}
+                <SourceLink href={page.source.href}>{page.source.label}</SourceLink>.
+              </>
             ) : undefined
           }
         />
@@ -146,10 +155,44 @@ export function FreeToolLanding({ id }: { id: ToolId }) {
         </Container>
       ) : null}
 
+      {guide ? (
+        <Container id="guide" className="pt-20">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
+            <div>
+              <SectionHeader title={guide.title} />
+              <div className="space-y-4">
+                {guide.paragraphs.map((p) => (
+                  <p
+                    key={p}
+                    className="leading-relaxed text-[var(--muted-ink)] sm:text-[17px]"
+                  >
+                    {p}
+                  </p>
+                ))}
+              </div>
+            </div>
+            <figure className="card overflow-hidden p-3">
+              <Image
+                src={`/guides/free-tools/${id}.svg`}
+                alt={guide.alt}
+                width={400}
+                height={300}
+                unoptimized
+                loading="lazy"
+                className="h-auto w-full rounded-2xl"
+              />
+              <figcaption className="px-2 pt-3 pb-1 text-sm text-[var(--muted-ink)]">
+                {guide.caption}
+              </figcaption>
+            </figure>
+          </div>
+        </Container>
+      ) : null}
+
       <Container id="faq" className="pt-20">
         <div className="grid gap-8 lg:grid-cols-[1fr_1.7fr]">
           <SectionHeader title={page.faqTitle} />
-          <FaqList items={page.faqs} />
+          <FaqList items={faqs} />
         </div>
       </Container>
 

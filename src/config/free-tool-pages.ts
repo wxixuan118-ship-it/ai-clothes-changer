@@ -34,6 +34,8 @@ export type FreeToolPage = {
   widget: Widget;
   steps: { title: string; body: string }[];
   stepsTitle: string;
+  /** Outbound reference shown under the steps heading on non-photo tools. */
+  source?: { lead: string; label: string; href: string };
   types?: {
     title: string;
     sub: string;
@@ -121,7 +123,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "face-shape-calculator",
-    metaTitle: "Face Shape Calculator: Find Your Shape by Measuring | StyleMirror",
+    metaTitle: "Face Shape Calculator: Measure Your Face Shape | StyleMirror",
     metaDescription:
       "Free face shape calculator: enter forehead, cheekbone, jaw and face length measurements to calculate your face shape — no photo needed.",
     eyebrow: "Free · No photo needed · Cm or inches",
@@ -130,6 +132,11 @@ export const freeToolPages: FreeToolPage[] = [
       "No photo? Use this free face shape calculator. Enter four measurements from a soft tape and your chin shape, and it calculates your face shape with haircut and glasses tips.",
     widget: { kind: "face-calc" },
     stepsTitle: "How to use the face shape calculator",
+    source: {
+      lead: "Measurements follow standard",
+      label: "facial anthropometry",
+      href: "https://en.wikipedia.org/wiki/Anthropometry",
+    },
     steps: [
       { title: "Grab a soft tape", body: "Stand in front of a mirror with your hair pulled back." },
       { title: "Take 4 measurements", body: "Forehead, cheekbones and jaw straight across, then hairline to chin." },
@@ -159,7 +166,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "face-shape-quiz",
-    metaTitle: "Face Shape Quiz: What Face Shape Am I? (7 Questions) | StyleMirror",
+    metaTitle: "Face Shape Quiz: What Face Shape Am I? | StyleMirror",
     metaDescription:
       "Take the free face shape quiz: answer 7 quick questions about your forehead, cheekbones, jawline and chin to find out what face shape you are.",
     eyebrow: "Free · 7 questions · Instant result",
@@ -168,6 +175,11 @@ export const freeToolPages: FreeToolPage[] = [
       "Answer seven quick questions in front of a mirror and this free face shape quiz tells you whether your face is oval, round, square, heart, diamond, oblong or triangle.",
     widget: { kind: "quiz", quiz: "face-shape" },
     stepsTitle: "How the face shape quiz works",
+    source: {
+      lead: "Questions are based on",
+      label: "facial anthropometry",
+      href: "https://en.wikipedia.org/wiki/Anthropometry",
+    },
     steps: [
       { title: "Find a mirror", body: "Pull your hair back so you can see your hairline and jaw." },
       { title: "Answer 7 questions", body: "About length, forehead, cheekbones, jawline and chin." },
@@ -193,7 +205,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "forehead-shape",
-    metaTitle: "Forehead Shape Detector: What Is My Forehead Shape? | StyleMirror",
+    metaTitle: "Forehead Shape Detector: Find Your Forehead Type",
     metaDescription:
       "Free forehead shape detector: upload a selfie to find your forehead shape — broad, narrow, round, square or balanced — plus hairstyles that suit it.",
     eyebrow: photoEyebrow,
@@ -224,7 +236,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "jawline-shape",
-    metaTitle: "Jawline Shape Detector: What Is My Jawline Shape? | StyleMirror",
+    metaTitle: "Jawline Shape Detector: Find Your Jaw Type | StyleMirror",
     metaDescription:
       "Free jawline shape detector: upload a selfie to find out if your jawline is square, round, V-shaped, oval, rectangular or triangular — with styling tips.",
     eyebrow: photoEyebrow,
@@ -294,7 +306,7 @@ export const freeToolPages: FreeToolPage[] = [
     id: "eyebrow-shape",
     metaTitle: "Eyebrow Shape Detector: Find Your Brow Shape | StyleMirror",
     metaDescription:
-      "Free eyebrow shape detector: upload a selfie to find your eyebrow shape — straight, soft arched, high arched, rounded, upward or downward — and the best brow for your face shape.",
+      "Free eyebrow shape detector: upload a selfie to find your brow shape — straight, arched, rounded, upward or downward — and the best brow for your face.",
     eyebrow: photoEyebrow,
     h1: ["Eyebrow shape detector:", "find your brow shape"],
     intro:
@@ -323,7 +335,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "nose-shape",
-    metaTitle: "Nose Shape Detector: What Is My Nose Shape? (12 Types) | StyleMirror",
+    metaTitle: "Nose Shape Detector: Find Your Nose Type | StyleMirror",
     metaDescription:
       "Free nose shape detector: upload a selfie to find your nose shape from 12 types — Greek, Roman, celestial, button, Nubian, bulbous and more.",
     eyebrow: photoEyebrow,
@@ -391,7 +403,7 @@ export const freeToolPages: FreeToolPage[] = [
   // ------------------------------------------------------------ proportions
   {
     id: "face-symmetry",
-    metaTitle: "Face Symmetry Test: How Symmetrical Is My Face? | StyleMirror",
+    metaTitle: "Face Symmetry Test: How Symmetrical Am I? | StyleMirror",
     metaDescription:
       "Free face symmetry test: upload a selfie to get a facial symmetry score, plus a breakdown for eyes, brows, nose, mouth and jaw.",
     eyebrow: photoEyebrow,
@@ -417,7 +429,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "eye-distance",
-    metaTitle: "Eye Distance Calculator: Close-Set or Wide-Set Eyes? | StyleMirror",
+    metaTitle: "Eye Distance Calculator: Close or Wide-Set? | StyleMirror",
     metaDescription:
       "Free eye distance calculator: upload a selfie to measure your eye spacing ratio and find out if your eyes are close-set, wide-set or balanced.",
     eyebrow: photoEyebrow,
@@ -476,7 +488,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "canthal-tilt",
-    metaTitle: "Canthal Tilt Calculator: Positive or Negative Tilt? | StyleMirror",
+    metaTitle: "Canthal Tilt Calculator: Measure Eye Tilt | StyleMirror",
     metaDescription:
       "Free canthal tilt calculator: upload a selfie to measure your canthal tilt angle in degrees and see if it's positive, neutral or negative.",
     eyebrow: photoEyebrow,
@@ -509,7 +521,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "facial-proportions",
-    metaTitle: "Facial Proportions Calculator: Facial Thirds & Midface Ratio | StyleMirror",
+    metaTitle: "Facial Proportions Calculator: Thirds & Midface Ratio",
     metaDescription:
       "Free facial proportions calculator: upload a selfie to measure your facial thirds, midface ratio, lip-to-chin ratio and eye spacing.",
     eyebrow: photoEyebrow,
@@ -543,7 +555,7 @@ export const freeToolPages: FreeToolPage[] = [
   // ------------------------------------------------------------ fun
   {
     id: "attractiveness",
-    metaTitle: "Attractiveness Test: How Attractive Am I? (AI, Free) | StyleMirror",
+    metaTitle: "Attractiveness Test: How Attractive Am I? | StyleMirror",
     metaDescription:
       "Free AI attractiveness test: upload a selfie to get a facial harmony score out of 10 based on symmetry, golden ratio, eye tilt and facial thirds.",
     eyebrow: photoEyebrow,
@@ -571,7 +583,7 @@ export const freeToolPages: FreeToolPage[] = [
     id: "face-rating",
     metaTitle: "Face Rating Test: Rate My Face Free (1–10) | StyleMirror",
     metaDescription:
-      "Free face rating test: upload a selfie and rate your face from 1 to 10 with an AI geometry breakdown — golden ratio, canthal tilt, symmetry, facial thirds and midface ratio.",
+      "Free face rating test: rate your face from 1 to 10 with an AI geometry breakdown of golden ratio, canthal tilt, symmetry, facial thirds and midface.",
     eyebrow: photoEyebrow,
     h1: ["Face rating test:", "rate my face 1–10"],
     intro:
@@ -603,7 +615,7 @@ export const freeToolPages: FreeToolPage[] = [
   // ------------------------------------------------------------ color
   {
     id: "skin-tone",
-    metaTitle: "Skin Tone Analyzer: Find Your Skin Tone & Undertone | StyleMirror",
+    metaTitle: "Skin Tone Analyzer: Tone & Undertone Test | StyleMirror",
     metaDescription:
       "Free skin tone analyzer: upload a selfie to find your skin tone, undertone (warm, cool, neutral or olive), Monk scale shade and the colors that suit you.",
     eyebrow: photoEyebrow,
@@ -650,6 +662,11 @@ export const freeToolPages: FreeToolPage[] = [
       "Answer ten questions about your veins, hair, eyes and how colors look on you, and this free color analysis quiz finds your season from the 12-season system, with your personal palette.",
     widget: { kind: "quiz", quiz: "color-season" },
     stepsTitle: "How the color analysis quiz works",
+    source: {
+      lead: "Based on the 12-season system of",
+      label: "personal color analysis",
+      href: "https://en.wikipedia.org/wiki/Color_analysis_(art)",
+    },
     steps: [
       { title: "Stand in daylight", body: "With a mirror and, ideally, something white and gold nearby." },
       { title: "Answer 10 questions", body: "Each one scores warmth, lightness and brightness." },
@@ -685,7 +702,7 @@ export const freeToolPages: FreeToolPage[] = [
   // ------------------------------------------------------------ makeup
   {
     id: "concealer",
-    metaTitle: "Concealer Shade Finder: Find Your Concealer Shade | StyleMirror",
+    metaTitle: "Concealer Shade Finder: Shade & Corrector | StyleMirror",
     metaDescription:
       "Free concealer shade finder: upload a selfie to find your concealer shade, undertone and the right color corrector for dark circles or redness.",
     eyebrow: photoEyebrow,
@@ -716,7 +733,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "lipstick",
-    metaTitle: "Lipstick Shade Finder: Best Lipstick Color for Me | StyleMirror",
+    metaTitle: "Lipstick Shade Finder: Best Lip Colors | StyleMirror",
     metaDescription:
       "Free lipstick shade finder: upload a picture to find the most flattering lipstick colors for your skin tone and undertone, plus your 'my lips but better' shade.",
     eyebrow: photoEyebrow,
@@ -778,7 +795,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "eyeshadow",
-    metaTitle: "Eyeshadow Shade Finder: Best Eyeshadow Color for Me | StyleMirror",
+    metaTitle: "Eyeshadow Shade Finder: Best Colors for Me | StyleMirror",
     metaDescription:
       "Free eyeshadow shade finder: upload a picture to detect your eye color and find the eyeshadow colors that make your eyes pop, matched to your undertone.",
     eyebrow: photoEyebrow,
@@ -816,15 +833,20 @@ export const freeToolPages: FreeToolPage[] = [
   // ------------------------------------------------------------ body
   {
     id: "body-type",
-    metaTitle: "Body Type Calculator: Ectomorph, Mesomorph or Endomorph? | StyleMirror",
+    metaTitle: "Body Type Calculator: Ecto, Meso or Endo? | StyleMirror",
     metaDescription:
-      "Free body type calculator: enter your height, weight and measurements to estimate your somatotype — ectomorph, mesomorph or endomorph — with training and style tips.",
+      "Free body type calculator: enter height, weight and measurements to estimate your somatotype — ectomorph, mesomorph or endomorph — plus style tips.",
     eyebrow: "Free · No sign-up · Metric or imperial",
     h1: ["Body type calculator:", "find your somatotype"],
     intro:
       "Enter your height, weight and four tape measurements and this free body type calculator estimates your somatotype — ectomorph, mesomorph, endomorph or a mix — with training and style tips.",
     widget: { kind: "body-type" },
     stepsTitle: "How to use the body type calculator",
+    source: {
+      lead: "Uses the three",
+      label: "somatotypes",
+      href: "https://en.wikipedia.org/wiki/Somatotype_and_constitutional_psychology",
+    },
     steps: [
       { title: "Measure yourself", body: "Height, weight, wrist, shoulders, waist and hips." },
       { title: "Frame and ratios", body: "Frame size, BMI, waist-to-height and shoulder-to-waist are calculated." },
@@ -862,7 +884,7 @@ export const freeToolPages: FreeToolPage[] = [
   },
   {
     id: "kibbe-test",
-    metaTitle: "Kibbe Body Type Test: Free Kibbe Quiz (13 Types) | StyleMirror",
+    metaTitle: "Kibbe Body Type Test: Free 13-Type Quiz | StyleMirror",
     metaDescription:
       "Take the free Kibbe body type test: 10 questions about your bone structure, body and features to find your Kibbe type from all 13, with style tips.",
     eyebrow: "Free · 10 questions · 13 Kibbe types",
@@ -871,6 +893,11 @@ export const freeToolPages: FreeToolPage[] = [
       "Answer ten questions about your height, bone structure, curves and features and this free Kibbe body type test finds your Kibbe type from all 13, with what to wear and what to avoid.",
     widget: { kind: "quiz", quiz: "kibbe" },
     stepsTitle: "How the Kibbe body type test works",
+    source: {
+      lead: "Inspired by the image identity system described alongside other",
+      label: "body shape classifications",
+      href: "https://en.wikipedia.org/wiki/Female_body_shape",
+    },
     steps: [
       { title: "Be honest", body: "Answer for your natural frame, not your weight or the clothes you like." },
       { title: "10 questions", body: "Each answer leans Dramatic, Natural, Classic, Gamine or Romantic." },
@@ -910,6 +937,11 @@ export const freeToolPages: FreeToolPage[] = [
       "The Kibbe body types group people into five image families — Dramatic, Natural, Classic, Gamine and Romantic — and 13 types in total. Here is each Kibbe type's body traits and what to wear.",
     widget: { kind: "none" },
     stepsTitle: "How the Kibbe body types work",
+    source: {
+      lead: "Kibbe types sit alongside other",
+      label: "body shape classifications",
+      href: "https://en.wikipedia.org/wiki/Female_body_shape",
+    },
     steps: [
       { title: "Yin and yang", body: "Yang is sharp, long or broad; yin is soft, rounded and small." },
       { title: "Five families", body: "Dramatic, Natural, Classic, Gamine and Romantic." },
