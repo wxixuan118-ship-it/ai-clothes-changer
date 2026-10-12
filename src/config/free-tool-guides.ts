@@ -245,6 +245,7 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       "Modern research is more cautious. Faces rated attractive in studies tend to be average, symmetrical and healthy-looking, and their ratios cluster near but not exactly on 1.618. So a high score means some of your proportions happen to land near φ, not that you're objectively more attractive.",
       "For a fair result, use a photo taken from at least arm's length, straight on, with a neutral expression. Close-up selfies widen the nose and shorten the face, which shifts several ratios at once.",
       "If you want to compare your result over time, keep the setup identical: same distance, same height, same light and a neutral face. Small changes in posture move the lower-face ratios most, while mouth and nose widths stay steadier from photo to photo. Averaging three photos gives a more stable figure than relying on one.",
+      "Treat the per-ratio scores as the useful part. A high mouth-to-nose match with a lower face-length match, for example, simply means your face is a little wider than the classical template, which many people consider a youthful trait. No single proportion makes or breaks a face.",
     ],
     faqs: [
       {
@@ -306,6 +307,7 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       "What it can't measure matters just as much. Skin quality, hair, grooming, expression and confidence all change how people see you, and none of them appear in landmark geometry. A warm smile in real life outweighs a decimal point here.",
       "To see your best result, use soft front light and a camera at eye level from arm's length. Try a few photos and keep the highest — that's closest to how you look in person, not the worst angle.",
       "People judge faces in motion, not in still frames. Expression, eye contact and how you move all shape first impressions, and familiarity makes faces look more appealing over time. Use the breakdown to learn which angles and styles flatter you, then focus on grooming, sleep and confidence, which change how you come across far more than any ratio.",
+      "Scores also depend on the camera. Front cameras on phones use wide lenses that distort faces held close, which lowers symmetry and ratio scores. Holding the phone further away and zooming in slightly gives a more natural result.",
     ],
     faqs: [
       {
@@ -530,6 +532,7 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       "Choose pixelate for a clearly censored look and blur for a softer result that keeps the photo pleasant. Set the strength high when anonymity matters: light blur can sometimes be partly recognized, especially for people you know.",
       "Faces that are very small, turned sideways or covered by sunglasses and masks can be missed by detection. Check the preview before downloading, and use a higher-resolution photo if a face wasn't found.",
       "Because the tool works offline after the first load, you can blur face online even on a slow connection: once the model is cached, nothing else needs to download. Large photos are resized to 2000 pixels on the longest side before blurring, which keeps the browser fast while staying sharp enough for social media and documents.",
+      "Blurring also helps with documents. Before sharing a screenshot of an ID, a team photo or a classroom picture, hide every face that isn't yours to share. The download keeps the original framing, so the image still makes sense to whoever receives it, and you can switch between blur and pixelate until it looks right.",
     ],
     faqs: [
       {

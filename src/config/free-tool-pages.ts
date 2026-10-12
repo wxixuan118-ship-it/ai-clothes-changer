@@ -561,7 +561,7 @@ export const freeToolPages: FreeToolPage[] = [
     eyebrow: photoEyebrow,
     h1: ["Attractiveness test:", "how attractive am I?"],
     intro:
-      "Upload a selfie and the free AI attractiveness test scores your facial harmony out of 10 from six geometric measures, then shows your strongest features.",
+      "Upload a selfie and the free AI attractiveness test tells you how attractive your face is on a scale of 1 to 10, based on facial harmony and proportion.",
     widget: { kind: "landmark", tool: "attractiveness" },
     stepsTitle: "How the attractiveness test works",
     steps: photoSteps(
