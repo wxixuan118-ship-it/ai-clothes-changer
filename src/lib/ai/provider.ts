@@ -7,8 +7,10 @@ import { gatewayProvider } from "./gateway";
 import { kieProvider } from "./kie";
 import { mockProvider } from "./mock";
 import { nbilityProvider } from "./nbility";
+import type { EditTask } from "./task";
 
 export { ContentBlockedError } from "./errors";
+export type { EditTask } from "./task";
 
 // The image-generation contract. One implementation ships here (AI Gateway,
 // ./gateway.ts) plus the zero-network mock for dev and e2e (AI_MOCK=true).
@@ -33,9 +35,9 @@ export type GenerateImageInput = {
   userId: string;
   /** The photo of the person to dress. Clothes-changer runs always set it. */
   personImage?: InputImage;
-  /** What to change: the outfit or the hairstyle. */
-  task?: "clothes" | "hair";
-  /** Reference photo — a garment (clothes) or a hairstyle (hair). */
+  /** What to change: the outfit, the hairstyle or the glasses. */
+  task?: EditTask;
+  /** Reference photo — a garment, a hairstyle or a pair of glasses. */
   referenceImage?: InputImage;
   garmentType?: GarmentType;
   /** Model id resolved by the caller (admin setting); providers default. */

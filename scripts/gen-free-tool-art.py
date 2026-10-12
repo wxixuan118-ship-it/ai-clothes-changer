@@ -78,6 +78,9 @@ def body(cx, shoulders, waist, hips, color):
 art["body-type"] = body(110,26,16,20,"#AFC8E7") + body(200,40,22,28,"#C3B1E1") + body(290,34,34,40,"#A6DCC0")
 art["kibbe-test"] = "".join(body(60+i*70, s, w, h, c) for i,(s,w,h,c) in enumerate([(22,16,20,"#2E3A6B"),(32,24,26,"#6B7A3A"),(26,18,26,"#9C8AA8"),(22,16,22,"#C2456E"),(26,16,32,"#F29CB2")]))
 art["kibbe-types"] = art["kibbe-test"]
+art["glasses-try-on"] = face((), '<g fill="none" stroke="#1E1B2E" stroke-width="6"><rect x="134" y="110" width="58" height="40" rx="12"/><rect x="208" y="110" width="58" height="40" rx="12"/><path d="M192 124 q8 -8 16 0 M134 122 L112 116 M266 122 L288 116"/></g>' + swatches(["#1E1B2E","#C9A24A","#8A5A2B","#C2262E","#D8DEE6"], 258))
+art["how-old"] = face(("outline",), '<rect x="306" y="60" width="70" height="180" rx="14" fill="#fff" stroke="#7C3AED" stroke-width="3"/>' + "".join(f'<rect x="318" y="{78+i*18}" width="{14+i*5}" height="10" rx="5" fill="#7C3AED" opacity="{0.25+i*0.08}"/>' for i in range(8)))
+art["age-calculator"] = "".join(f'<circle cx="{x}" cy="140" r="40" fill="{SKIN}"/><rect x="{x-35}" y="185" width="70" height="80" rx="30" fill="{c}"/><rect x="{x-30}" y="78" width="60" height="22" rx="8" fill="#7C3AED"/><text x="{x}" y="94" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#fff">~{a}</text>' for x,c,a in [(110,"#C3B1E1",27),(200,"#AFC8E7",34),(290,"#A6DCC0",8)])
 art["free-tools"] = face(("outline","eyes","lips"), swatches(["#F7B39A","#C3B1E1","#A6DCC0","#F5C02E"], 258))
 
 os.makedirs(OUT, exist_ok=True)

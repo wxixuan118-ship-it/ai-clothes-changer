@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   CheckIcon,
+  GlassesIcon,
   ImageUpIcon,
   ScissorsIcon,
   ShirtIcon,
@@ -25,6 +26,11 @@ import {
   type AuthOptions,
 } from "@/components/generate/auth-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  getGlassesPreset,
+  glassesCategories,
+  glassesPresets,
+} from "@/config/glasses";
 import { DEFAULT_HAIR_COLOR, hairColors } from "@/config/hair-colors";
 import {
   getHairPreset,
@@ -65,7 +71,7 @@ const errorMessages: Record<NonNullable<GenerateResult["error"]>, string> = {
   rate_limited: "Slow down — 10 per minute. Try again in a moment.",
   insufficient_credits:
     "You're out of credits — top up in Billing and try again.",
-  generation_failed: "Outfit change failed — credit refunded.",
+  generation_failed: "Generation failed — credit refunded.",
 };
 
 type Mode = "reference" | "prompt" | "style";
@@ -86,7 +92,7 @@ const garmentTypes = [
   { id: "full", label: "Full outfit" },
 ] as const;
 
-// Everything that differs between the two generators. The clothes copy and
+// Everything that differs between the generators. The clothes copy and
 // field names are unchanged from the original clothes-only form.
 const toolCopy = {
   clothes: {
@@ -145,6 +151,34 @@ const toolCopy = {
     getPreset: getHairPreset as (id: string) => Preset | undefined,
     busyLabel: "Changing hairstyle…",
   },
+  glasses: {
+    referenceMode: "reference",
+    referenceField: "referenceImage",
+    referenceId: "glasses-photo",
+    referenceTitle: "Upload glasses",
+    referenceHint:
+      "A product photo of the frames, front view on a plain background works best.",
+    personHint:
+      "A clear, front-facing photo of your face, eyes open. Drag & drop or click.",
+    step2: "Choose the glasses",
+    modeLabels: {
+      reference: { label: "Glasses photo", short: "Photo" },
+      prompt: { label: "Describe it", short: "Describe" },
+      style: { label: "Frames", short: "Frames" },
+    },
+    promptLabel: "Describe the glasses",
+    promptExample: "thin gold round frames with clear lenses",
+    promptIdeas: [
+      "Black rectangular frames",
+      "Tortoiseshell cat-eye glasses",
+      "Gold aviator sunglasses",
+      "Clear round frames",
+    ],
+    categories: glassesCategories as readonly string[],
+    presets: glassesPresets as readonly Preset[],
+    getPreset: getGlassesPreset as (id: string) => Preset | undefined,
+    busyLabel: "Trying on glasses…",
+  },
 } as const;
 
 const modeIcons: Record<Mode, typeof ShirtIcon> = {
@@ -153,8 +187,9 @@ const modeIcons: Record<Mode, typeof ShirtIcon> = {
   style: SparklesIcon,
 };
 // Tab order: the hairstyle tool leads with its style library.
-const modeOrders: Record<"hair" | "clothes", Mode[]> = {
+const modeOrders: Record<GeneratorToolId, Mode[]> = {
   hair: ["style", "reference", "prompt"],
+  glasses: ["style", "reference", "prompt"],
   clothes: ["reference", "prompt", "style"],
 };
 
@@ -438,7 +473,7 @@ export function GenerateForm({
   // clothes tool on the garment upload.
   const modeOrder = modeOrders[tool];
   const [mode, setMode] = React.useState<Mode>(
-    tool === "hair" ? "style" : "reference",
+    tool === "clothes" ? "reference" : "style",
   );
   const [garmentType, setGarmentType] =
     React.useState<(typeof garmentTypes)[number]["id"]>("full");
@@ -654,7 +689,11 @@ export function GenerateForm({
             <div
               role="tablist"
               aria-label={
-                tool === "hair" ? "Hairstyle source" : "Outfit source"
+                tool === "hair"
+                  ? "Hairstyle source"
+                  : tool === "glasses"
+                    ? "Glasses source"
+                    : "Outfit source"
               }
               className="grid grid-cols-3 gap-1 rounded-full bg-[var(--canvas)] p-1"
             >
@@ -664,7 +703,9 @@ export function GenerateForm({
                   icon:
                     id === "reference" && tool === "hair"
                       ? ScissorsIcon
-                      : modeIcons[id],
+                      : id === "reference" && tool === "glasses"
+                        ? GlassesIcon
+                        : modeIcons[id],
                   ...copy.modeLabels[id],
                 };
                 return (
@@ -893,11 +934,21 @@ export function GenerateForm({
                                         : "hover:bg-[color-mix(in_oklch,var(--ink),transparent_95%)]",
                                     )}
                                   >
-                                    <span
-                                      aria-hidden
-                                      className="h-10 w-7 shrink-0 rounded-t-full rounded-b-sm"
-                                      style={{ background: preset.tint }}
-                                    />
+                                    {tool === "glasses" ? (
+                                      <span
+                                        aria-hidden
+                                        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--canvas)]"
+                                        style={{ color: preset.tint }}
+                                      >
+                                        <GlassesIcon className="size-6" />
+                                      </span>
+                                    ) : (
+                                      <span
+                                        aria-hidden
+                                        className="h-10 w-7 shrink-0 rounded-t-full rounded-b-sm"
+                                        style={{ background: preset.tint }}
+                                      />
+                                    )}
                                     {preset.name}
                                   </button>
                                 ),

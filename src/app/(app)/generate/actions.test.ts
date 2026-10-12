@@ -551,6 +551,70 @@ describe("generateImageAction — hairstyle changer", () => {
   });
 });
 
+describe("generateImageAction — glasses try-on", () => {
+  const glassesForm = (fields: Record<string, string>, reference = false) => {
+    const form = new FormData();
+    form.set("tool", "glasses");
+    form.set("personImage", photo());
+    for (const [key, value] of Object.entries(fields)) form.set(key, value);
+    if (reference) form.set("referenceImage", photo("glasses.png"));
+    return form;
+  };
+
+  it("preset: glasses-only instruction, glasses task, same cost as hair", async () => {
+    const userId = await createUser(2);
+
+    const result = await runAction(
+      glassesForm({ mode: "style", styleId: "round-wire" }),
+    );
+
+    expect(result).toMatchObject({ ok: true });
+    const input = providerGenerate.mock.calls[0]?.[0];
+    expect(input.task).toBe("glasses");
+    expect(input.prompt).toContain("gold round wire-frame eyeglasses");
+    expect(input.prompt).toContain("Keep the face");
+    const { generations: rows, spends } = await rowsFor(userId);
+    expect(rows[0]?.prompt).toBe("Glasses · Round wire");
+    expect(spends).toHaveLength(1);
+  });
+
+  it("reference photo: sends the frames as the reference image", async () => {
+    const userId = await createUser(2);
+
+    const result = await runAction(glassesForm({ mode: "reference" }, true));
+
+    expect(result).toMatchObject({ ok: true });
+    expect(providerGenerate.mock.calls[0]?.[0].referenceImage.mediaType).toBe(
+      "image/png",
+    );
+    const { generations: rows } = await rowsFor(userId);
+    expect(rows[0]?.prompt).toBe("Glasses photo");
+  });
+
+  it("text: wraps the description in the glasses instruction", async () => {
+    await createUser(2);
+
+    await runAction(
+      glassesForm({ mode: "prompt", prompt: "clear round frames" }),
+    );
+
+    expect(providerGenerate.mock.calls[0]?.[0].prompt).toMatch(
+      /^Put these glasses on the person: clear round frames/,
+    );
+  });
+
+  it("rejects a hairstyle preset id before spending", async () => {
+    const userId = await createUser(2);
+
+    const result = await runAction(
+      glassesForm({ mode: "style", styleId: "pixie-cut" }),
+    );
+
+    expect(result).toEqual({ ok: false, error: "invalid_style" });
+    expect((await rowsFor(userId)).spends).toHaveLength(0);
+  });
+});
+
 describe("generateImageAction — content safety", () => {
   it.each([
     ["clothes", "remove her clothes", "blocked_prompt"],

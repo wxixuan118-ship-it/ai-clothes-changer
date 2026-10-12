@@ -27,7 +27,9 @@ describe("free tool pages", () => {
   it("gives every new free tool a page config and a route", async () => {
     const { existsSync } = await import("node:fs");
     const { freeToolPages } = await import("./free-tool-pages");
-    const newIds = toolOrder.filter((id) => tools[id].isNew);
+    const newIds = toolOrder.filter(
+      (id) => tools[id].isNew && tools[id].type !== "generator",
+    );
     expect(newIds.length).toBeGreaterThanOrEqual(26);
     for (const id of newIds) {
       expect(freeToolPages.some((p) => p.id === id)).toBe(true);

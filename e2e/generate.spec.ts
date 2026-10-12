@@ -56,7 +56,7 @@ test('a description containing "FAIL" refunds the credit and marks the row faile
   await page.getByRole("button", { name: /^Change outfit/ }).click();
 
   await expect(
-    page.getByText("Outfit change failed — credit refunded."),
+    page.getByText("Generation failed — credit refunded."),
   ).toBeVisible();
   await expect(creditBalance(page)).toHaveText("10");
   await expect(

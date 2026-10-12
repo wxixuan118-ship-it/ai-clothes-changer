@@ -58,7 +58,8 @@ const free = toolOrder.filter((id) => tools[id].type !== "generator");
 const categoryIntro: Record<string, string> = {
   "face-shape": "Find your face shape from a selfie, a tape measure or a quiz.",
   features: "Detect the shape of your eyes, brows, nose and lips.",
-  proportions: "Measure symmetry, golden ratio, canthal tilt and facial thirds.",
+  proportions:
+    "Measure symmetry, golden ratio, canthal tilt and facial thirds.",
   fun: "Geometry-based scores, for fun.",
   makeup: "Shades picked for your skin tone, undertone and eye color.",
   color: "Your undertone and seasonal color palette.",
@@ -73,15 +74,15 @@ export default function FreeToolsPage() {
         data={[
           faqSchema(faqs),
           {
-          "@context": "https://schema.org",
-          "@type": "ItemList",
-          name: "StyleMirror free tools",
-          itemListElement: free.map((id, i) => ({
-            "@type": "ListItem",
-            position: i + 1,
-            name: tools[id].name,
-            url: absoluteUrl(tools[id].landing),
-          })),
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "StyleMirror free tools",
+            itemListElement: free.map((id, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: tools[id].name,
+              url: absoluteUrl(tools[id].landing),
+            })),
           },
         ]}
       />
@@ -90,7 +91,9 @@ export default function FreeToolsPage() {
         title={
           <>
             Free face tools{" "}
-            <span className="text-[var(--brand)]">that run in your browser</span>
+            <span className="text-[var(--brand)]">
+              that run in your browser
+            </span>
           </>
         }
         intro="These free face tools run on your own device — face shape, facial features, proportions, makeup shades, color seasons and body type. No account, no uploads, no limits."
@@ -128,8 +131,8 @@ export default function FreeToolsPage() {
                 Most online face analysis sites upload your selfie to a server.
                 Ours download a small detection model once, then measure 478
                 points on your face entirely on your phone or computer. Your
-                photo is never sent anywhere, so there is nothing to store,
-                leak or delete later.
+                photo is never sent anywhere, so there is nothing to store, leak
+                or delete later.
               </p>
               <p>
                 Running locally also keeps every tool fast and unlimited. There

@@ -15,10 +15,16 @@ import {
   StepCards,
 } from "@/components/site/blocks";
 import { freeToolGuides } from "@/config/free-tool-guides";
-import { freeToolPage, type FreeToolPage, type Widget } from "@/config/free-tool-pages";
+import {
+  freeToolPage,
+  type FreeToolPage,
+  type Widget,
+} from "@/config/free-tool-pages";
 import { tools, type ToolId } from "@/config/tools";
 import { absoluteUrl } from "@/lib/site-url";
 
+import { AgeGroupTool } from "./age-group-tool";
+import { AgeTool } from "./age-tool";
 import { BlurFace } from "./blur-face";
 import { BodyTypeCalculator } from "./body-type-calculator";
 import { FaceShapeCalculator } from "./face-shape-calculator";
@@ -32,7 +38,11 @@ export function freeToolMetadata(id: ToolId): Metadata {
     title: { absolute: page.metaTitle },
     description: page.metaDescription,
     alternates: { canonical: path },
-    openGraph: { title: page.metaTitle, description: page.metaDescription, url: path },
+    openGraph: {
+      title: page.metaTitle,
+      description: page.metaDescription,
+      url: path,
+    },
     twitter: { title: page.metaTitle, description: page.metaDescription },
   };
 }
@@ -49,6 +59,10 @@ function ToolWidget({ widget }: { widget: Widget }) {
       return <BodyTypeCalculator />;
     case "blur":
       return <BlurFace />;
+    case "age":
+      return <AgeTool />;
+    case "age-group":
+      return <AgeGroupTool />;
     case "none":
       return null;
   }
@@ -84,7 +98,12 @@ export function FreeToolLanding({ id }: { id: ToolId }) {
   const tool = tools[id];
   const guide = freeToolGuides[id];
   const faqs = guide ? [...page.faqs, ...guide.faqs] : page.faqs;
-  const usesPhoto = page.widget.kind === "landmark" || page.widget.kind === "blur";
+  const usesAgeModel =
+    page.widget.kind === "age" || page.widget.kind === "age-group";
+  const usesPhoto =
+    page.widget.kind === "landmark" ||
+    page.widget.kind === "blur" ||
+    usesAgeModel;
   return (
     <>
       <JsonLd
@@ -116,7 +135,23 @@ export function FreeToolLanding({ id }: { id: ToolId }) {
         <SectionHeader
           title={page.stepsTitle}
           sub={
-            usesPhoto ? (
+            usesAgeModel ? (
+              <>
+                Faces are found with{" "}
+                <SourceLink href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker">
+                  MediaPipe
+                </SourceLink>
+                ; ages come from the{" "}
+                <SourceLink href="https://github.com/dchen236/FairFace">
+                  FairFace model
+                </SourceLink>{" "}
+                by Kärkkäinen &amp; Joo (
+                <SourceLink href="https://creativecommons.org/licenses/by/4.0/">
+                  CC BY 4.0
+                </SourceLink>
+                ), quantized to 8-bit to run in your browser.
+              </>
+            ) : usesPhoto ? (
               <>
                 Detection uses Google&apos;s{" "}
                 <SourceLink href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker">
@@ -127,7 +162,10 @@ export function FreeToolLanding({ id }: { id: ToolId }) {
             ) : page.source ? (
               <>
                 {page.source.lead}{" "}
-                <SourceLink href={page.source.href}>{page.source.label}</SourceLink>.
+                <SourceLink href={page.source.href}>
+                  {page.source.label}
+                </SourceLink>
+                .
               </>
             ) : undefined
           }
@@ -147,7 +185,10 @@ export function FreeToolLanding({ id }: { id: ToolId }) {
           <SectionHeader title={page.extra.title} sub={page.extra.sub} />
           <div className="max-w-3xl space-y-4">
             {page.extra.paragraphs.map((p) => (
-              <p key={p} className="leading-relaxed text-[var(--muted-ink)] sm:text-[17px]">
+              <p
+                key={p}
+                className="leading-relaxed text-[var(--muted-ink)] sm:text-[17px]"
+              >
                 {p}
               </p>
             ))}

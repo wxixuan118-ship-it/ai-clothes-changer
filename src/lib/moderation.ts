@@ -331,7 +331,7 @@ const GARMENT_WORDS =
 
 export function screenPrompt(
   raw: string,
-  tool: "hair" | "clothes" = "clothes",
+  tool: "hair" | "clothes" | "glasses" = "clothes",
 ): ScreenResult {
   const plain = base(raw);
   if (EXPLICIT_OTHER_SCRIPTS.test(plain)) {

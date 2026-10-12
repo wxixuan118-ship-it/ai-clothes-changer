@@ -66,9 +66,13 @@ export function QuizTool({ quiz }: { quiz: QuizId }) {
 
       {question ? (
         <fieldset key={step} className="mt-7">
-          <legend className="text-xl font-bold sm:text-2xl">{question.q}</legend>
+          <legend className="text-xl font-bold sm:text-2xl">
+            {question.q}
+          </legend>
           {question.hint ? (
-            <p className="mt-2 text-sm text-[var(--muted-ink)]">{question.hint}</p>
+            <p className="mt-2 text-sm text-[var(--muted-ink)]">
+              {question.hint}
+            </p>
           ) : null}
           <div
             className={cn(

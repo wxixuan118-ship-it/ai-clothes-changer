@@ -21,7 +21,9 @@ export function BlurFace() {
   const [faces, setFaces] = React.useState<Face[] | null>(null);
   const [mode, setMode] = React.useState<Mode>("blur");
   const [strength, setStrength] = React.useState(60);
-  const [status, setStatus] = React.useState<"idle" | "working" | "error">("idle");
+  const [status, setStatus] = React.useState<"idle" | "working" | "error">(
+    "idle",
+  );
   const [fileName, setFileName] = React.useState("photo");
 
   React.useEffect(() => {
@@ -47,7 +49,15 @@ export function BlurFace() {
       ctx.save();
       ctx.beginPath();
       if (mode === "blur") {
-        ctx.ellipse(f.x + f.w / 2, f.y + f.h / 2, f.w / 2, f.h / 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(
+          f.x + f.w / 2,
+          f.y + f.h / 2,
+          f.w / 2,
+          f.h / 2,
+          0,
+          0,
+          Math.PI * 2,
+        );
       } else {
         ctx.rect(f.x, f.y, f.w, f.h);
       }
@@ -60,7 +70,15 @@ export function BlurFace() {
         // A second pass softens the blocky edges of the upscaled image.
         ctx.save();
         ctx.beginPath();
-        ctx.ellipse(f.x + f.w / 2, f.y + f.h / 2, f.w / 2, f.h / 2, 0, 0, Math.PI * 2);
+        ctx.ellipse(
+          f.x + f.w / 2,
+          f.y + f.h / 2,
+          f.w / 2,
+          f.h / 2,
+          0,
+          0,
+          Math.PI * 2,
+        );
         ctx.clip();
         ctx.globalAlpha = 0.5;
         ctx.drawImage(small, 0, 0, sw, sh, f.x - 2, f.y - 2, f.w + 4, f.h + 4);
@@ -85,13 +103,18 @@ export function BlurFace() {
       const source = document.createElement("canvas");
       source.width = Math.round(img.width * scale);
       source.height = Math.round(img.height * scale);
-      source.getContext("2d")!.drawImage(img, 0, 0, source.width, source.height);
+      source
+        .getContext("2d")!
+        .drawImage(img, 0, 0, source.width, source.height);
       URL.revokeObjectURL(url);
       const landmarker = await getMultiFaceLandmarker();
       const found = landmarker.detect(source).faceLandmarks ?? [];
       sourceRef.current = source;
       setFaces(
-        found.map((l) => ({ ...faceBox(l, source.width, source.height), on: true })),
+        found.map((l) => ({
+          ...faceBox(l, source.width, source.height),
+          on: true,
+        })),
       );
       setStatus("idle");
     } catch {
@@ -208,7 +231,10 @@ export function BlurFace() {
             <>
               <p className="font-medium">Drop a photo here</p>
               {status === "error" ? (
-                <p role="alert" className="mt-1 text-sm text-[var(--debit-text)]">
+                <p
+                  role="alert"
+                  className="mt-1 text-sm text-[var(--debit-text)]"
+                >
                   That file couldn&apos;t be read. Try a JPG, PNG or WebP image.
                 </p>
               ) : (

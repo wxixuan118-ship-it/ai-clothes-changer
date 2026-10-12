@@ -87,7 +87,10 @@ export function ResultCard({
           )}
         >
           {result.metrics.map((m) => (
-            <div key={m.label} className="rounded-2xl border bg-[var(--paper-2)] p-4">
+            <div
+              key={m.label}
+              className="rounded-2xl border bg-[var(--paper-2)] p-4"
+            >
               <p className="text-xs font-semibold tracking-wider text-[var(--muted-ink)] uppercase">
                 {m.label}
               </p>
@@ -104,11 +107,17 @@ export function ResultCard({
       ) : null}
 
       {result.swatches?.map((group) => (
-        <div key={group.title} className="rounded-2xl border bg-[var(--paper-2)] p-5">
+        <div
+          key={group.title}
+          className="rounded-2xl border bg-[var(--paper-2)] p-5"
+        >
           <p className="font-bold">{group.title}</p>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {group.items.map((s) => (
-              <li key={`${s.name}-${s.hex}`} className="flex items-center gap-3">
+              <li
+                key={`${s.name}-${s.hex}`}
+                className="flex items-center gap-3"
+              >
                 <span
                   className="size-11 shrink-0 rounded-xl border"
                   style={{ background: s.hex }}
@@ -129,7 +138,10 @@ export function ResultCard({
       ))}
 
       {result.sections.map((section) => (
-        <div key={section.title} className="rounded-2xl border bg-[var(--paper-2)] p-5">
+        <div
+          key={section.title}
+          className="rounded-2xl border bg-[var(--paper-2)] p-5"
+        >
           <p className="font-bold">{section.title}</p>
           <ul className="mt-3 space-y-2">
             {section.items.map((item) => (

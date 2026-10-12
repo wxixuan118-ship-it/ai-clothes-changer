@@ -2,6 +2,7 @@
 export type ToolId =
   | "hair"
   | "clothes"
+  | "glasses"
   | "face-shape"
   | "hairstyle-face-shape"
   | "foundation"
@@ -23,6 +24,8 @@ export type ToolId =
   | "facial-proportions"
   | "attractiveness"
   | "face-rating"
+  | "how-old"
+  | "age-calculator"
   | "skin-tone"
   | "color-analysis"
   | "concealer"
@@ -34,7 +37,8 @@ export type ToolId =
   | "kibbe-types"
   | "blur-face";
 
-export type ToolType = "generator" | "analyzer" | "calculator" | "quiz" | "guide";
+export type ToolType =
+  "generator" | "analyzer" | "calculator" | "quiz" | "guide";
 
 // Free-tool groups, in menu order.
 export type ToolCategory =
@@ -94,6 +98,17 @@ export const tools: Record<
     category: "ai",
     icon: "shirt",
     desc: "Virtually try on outfits",
+  },
+  glasses: {
+    name: "AI Glasses Try-On",
+    landing: "/glasses-try-on",
+    studio: "/generate?tool=glasses",
+    action: "Try on glasses",
+    type: "generator",
+    category: "ai",
+    icon: "glasses",
+    desc: "See any frames on your own photo",
+    isNew: true,
   },
   "face-shape": {
     name: "Face Shape Detector",
@@ -280,7 +295,7 @@ export const tools: Record<
     desc: "Facial thirds & midface ratio",
     isNew: true,
   },
-  "attractiveness": {
+  attractiveness: {
     name: "Attractiveness Test",
     landing: "/attractiveness-test",
     action: "Take the test",
@@ -298,6 +313,26 @@ export const tools: Record<
     category: "fun",
     icon: "star",
     desc: "5-part geometry breakdown",
+    isNew: true,
+  },
+  "how-old": {
+    name: "How Old Do I Look?",
+    landing: "/how-old-do-i-look",
+    action: "Guess my age",
+    type: "analyzer",
+    category: "fun",
+    icon: "hourglass",
+    desc: "AI guesses your age from a selfie",
+    isNew: true,
+  },
+  "age-calculator": {
+    name: "Age Calculator by Photo",
+    landing: "/age-calculator-by-photo",
+    action: "Estimate ages",
+    type: "analyzer",
+    category: "fun",
+    icon: "users",
+    desc: "Estimate ages, even in group photos",
     isNew: true,
   },
   "skin-tone": {
@@ -320,7 +355,7 @@ export const tools: Record<
     desc: "Your seasonal color palette",
     isNew: true,
   },
-  "concealer": {
+  concealer: {
     name: "Concealer Shade Finder",
     landing: "/concealer-shade-finder",
     action: "Find concealer shade",
@@ -330,7 +365,7 @@ export const tools: Record<
     desc: "Concealer shade & corrector",
     isNew: true,
   },
-  "lipstick": {
+  lipstick: {
     name: "Lipstick Shade Finder",
     landing: "/lipstick-shade-finder",
     action: "Find lipstick shades",
@@ -340,7 +375,7 @@ export const tools: Record<
     desc: "Your most flattering lip colors",
     isNew: true,
   },
-  "blush": {
+  blush: {
     name: "Blush Shade Finder",
     landing: "/blush-shade-finder",
     action: "Find blush shades",
@@ -350,7 +385,7 @@ export const tools: Record<
     desc: "Blush colors & placement",
     isNew: true,
   },
-  "eyeshadow": {
+  eyeshadow: {
     name: "Eyeshadow Shade Finder",
     landing: "/eyeshadow-shade-finder",
     action: "Find eyeshadow colors",
@@ -407,6 +442,7 @@ export const tools: Record<
 export const toolOrder: ToolId[] = [
   "hair",
   "clothes",
+  "glasses",
   "face-shape",
   "hairstyle-face-shape",
   "face-analyzer",
@@ -425,6 +461,8 @@ export const toolOrder: ToolId[] = [
   "facial-proportions",
   "attractiveness",
   "face-rating",
+  "how-old",
+  "age-calculator",
   "foundation",
   "concealer",
   "lipstick",
@@ -442,6 +480,7 @@ export const toolOrder: ToolId[] = [
 
 export function parseTool(value: string | null | undefined): ToolId {
   if (value === "clothes") return "clothes";
+  if (value === "glasses") return "glasses";
   if (value === "face-shape") return "face-shape";
   if (value === "hairstyle-face-shape") return "hairstyle-face-shape";
   if (value === "foundation") return "foundation";
@@ -450,7 +489,7 @@ export function parseTool(value: string | null | undefined): ToolId {
   return "hair";
 }
 
-export type GeneratorToolId = "hair" | "clothes";
+export type GeneratorToolId = "hair" | "clothes" | "glasses";
 export type AnalyzerToolId =
   "face-shape" | "hairstyle-face-shape" | "foundation";
 

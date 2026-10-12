@@ -3,16 +3,35 @@
 import * as React from "react";
 
 import type { AnalysisResult } from "@/lib/face/analysis-result";
-import { faceShapeCalcResult, type ChinShape } from "@/lib/face/face-shape-calc";
+import {
+  faceShapeCalcResult,
+  type ChinShape,
+} from "@/lib/face/face-shape-calc";
 
 import { MeasureField, SegmentedControl } from "./measure-field";
 import { ResultCard } from "./result-card";
 
 const fields = [
-  { key: "forehead", label: "Forehead width", help: "Across the widest part of your forehead, halfway between brows and hairline." },
-  { key: "cheekbones", label: "Cheekbone width", help: "Across the widest point of your cheekbones, just below the outer eye corners." },
-  { key: "jaw", label: "Jaw width", help: "Straight across from one jaw corner (below the ear) to the other." },
-  { key: "length", label: "Face length", help: "From the center of your hairline to the tip of your chin." },
+  {
+    key: "forehead",
+    label: "Forehead width",
+    help: "Across the widest part of your forehead, halfway between brows and hairline.",
+  },
+  {
+    key: "cheekbones",
+    label: "Cheekbone width",
+    help: "Across the widest point of your cheekbones, just below the outer eye corners.",
+  },
+  {
+    key: "jaw",
+    label: "Jaw width",
+    help: "Straight across from one jaw corner (below the ear) to the other.",
+  },
+  {
+    key: "length",
+    label: "Face length",
+    help: "From the center of your hairline to the tip of your chin.",
+  },
 ] as const;
 
 type Key = (typeof fields)[number]["key"];
@@ -35,7 +54,9 @@ export function FaceShapeCalculator() {
     const nums = Object.fromEntries(
       fields.map(({ key }) => [key, Number(values[key])]),
     ) as Record<Key, number>;
-    if (Object.values(nums).some((v) => !Number.isFinite(v) || v < min || v > max)) {
+    if (
+      Object.values(nums).some((v) => !Number.isFinite(v) || v < min || v > max)
+    ) {
       setError(`Enter each measurement between ${min} and ${max} ${unit}.`);
       setResult(null);
       return;

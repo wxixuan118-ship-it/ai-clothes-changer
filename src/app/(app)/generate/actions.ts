@@ -10,12 +10,14 @@ import {
   getHairColor,
   hairColorInstruction,
 } from "@/config/hair-colors";
+import { getGlassesPreset } from "@/config/glasses";
 import { getHairPreset } from "@/config/hairstyles";
 import { getStylePreset } from "@/config/styles";
 import { db } from "@/db";
 import { generations } from "@/db/schema";
 import {
   getImageProvider,
+  type EditTask,
   type GarmentType,
   type InputImage,
 } from "@/lib/ai/provider";
@@ -43,11 +45,14 @@ const promptSchema = z
 // "garment" (clothes) and "reference" (hair) both mean "use the uploaded
 // reference photo".
 const modeSchema = z.enum(["garment", "reference", "prompt", "style"]);
-const toolSchema = z.enum(["clothes", "hair"]);
+const toolSchema = z.enum(["clothes", "hair", "glasses"]);
 
 // Only the hair may change; everything else is the user's.
 const KEEP_FOR_HAIR =
   "Keep the face, facial features, skin, makeup, expression, head shape, clothing, background, and lighting unchanged. Make the hairline and hair texture look natural.";
+// Only the eyewear may change.
+const KEEP_FOR_GLASSES =
+  "Fit the frames naturally on the nose and ears at a realistic size for the face, with correct perspective, reflections and shadows. If the person already wears glasses, replace them. Keep the face, eyes, facial features, skin, hair, expression, clothing, background, and lighting unchanged.";
 const garmentTypeSchema = z.enum(["top", "bottom", "dress", "full"]);
 
 /**
@@ -139,7 +144,7 @@ type ChangeRequest = {
   label: string;
   /** What the model receives. */
   instruction: string;
-  task: "clothes" | "hair";
+  task: EditTask;
   /** The user's own words (prompt mode) — screened before any spend. */
   userText?: string;
   personImage: InputImage;
@@ -197,6 +202,43 @@ async function parseHairRequest(
   };
 }
 
+async function parseGlassesRequest(
+  formData: FormData,
+  mode: z.infer<typeof modeSchema>,
+  personImage: InputImage,
+): Promise<ChangeRequest | NonNullable<GenerateResult["error"]>> {
+  if (mode === "reference" || mode === "garment") {
+    const referenceImage = await readPhoto(formData.get("referenceImage"));
+    if (!referenceImage) return "invalid_garment";
+    return {
+      task: "glasses",
+      label: "Glasses photo",
+      instruction: `Put the eyeglasses shown in the reference photo on the person — same frame shape, color, material and lens tint. ${KEEP_FOR_GLASSES}`,
+      personImage,
+      referenceImage,
+    };
+  }
+  if (mode === "style") {
+    const preset = getGlassesPreset(String(formData.get("styleId") ?? ""));
+    if (!preset) return "invalid_style";
+    return {
+      task: "glasses",
+      label: `Glasses · ${preset.name}`,
+      instruction: `Put ${preset.prompt} on the person. ${KEEP_FOR_GLASSES}`,
+      personImage,
+    };
+  }
+  const prompt = promptSchema.safeParse(formData.get("prompt"));
+  if (!prompt.success) return "invalid_prompt";
+  return {
+    task: "glasses",
+    label: prompt.data,
+    userText: prompt.data,
+    instruction: `Put these glasses on the person: ${prompt.data}. ${KEEP_FOR_GLASSES}`,
+    personImage,
+  };
+}
+
 async function parseChangeRequest(
   formData: FormData,
 ): Promise<ChangeRequest | NonNullable<GenerateResult["error"]>> {
@@ -210,6 +252,9 @@ async function parseChangeRequest(
 
   if (tool.data === "hair") {
     return parseHairRequest(formData, mode.data, personImage);
+  }
+  if (tool.data === "glasses") {
+    return parseGlassesRequest(formData, mode.data, personImage);
   }
 
   if (mode.data === "garment" || mode.data === "reference") {

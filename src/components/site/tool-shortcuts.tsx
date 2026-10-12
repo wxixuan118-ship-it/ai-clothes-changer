@@ -7,6 +7,7 @@ import { toolIcon, toolTint } from "./tool-style";
 const short: Partial<Record<ToolId, string>> = {
   hair: "Hairstyle",
   clothes: "Outfit",
+  glasses: "Glasses",
   "face-shape": "Face shape",
   "hairstyle-face-shape": "Cuts for you",
   "face-analyzer": "Face analysis",

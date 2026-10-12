@@ -25,6 +25,12 @@ function formatTimestamp(date: Date): string {
   return date.toISOString().slice(0, 16).replace("T", " ");
 }
 
+const studioLabels: Record<GeneratorToolId, string> = {
+  hair: "Hairstyle",
+  clothes: "Clothes",
+  glasses: "Glasses",
+};
+
 export default async function GeneratePage({
   searchParams,
 }: {
@@ -32,8 +38,9 @@ export default async function GeneratePage({
 }) {
   const session = await requireSession();
   const rawTool = parseTool((await searchParams).tool);
-  // Studio only supports the two generators.
-  const tool: GeneratorToolId = rawTool === "clothes" ? "clothes" : "hair";
+  // Studio only supports the generators.
+  const tool: GeneratorToolId =
+    rawTool === "clothes" || rawTool === "glasses" ? rawTool : "hair";
 
   const history = await db
     .select()
@@ -65,7 +72,7 @@ export default async function GeneratePage({
         aria-label="Generator"
         className="flex w-fit gap-1 rounded-full border bg-[var(--paper-2)] p-1"
       >
-        {(["hair", "clothes"] as GeneratorToolId[]).map((id) => (
+        {(["hair", "clothes", "glasses"] as GeneratorToolId[]).map((id) => (
           <Link
             key={id}
             href={tools[id].studio!}
@@ -77,7 +84,7 @@ export default async function GeneratePage({
                 : "text-[var(--muted-ink)] hover:text-[var(--ink)]")
             }
           >
-            {id === "hair" ? "Hairstyle" : "Clothes"}
+            {studioLabels[id]}
           </Link>
         ))}
       </nav>

@@ -1,7 +1,12 @@
 import { env } from "@/lib/env";
 
 import { ContentBlockedError, ProviderBusyError } from "./errors";
-import type { GenerateImageInput, ImageProvider, InputImage } from "./provider";
+import {
+  type GenerateImageInput,
+  type ImageProvider,
+  type InputImage,
+} from "./provider";
+import { referenceKind } from "./task";
 
 // Alibaba Cloud Model Studio (DashScope) image editing — qwen-image-edit-plus
 // by default. Synchronous HTTP API: one POST returns a signed PNG URL that
@@ -54,7 +59,7 @@ export function buildMessageContent(
     throw new Error("dashscope: a person photo is required");
   }
   if (input.referenceImage) {
-    const kind = input.task === "hair" ? "hairstyle" : "garment";
+    const kind = referenceKind(input.task);
     return [
       { image: dataUri(input.referenceImage) },
       { image: dataUri(input.personImage) },

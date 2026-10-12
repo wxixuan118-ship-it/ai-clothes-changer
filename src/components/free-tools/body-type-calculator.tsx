@@ -9,12 +9,48 @@ import { MeasureField, SegmentedControl } from "./measure-field";
 import { ResultCard } from "./result-card";
 
 const fields = [
-  { key: "height", label: "Height", help: "Standing straight, without shoes.", cm: [120, 230], in: [48, 90] },
-  { key: "weight", label: "Weight", help: "Morning weight is most consistent.", cm: [30, 250], in: [66, 550] },
-  { key: "wrist", label: "Wrist", help: "Around the wrist, just above the wrist bone.", cm: [10, 25], in: [4, 10] },
-  { key: "shoulders", label: "Shoulders", help: "Around the widest part of your shoulders.", cm: [70, 170], in: [28, 67] },
-  { key: "waist", label: "Waist", help: "Around your natural waist.", cm: [45, 180], in: [18, 71] },
-  { key: "hips", label: "Hips", help: "Around the fullest part of your hips.", cm: [60, 190], in: [24, 75] },
+  {
+    key: "height",
+    label: "Height",
+    help: "Standing straight, without shoes.",
+    cm: [120, 230],
+    in: [48, 90],
+  },
+  {
+    key: "weight",
+    label: "Weight",
+    help: "Morning weight is most consistent.",
+    cm: [30, 250],
+    in: [66, 550],
+  },
+  {
+    key: "wrist",
+    label: "Wrist",
+    help: "Around the wrist, just above the wrist bone.",
+    cm: [10, 25],
+    in: [4, 10],
+  },
+  {
+    key: "shoulders",
+    label: "Shoulders",
+    help: "Around the widest part of your shoulders.",
+    cm: [70, 170],
+    in: [28, 67],
+  },
+  {
+    key: "waist",
+    label: "Waist",
+    help: "Around your natural waist.",
+    cm: [45, 180],
+    in: [18, 71],
+  },
+  {
+    key: "hips",
+    label: "Hips",
+    help: "Around the fullest part of your hips.",
+    cm: [60, 190],
+    in: [24, 75],
+  },
 ] as const;
 
 type Key = (typeof fields)[number]["key"];

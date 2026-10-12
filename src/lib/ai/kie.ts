@@ -3,7 +3,12 @@ import sharp from "sharp";
 import { env } from "@/lib/env";
 
 import { ContentBlockedError, ProviderBusyError } from "./errors";
-import type { GenerateImageInput, ImageProvider, InputImage } from "./provider";
+import {
+  type GenerateImageInput,
+  type ImageProvider,
+  type InputImage,
+} from "./provider";
+import { referenceKind } from "./task";
 
 // kie.ai market API — Seedream 5.0 Flash image editing.
 // Tasks take image URLs, not bytes, so each photo first goes through kie's
@@ -64,7 +69,7 @@ export async function pickAspectRatio(person: InputImage): Promise<string> {
 /** The instruction. The person photo is always image 1. */
 export function buildPrompt(input: GenerateImageInput): string {
   if (input.referenceImage) {
-    const kind = input.task === "hair" ? "hairstyle" : "garment";
+    const kind = referenceKind(input.task);
     return `${SAFETY} Image 1 is the person to edit — keep their face, identity, skin tone, body, pose, background, lighting and framing exactly the same. Image 2 is the ${kind} reference: apply only the ${kind} from image 2 to the person in image 1 and ignore any person, skin or body shown in image 2. ${input.prompt} ${SAFETY}`;
   }
   return `${SAFETY} Keep the person's face, identity, skin tone, body, pose, background, lighting and framing exactly the same. ${input.prompt} ${SAFETY}`;

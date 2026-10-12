@@ -17,7 +17,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "face-analyzer": {
     title: "Face analyzer tips",
     alt: "Face analyzer diagram showing measured landmarks on the eyes, nose, lips and jaw",
-    caption: "Every reading starts from the same 478 points, so results stay consistent across features.",
+    caption:
+      "Every reading starts from the same 478 points, so results stay consistent across features.",
     paragraphs: [
       "Start with the overall rating, then read the cards in order. Shape comes first because it frames everything else: a heart-shaped face with almond eyes needs different haircuts and frames than a square face with round eyes, even though both have balanced proportions.",
       "Proportion cards compare your measurements with classic ideals such as equal facial thirds or eyes spaced one eye-width apart. These ideals come from art history, not biology, so treat a lower number as a description of your features rather than a flaw. Plenty of famous faces break every rule.",
@@ -38,7 +39,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "face-shape-calculator": {
     title: "Tips for accurate face shape calculator measurements",
     alt: "Face shape calculator diagram showing forehead, cheekbone, jaw and face length measurements",
-    caption: "Measure the four lines straight across, then trace your chin shape.",
+    caption:
+      "Measure the four lines straight across, then trace your chin shape.",
     paragraphs: [
       "Use a soft tailor's tape and measure in front of a mirror, or ask a friend to help. Keep the tape level and straight across the face for widths — don't follow the curve around to your ears. Tie your hair back so you can see where your hairline really starts.",
       "Forehead width sits halfway between your eyebrows and hairline. Cheekbone width is the widest point just below the outer corners of your eyes. Jaw width runs from one jaw corner, just below the earlobe, to the other. Face length goes from the center of your hairline down to the tip of your chin.",
@@ -78,7 +80,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "forehead-shape": {
     title: "Choosing a hairstyle for your forehead shape",
     alt: "Forehead shape detector diagram highlighting forehead width and top curve",
-    caption: "Width at the temples and the curve of the top line decide the forehead type.",
+    caption:
+      "Width at the temples and the curve of the top line decide the forehead type.",
     paragraphs: [
       "A forehead reads as broad or narrow relative to your cheekbones, not on its own. That's why the detector compares the two widths instead of measuring the forehead alone. A broad forehead pairs well with fringes and volume lower down; a narrow one benefits from lift at the temples.",
       "Height matters too. A high forehead can be balanced with curtain bangs or a side part, while a low forehead looks best with hair swept back to open it up. Middle parts make any forehead look more symmetrical but also highlight width.",
@@ -98,7 +101,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "jawline-shape": {
     title: "Styling tips by jawline shape",
     alt: "Jawline shape detector diagram highlighting the jaw corners and chin",
-    caption: "Jaw width, corner angle and chin width together define the jawline type.",
+    caption:
+      "Jaw width, corner angle and chin width together define the jawline type.",
     paragraphs: [
       "Your jawline sets where a haircut should end. Cuts that stop exactly at the widest point of the jaw draw the eye there, which is great for a defined jaw and less flattering when you want to soften it. Ending a bob just below or above the jaw changes the effect.",
       "For beards, the rule is to add what the jaw lacks. A round jaw gains structure from a squared beard with a little length at the chin. A square jaw looks softer with rounded edges. A V-shaped jaw looks fuller with denser sides.",
@@ -118,7 +122,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "eye-shape": {
     title: "Eyeliner by eye shape: quick guide",
     alt: "Eye shape detector diagram showing eye width, height and corner tilt",
-    caption: "Openness, outer-corner tilt and lid space are the three numbers behind the result.",
+    caption:
+      "Openness, outer-corner tilt and lid space are the three numbers behind the result.",
     paragraphs: [
       "Eyeliner works best when it follows your natural angle. Almond eyes can take a classic wing. Round eyes look longer when the liner extends past the outer corner and stays thin in the middle. Upturned eyes need little lift, while downturned eyes benefit from a wing that angles up rather than following the lower lash line.",
       "Hooded and monolid eyes need placement you can see with your eyes open. Apply liner and shadow while looking straight into a mirror, building color above the crease or from the lash line upward, and pick waterproof formulas so nothing transfers.",
@@ -138,7 +143,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "eyebrow-shape": {
     title: "Shaping brows after the eyebrow shape detector",
     alt: "Eyebrow shape detector diagram showing brow head, arch peak and tail",
-    caption: "Arch height, peak position and tail direction decide the brow type.",
+    caption:
+      "Arch height, peak position and tail direction decide the brow type.",
     paragraphs: [
       "Map your ideal brow with a pencil held against your face. The brow should start above the inner corner of your eye, peak above the outer edge of your iris when you look straight ahead, and end on a line from the side of your nose past the outer corner of your eye.",
       "Grow before you shape. Leave brows alone for four to six weeks so you can see their natural line, then remove only the hairs clearly outside it. Over-plucked hairs can take months to return, and some never do.",
@@ -158,7 +164,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "nose-shape": {
     title: "Contour and glasses tips for every nose shape",
     alt: "Nose shape detector diagram showing nose width, length and bridge profile",
-    caption: "Width, length and the bridge's depth profile point to one of 12 nose types.",
+    caption:
+      "Width, length and the bridge's depth profile point to one of 12 nose types.",
     paragraphs: [
       "Contouring a nose is about light, not changing it. Use a matte shade one to two steps deeper than your skin along the sides of the bridge, blend well, and add a small touch of highlight down the center. Keep contour lighter on camera than you think you need.",
       "Glasses fit depends on your bridge more than your nose length. Lower or flatter bridges suit frames with adjustable nose pads or a low-bridge fit, so lenses don't rest on your cheeks. Higher bridges suit keyhole or saddle bridges that spread weight evenly.",
@@ -178,7 +185,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "lip-shape": {
     title: "Lip liner tricks by lip shape",
     alt: "Lip shape analyzer diagram showing lip height, mouth width and cupid's bow",
-    caption: "Fullness, upper-to-lower ratio and the cupid's bow define lip type.",
+    caption:
+      "Fullness, upper-to-lower ratio and the cupid's bow define lip type.",
     paragraphs: [
       "Lip liner is the most useful tool for any lip shape. Choose a shade close to your natural lip color, not your lipstick, so the edge stays invisible as the color wears off. Line just on the natural edge to add definition, or a hair outside at the center to add volume.",
       "Gloss and light shades make lips look fuller; matte and deep shades make them look smaller and more defined. You can combine both: a deeper shade at the corners and a lighter, glossier one in the center creates a pout without overlining.",
@@ -198,7 +206,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "face-symmetry": {
     title: "How to get a fair face symmetry reading",
     alt: "Face symmetry test diagram with a center line and mirrored landmark pairs",
-    caption: "Each left-side point is mirrored across the center line and compared with its right-side partner.",
+    caption:
+      "Each left-side point is mirrored across the center line and compared with its right-side partner.",
     paragraphs: [
       "Symmetry scores are sensitive to the photo more than the face. Stand facing the camera with your nose pointing straight at the lens, and keep the phone at eye level. Even a small head turn makes the nearer side look wider and drops the score.",
       "Avoid wide-angle selfies held close to your face. Lenses at short distances enlarge whatever is nearest, usually the nose and one cheek. Prop the phone on a shelf, step back and use the timer, or ask someone to take the photo.",
@@ -218,7 +227,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "eye-distance": {
     title: "Eye distance calculator results for makeup and frames",
     alt: "Eye distance calculator diagram showing eye width and the gap between the eyes",
-    caption: "The rule of fifths compares the inner-corner gap with one eye width.",
+    caption:
+      "The rule of fifths compares the inner-corner gap with one eye width.",
     paragraphs: [
       "The rule of fifths divides a face into five equal vertical sections, each the width of one eye. When the gap between the inner corners equals one eye width, eyes read as balanced. The calculator reports that ratio directly, so you don't need a ruler or millimeters.",
       "Makeup can nudge the look either way. To bring wide-set eyes closer, darken the inner third of the lid and fill brows slightly toward the nose. To open up close-set eyes, keep the inner corners bright and focus color on the outer half.",
@@ -239,7 +249,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "golden-ratio": {
     title: "Where the golden ratio face idea comes from",
     alt: "Golden ratio face calculator diagram comparing facial proportions to 1.618",
-    caption: "Five proportions are compared with φ = 1.618 and averaged into one match score.",
+    caption:
+      "Five proportions are compared with φ = 1.618 and averaged into one match score.",
     paragraphs: [
       "The golden ratio, often written φ, is about 1.618. Renaissance artists used it in composition, and in the twentieth century some cosmetic surgeons proposed facial masks built from it. The idea became popular online as a way to score beauty.",
       "Modern research is more cautious. Faces rated attractive in studies tend to be average, symmetrical and healthy-looking, and their ratios cluster near but not exactly on 1.618. So a high score means some of your proportions happen to land near φ, not that you're objectively more attractive.",
@@ -261,7 +272,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "canthal-tilt": {
     title: "Reading your canthal tilt result",
     alt: "Canthal tilt calculator diagram showing the angle between inner and outer eye corners",
-    caption: "Tilt is the angle of the line from the inner to the outer corner of each eye.",
+    caption:
+      "Tilt is the angle of the line from the inner to the outer corner of each eye.",
     paragraphs: [
       "The calculator measures each eye separately because most people have slightly different tilts on each side. It also measures against the line joining your two eyes, so a tilted head doesn't make your tilt look more positive or negative than it is.",
       "Expression matters. Smiling lifts the lower lids and outer corners, which increases tilt, while a tired or relaxed face can lower it. For a baseline, keep a neutral face and look straight into the lens at eye level.",
@@ -301,7 +313,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   attractiveness: {
     title: "How the attractiveness test scores you",
     alt: "Attractiveness test diagram combining symmetry, proportion and eye tilt measurements",
-    caption: "Six geometric measures are weighted into one facial harmony score.",
+    caption:
+      "Six geometric measures are weighted into one facial harmony score.",
     paragraphs: [
       "The score combines six measures that research and beauty tradition link to facial harmony: symmetry, golden ratio proportions, eye tilt, balance between facial thirds, midface compactness and eye spacing. Symmetry carries the most weight, since it has the strongest support in studies.",
       "What it can't measure matters just as much. Skin quality, hair, grooming, expression and confidence all change how people see you, and none of them appear in landmark geometry. A warm smile in real life outweighs a decimal point here.",
@@ -323,7 +336,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "face-rating": {
     title: "How each face rating part is scored",
     alt: "Face rating test diagram showing five scored measurements on a face",
-    caption: "Golden ratio, canthal tilt, symmetry, thirds and midface each get a score out of 10.",
+    caption:
+      "Golden ratio, canthal tilt, symmetry, thirds and midface each get a score out of 10.",
     paragraphs: [
       "Each part is scored out of ten. Golden ratio averages how close five proportions come to 1.618. Canthal tilt peaks at a slight upward angle of about four to nine degrees. Symmetry compares mirrored points on both sides of the face.",
       "Facial thirds rewards a middle third about equal to the lower third, and midface ratio rewards a compact space between the eyes and upper lip. The overall rating weights symmetry most, then golden ratio, then the rest.",
@@ -340,10 +354,55 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       },
     ],
   },
+  "how-old": {
+    title: "Why you might look older or younger",
+    alt: "How old do I look illustration of a face with an age estimate scale",
+    caption:
+      "The model scores nine age ranges; your estimate is the weighted average.",
+    paragraphs: [
+      "Perceived age comes from a handful of visual cues: skin texture, shadows under the eyes, the fullness of the cheeks and lips, hair color and the sharpness of the jawline. The model learned these cues from thousands of labeled faces, so it reacts to the same things people notice.",
+      "Light is the biggest swing factor. Soft daylight from the front fills in fine lines and makes skin look even, which usually reads younger. Overhead or side light deepens every shadow and can add years. Try the same face in two lighting setups and you'll often see a difference of five or more.",
+      "Styling matters too. Glasses, beards, heavy makeup and gray hair push estimates up; a relaxed expression, a fresh haircut and good sleep pull them down. Use the result as a fun mirror, not a verdict — the model has a typical error of several years in either direction.",
+      "Because everything runs on your device, the first visit downloads the 14 MB age model once. After that it's cached, so later guesses take under a second and work even on a slow connection.",
+    ],
+    faqs: [
+      {
+        q: "Does it work for children?",
+        a: "It covers ranges from 0–2 upward, but photos of children are best kept private. Everything stays on your device either way.",
+      },
+      {
+        q: "Why is my result a range and a number?",
+        a: "The model predicts nine age ranges. The number blends them by probability, so it's more precise than a range but less certain.",
+      },
+    ],
+  },
+  "age-calculator": {
+    title: "Getting good results from a group photo",
+    alt: "Age calculator by photo illustration of several faces labeled with estimated ages",
+    caption:
+      "Each detected face is numbered left to right and labeled with its estimated age.",
+    paragraphs: [
+      "Group photos are harder than selfies because faces are smaller and often turned. The calculator works best when each face is at least 80 pixels wide and looking roughly toward the camera. Use the original photo rather than a compressed screenshot to keep detail.",
+      "Faces are numbered from left to right on the photo, and the list underneath shows each estimate with the age range the model is most confident about. A low confidence percentage means the face sits between two ranges, so read the estimate loosely.",
+      "Estimates describe how old a face looks, not how old someone is. Makeup, lighting, expression and image quality all move the number. Never use it to verify a person's age for legal, safety or access purposes.",
+      "Everything happens in your browser: the photo is decoded, faces are found and ages are estimated on your device. Nothing is uploaded, which makes it safe to try with family photos.",
+    ],
+    faqs: [
+      {
+        q: "Can I download the labeled photo?",
+        a: "Right-click or long-press the labeled image to save it. The original photo is never changed.",
+      },
+      {
+        q: "Why was a face missed?",
+        a: "Faces that are tiny, blurred, heavily covered or in profile can fall below the detector's confidence threshold.",
+      },
+    ],
+  },
   "skin-tone": {
     title: "Using your skin tone results day to day",
     alt: "Skin tone analyzer diagram showing forehead, cheek and chin sampling points and a tone scale",
-    caption: "Skin is sampled at the forehead, cheeks and chin, then placed on a 10-shade scale.",
+    caption:
+      "Skin is sampled at the forehead, cheeks and chin, then placed on a 10-shade scale.",
     paragraphs: [
       "Your undertone is the most useful result. Warm undertones glow in golden, olive and earthy shades; cool undertones look clearest in blue-based pinks, jewel tones and crisp white; neutral undertones can borrow from both. Olive skin often suits deep greens, golds and warm reds.",
       "Use the swatches as a shopping filter. Hold a top in a store mirror near your face in daylight: if your skin looks even and your eyes look brighter, it's working. If shadows look grayer or redness appears, the color is fighting your undertone.",
@@ -383,7 +442,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   concealer: {
     title: "Concealer shade guide by concern",
     alt: "Concealer shade finder diagram comparing under-eye and cheek color with corrector swatches",
-    caption: "Under-eye color is compared with the cheeks to choose a corrector.",
+    caption:
+      "Under-eye color is compared with the cheeks to choose a corrector.",
     paragraphs: [
       "Dark circles come in different colors. Blue or purple shadows show through thin skin and need a peach, apricot or orange corrector depending on skin depth. Brown pigmentation needs a salmon or orange tone. Redness around the nose and blemishes needs a yellow or green corrector.",
       "After correcting, apply concealer only where it's needed. For brightening under the eyes, choose a shade about one step lighter than your foundation. For spots and scars, match your skin exactly; a lighter shade on a blemish makes it stand out.",
@@ -403,7 +463,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   lipstick: {
     title: "Lipstick shade finder tips by undertone",
     alt: "Lipstick shade finder swatches matched to skin tone and undertone",
-    caption: "Your skin depth and undertone narrow down the shades that flatter you.",
+    caption:
+      "Your skin depth and undertone narrow down the shades that flatter you.",
     paragraphs: [
       "Undertone decides the direction of a shade. Cool undertones suit blue-based reds, berries and pinks; warm undertones suit orange-based reds, corals and terracottas; neutral undertones suit true reds and rosy nudes. Depth decides how intense the shade can be before it looks too heavy or too faint.",
       "Nude lipstick is the hardest to choose. It should be slightly deeper than your natural lip and never lighter than your skin, or it can look washed out. The 'my lips but better' shade the tool suggests starts from your own lip color for that reason.",
@@ -424,7 +485,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   blush: {
     title: "Blush placement and formulas",
     alt: "Blush shade finder diagram showing blush placement on the cheeks",
-    caption: "Blush color follows your undertone; placement follows your face shape.",
+    caption:
+      "Blush color follows your undertone; placement follows your face shape.",
     paragraphs: [
       "Blush should look like a natural flush, so the best shade is often close to the color your cheeks turn after exercise. Warm undertones usually flush peach or coral, cool undertones pink or rose, and neutral undertones somewhere in between.",
       "Placement changes the shape of your face. Sweeping blush upward toward the temples lifts and lengthens; applying it horizontally toward the nose shortens a long face; keeping it on the apples softens angles. The tool picks placement from your detected face shape.",
@@ -444,7 +506,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   eyeshadow: {
     title: "Building an eyeshadow look that makes your eyes pop",
     alt: "Eyeshadow shade finder diagram showing iris color and contrasting shadow swatches",
-    caption: "Iris color is sampled from the lower half of each iris to avoid lashes and reflections.",
+    caption:
+      "Iris color is sampled from the lower half of each iris to avoid lashes and reflections.",
     paragraphs: [
       "Contrast is what makes eye color look brighter. Colors opposite your iris on the color wheel intensify it: coppers and warm browns for blue eyes, plums and burgundies for green, purples and olives for hazel. Brown eyes have the widest range and suit both warm metallics and cool jewel tones.",
       "A simple three-shade routine works for everyone. Sweep the neutral base across the lid, press the crease shade into the socket with a fluffy brush, then add the pop color to the outer third and along the lower lash line.",
@@ -464,7 +527,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "body-type": {
     title: "How the body type calculator estimates your build",
     alt: "Body type calculator illustration comparing ectomorph, mesomorph and endomorph builds",
-    caption: "Frame size, BMI and body ratios each nudge the three somatotype scores.",
+    caption:
+      "Frame size, BMI and body ratios each nudge the three somatotype scores.",
     paragraphs: [
       "Frame size comes from your height divided by your wrist circumference, a standard method used in nutrition guides. A small frame pushes toward ectomorph, a large frame toward endomorph or mesomorph. BMI and waist-to-height then show how much mass that frame carries.",
       "Shoulder-to-waist ratio separates a muscular build from a heavier one with similar weight. A high ratio adds to the mesomorph score; a high waist-to-height adds to endomorph. The three scores become percentages, so you see your mix rather than a single label.",
@@ -506,7 +570,8 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "kibbe-types": {
     title: "Choosing between neighboring Kibbe body types",
     alt: "Kibbe body types illustration with silhouettes for the five Kibbe families",
-    caption: "Five families, each with a yin or yang variation, make up the 13 types.",
+    caption:
+      "Five families, each with a yin or yang variation, make up the 13 types.",
     paragraphs: [
       "Neighboring types share a family but differ in their yin or yang lean. A Soft Dramatic and a Dramatic are both long and bold, but the Soft Dramatic adds curves and softer features, so they look best in draping rather than stiff geometry.",
       "When you're unsure, try clothing lines rather than labels. Put on a sharply tailored jacket and then a soft wrap top. Notice which one makes your outline look intentional. Repeat with a long column dress and a cropped, broken-line outfit.",

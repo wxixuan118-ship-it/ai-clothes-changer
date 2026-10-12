@@ -33,7 +33,11 @@ import {
 
 import { ResultCard } from "./result-card";
 
-type Geometry = (l: NormalizedLandmark[], w: number, h: number) => AnalysisResult;
+type Geometry = (
+  l: NormalizedLandmark[],
+  w: number,
+  h: number,
+) => AnalysisResult;
 type Color = (
   l: NormalizedLandmark[],
   img: ImageData,
@@ -66,9 +70,7 @@ const color = {
 } satisfies Record<string, Color>;
 
 export type LandmarkToolId =
-  | keyof typeof geometry
-  | keyof typeof color
-  | "face-analyzer";
+  keyof typeof geometry | keyof typeof color | "face-analyzer";
 
 /** Photo → MediaPipe landmarks → one (or, for the face analyzer, many) results. */
 export function LandmarkTool({ tool }: { tool: LandmarkToolId }) {

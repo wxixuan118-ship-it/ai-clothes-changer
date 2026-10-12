@@ -22,6 +22,8 @@ export type Widget =
   | { kind: "face-calc" }
   | { kind: "body-type" }
   | { kind: "blur" }
+  | { kind: "age" }
+  | { kind: "age-group" }
   | { kind: "none" };
 
 export type FreeToolPage = {
@@ -83,8 +85,9 @@ const hairCta = {
   label: "Try a hairstyle",
 };
 
-const infoItems = (map: Record<string, { label: string; description: string }>) =>
-  Object.values(map).map((v) => ({ title: v.label, body: v.description }));
+const infoItems = (
+  map: Record<string, { label: string; description: string }>,
+) => Object.values(map).map((v) => ({ title: v.label, body: v.description }));
 
 export const freeToolPages: FreeToolPage[] = [
   // ------------------------------------------------------------ face shape
@@ -138,9 +141,18 @@ export const freeToolPages: FreeToolPage[] = [
       href: "https://en.wikipedia.org/wiki/Anthropometry",
     },
     steps: [
-      { title: "Grab a soft tape", body: "Stand in front of a mirror with your hair pulled back." },
-      { title: "Take 4 measurements", body: "Forehead, cheekbones and jaw straight across, then hairline to chin." },
-      { title: "Calculate your face shape", body: "The calculator compares the ratios to seven face shapes." },
+      {
+        title: "Grab a soft tape",
+        body: "Stand in front of a mirror with your hair pulled back.",
+      },
+      {
+        title: "Take 4 measurements",
+        body: "Forehead, cheekbones and jaw straight across, then hairline to chin.",
+      },
+      {
+        title: "Calculate your face shape",
+        body: "The calculator compares the ratios to seven face shapes.",
+      },
     ],
     types: {
       title: "Face shapes the calculator can find",
@@ -181,9 +193,18 @@ export const freeToolPages: FreeToolPage[] = [
       href: "https://en.wikipedia.org/wiki/Anthropometry",
     },
     steps: [
-      { title: "Find a mirror", body: "Pull your hair back so you can see your hairline and jaw." },
-      { title: "Answer 7 questions", body: "About length, forehead, cheekbones, jawline and chin." },
-      { title: "Get your face shape", body: "With the closest runner-up and the haircuts that suit you." },
+      {
+        title: "Find a mirror",
+        body: "Pull your hair back so you can see your hairline and jaw.",
+      },
+      {
+        title: "Answer 7 questions",
+        body: "About length, forehead, cheekbones, jawline and chin.",
+      },
+      {
+        title: "Get your face shape",
+        body: "With the closest runner-up and the haircuts that suit you.",
+      },
     ],
     types: {
       title: "Face shapes in the quiz",
@@ -612,6 +633,71 @@ export const freeToolPages: FreeToolPage[] = [
     ],
     cta: hairCta,
   },
+  {
+    id: "how-old",
+    metaTitle: "How Old Do I Look? Free AI Age Guesser | StyleMirror",
+    metaDescription:
+      "How old do I look? Upload a selfie and a free AI age guesser estimates your age in seconds. It runs in your browser, so your photo is never uploaded.",
+    eyebrow: photoEyebrow,
+    h1: ["How old do I look?", "AI age guesser"],
+    intro:
+      "How old do I look? Upload a selfie and this free AI age guesser estimates your age in seconds, with the age range it is most confident about. It runs entirely in your browser.",
+    widget: { kind: "age" },
+    stepsTitle: "How the age guesser works",
+    steps: photoSteps(
+      "Your face is found and aligned, then an age model scores nine age ranges from 0–2 to 70+.",
+      "See your estimated age in years and how confident the model is in each range.",
+    ),
+    faqTitle: "How old do I look FAQ",
+    faqs: [
+      ...privacyFaqs,
+      photoTip,
+      {
+        q: "How accurate is the age guess?",
+        a: "Expect a typical error of about 5 to 8 years. The model predicts age ranges, and the years figure is a weighted average across them.",
+      },
+    ],
+    cta: hairCta,
+  },
+  {
+    id: "age-calculator",
+    metaTitle: "Age Calculator by Photo: Estimate Age From a Picture",
+    metaDescription:
+      "Free age calculator by photo: upload a picture and AI estimates the age of every face, group photos included. Runs in your browser, nothing is uploaded.",
+    eyebrow: photoEyebrow,
+    h1: ["Age calculator by photo:", "estimate every face"],
+    intro:
+      "This free age calculator by photo estimates the age of every face in a picture — selfies or group photos — and labels each one. Detection and age estimation run in your browser.",
+    widget: { kind: "age-group" },
+    stepsTitle: "How the age calculator by photo works",
+    steps: [
+      {
+        title: "Upload a photo",
+        body: "A selfie or a group photo with up to 20 faces.",
+      },
+      {
+        title: "Faces are found",
+        body: "Each face is detected, aligned and passed to the age model.",
+      },
+      {
+        title: "Ages are labeled",
+        body: "Every face gets a number and an estimated age on the photo.",
+      },
+    ],
+    faqTitle: "Age calculator by photo FAQ",
+    faqs: [
+      ...privacyFaqs,
+      {
+        q: "How many faces can it handle?",
+        a: "Up to 20 faces per photo. Very small, blurred or side-on faces may be skipped.",
+      },
+      {
+        q: "Can it tell someone's exact age?",
+        a: "No. It estimates how old a face looks, with a typical error of 5 to 8 years. Don't use it to verify identity or age.",
+      },
+    ],
+    cta: hairCta,
+  },
   // ------------------------------------------------------------ color
   {
     id: "skin-tone",
@@ -625,9 +711,18 @@ export const freeToolPages: FreeToolPage[] = [
     widget: { kind: "landmark", tool: "skin-tone" },
     stepsTitle: "How the skin tone analyzer works",
     steps: [
-      { title: "Upload a daylight selfie", body: "Face a window, no makeup or filters if possible." },
-      { title: "Skin is sampled", body: "Forehead, cheek and chin pixels are converted to CIELAB color." },
-      { title: "Get your skin tone", body: "Tone, undertone, Monk scale shade and your best colors." },
+      {
+        title: "Upload a daylight selfie",
+        body: "Face a window, no makeup or filters if possible.",
+      },
+      {
+        title: "Skin is sampled",
+        body: "Forehead, cheek and chin pixels are converted to CIELAB color.",
+      },
+      {
+        title: "Get your skin tone",
+        body: "Tone, undertone, Monk scale shade and your best colors.",
+      },
     ],
     extra: {
       title: "Skin tone vs undertone",
@@ -668,9 +763,18 @@ export const freeToolPages: FreeToolPage[] = [
       href: "https://en.wikipedia.org/wiki/Color_analysis_(art)",
     },
     steps: [
-      { title: "Stand in daylight", body: "With a mirror and, ideally, something white and gold nearby." },
-      { title: "Answer 10 questions", body: "Each one scores warmth, lightness and brightness." },
-      { title: "Get your color season", body: "Your season, palette, best neutrals and metals." },
+      {
+        title: "Stand in daylight",
+        body: "With a mirror and, ideally, something white and gold nearby.",
+      },
+      {
+        title: "Answer 10 questions",
+        body: "Each one scores warmth, lightness and brightness.",
+      },
+      {
+        title: "Get your color season",
+        body: "Your season, palette, best neutrals and metals.",
+      },
     ],
     types: {
       title: "The 12 color seasons",
@@ -848,9 +952,18 @@ export const freeToolPages: FreeToolPage[] = [
       href: "https://en.wikipedia.org/wiki/Somatotype_and_constitutional_psychology",
     },
     steps: [
-      { title: "Measure yourself", body: "Height, weight, wrist, shoulders, waist and hips." },
-      { title: "Frame and ratios", body: "Frame size, BMI, waist-to-height and shoulder-to-waist are calculated." },
-      { title: "Get your body type", body: "Your somatotype mix with training and style tips." },
+      {
+        title: "Measure yourself",
+        body: "Height, weight, wrist, shoulders, waist and hips.",
+      },
+      {
+        title: "Frame and ratios",
+        body: "Frame size, BMI, waist-to-height and shoulder-to-waist are calculated.",
+      },
+      {
+        title: "Get your body type",
+        body: "Your somatotype mix with training and style tips.",
+      },
     ],
     types: {
       title: "The three body types",
@@ -899,14 +1012,26 @@ export const freeToolPages: FreeToolPage[] = [
       href: "https://en.wikipedia.org/wiki/Female_body_shape",
     },
     steps: [
-      { title: "Be honest", body: "Answer for your natural frame, not your weight or the clothes you like." },
-      { title: "10 questions", body: "Each answer leans Dramatic, Natural, Classic, Gamine or Romantic." },
-      { title: "Get your Kibbe type", body: "Your top family plus its yin or yang lean decide your type." },
+      {
+        title: "Be honest",
+        body: "Answer for your natural frame, not your weight or the clothes you like.",
+      },
+      {
+        title: "10 questions",
+        body: "Each answer leans Dramatic, Natural, Classic, Gamine or Romantic.",
+      },
+      {
+        title: "Get your Kibbe type",
+        body: "Your top family plus its yin or yang lean decide your type.",
+      },
     ],
     types: {
       title: "The 13 Kibbe body types",
       sub: "Five families, from sharp yang (Dramatic) to soft yin (Romantic).",
-      items: Object.values(kibbeInfo).map((k) => ({ title: k.label, body: k.essence })),
+      items: Object.values(kibbeInfo).map((k) => ({
+        title: k.label,
+        body: k.essence,
+      })),
     },
     faqTitle: "Kibbe body type test FAQ",
     faqs: [
@@ -943,9 +1068,18 @@ export const freeToolPages: FreeToolPage[] = [
       href: "https://en.wikipedia.org/wiki/Female_body_shape",
     },
     steps: [
-      { title: "Yin and yang", body: "Yang is sharp, long or broad; yin is soft, rounded and small." },
-      { title: "Five families", body: "Dramatic, Natural, Classic, Gamine and Romantic." },
-      { title: "13 types", body: "Each family splits by a yin or yang lean, like Soft Dramatic." },
+      {
+        title: "Yin and yang",
+        body: "Yang is sharp, long or broad; yin is soft, rounded and small.",
+      },
+      {
+        title: "Five families",
+        body: "Dramatic, Natural, Classic, Gamine and Romantic.",
+      },
+      {
+        title: "13 types",
+        body: "Each family splits by a yin or yang lean, like Soft Dramatic.",
+      },
     ],
     types: {
       title: "All 13 Kibbe body types",
@@ -986,8 +1120,14 @@ export const freeToolPages: FreeToolPage[] = [
     widget: { kind: "blur" },
     stepsTitle: "How to blur a face in a photo",
     steps: [
-      { title: "Upload a photo", body: "JPG, PNG or WebP. Up to 20 faces are detected." },
-      { title: "Pick blur or pixelate", body: "Set the strength. Click any face to toggle it." },
+      {
+        title: "Upload a photo",
+        body: "JPG, PNG or WebP. Up to 20 faces are detected.",
+      },
+      {
+        title: "Pick blur or pixelate",
+        body: "Set the strength. Click any face to toggle it.",
+      },
       { title: "Download", body: "Save the blurred photo as a PNG." },
     ],
     extra: {

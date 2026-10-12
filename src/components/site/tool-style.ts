@@ -10,6 +10,8 @@ import {
   EyeOffIcon,
   FingerprintIcon,
   FlipHorizontal2Icon,
+  GlassesIcon,
+  HourglassIcon,
   GaugeIcon,
   PaletteIcon,
   PanelTopIcon,
@@ -25,6 +27,7 @@ import {
   SwatchBookIcon,
   TrendingUpIcon,
   TriangleIcon,
+  UsersIcon,
   WandSparklesIcon,
 } from "lucide-react";
 
@@ -47,6 +50,7 @@ const categoryTint: Record<ToolCategory, [string, string]> = {
 // Existing tools keep their original colors.
 const tintOverride: Partial<Record<ToolId, [string, string]>> = {
   clothes: ["var(--pop-pink)", "var(--pop-pink-bold)"],
+  glasses: ["var(--pop-sky)", "var(--pop-sky-bold)"],
   "hairstyle-face-shape": ["var(--pop-orange)", "var(--pop-orange-bold)"],
   foundation: ["var(--pop-yellow)", "var(--pop-yellow-bold)"],
   "body-shape": ["var(--pop-sky)", "var(--pop-sky-bold)"],
@@ -62,6 +66,7 @@ export const toolTint = Object.fromEntries(
 export const toolIcon: Record<ToolId, typeof ScissorsIcon> = {
   hair: ScissorsIcon,
   clothes: ShirtIcon,
+  glasses: GlassesIcon,
   "face-shape": ScanFaceIcon,
   "hairstyle-face-shape": WandSparklesIcon,
   foundation: DropletIcon,
@@ -83,6 +88,8 @@ export const toolIcon: Record<ToolId, typeof ScissorsIcon> = {
   "facial-proportions": Rows3Icon,
   attractiveness: GaugeIcon,
   "face-rating": StarIcon,
+  "how-old": HourglassIcon,
+  "age-calculator": UsersIcon,
   "skin-tone": PaletteIcon,
   "color-analysis": SwatchBookIcon,
   concealer: PipetteIcon,
