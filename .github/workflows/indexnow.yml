@@ -1,0 +1,25 @@
+name: IndexNow
+
+# Pings IndexNow with the live sitemap after a push to main. AnySites deploys
+# from the same push, so wait for the new build to go live first. Can also be
+# run by hand from the Actions tab.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Wait for AnySites deploy
+        if: github.event_name == 'push'
+        run: sleep 300
+
+      - run: node scripts/indexnow.mjs
