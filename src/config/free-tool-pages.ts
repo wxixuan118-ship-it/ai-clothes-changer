@@ -96,7 +96,7 @@ export const freeToolPages: FreeToolPage[] = [
     eyebrow: photoEyebrow,
     h1: ["Face analyzer:", "your full facial analysis"],
     intro:
-      "Upload one selfie and the free face analyzer runs every reading at once — face shape, eye, brow, nose and lip shapes, jawline, symmetry, golden ratio, facial thirds and skin tone — in your browser.",
+      "Upload one selfie and the free face analyzer runs a full facial analysis in your browser: face shape, facial features, symmetry, proportions and skin tone, each with styling tips.",
     widget: { kind: "landmark", tool: "face-analyzer" },
     stepsTitle: "How the face analyzer works",
     steps: photoSteps(
@@ -561,7 +561,7 @@ export const freeToolPages: FreeToolPage[] = [
     eyebrow: photoEyebrow,
     h1: ["Attractiveness test:", "how attractive am I?"],
     intro:
-      "Upload a selfie and the free AI attractiveness test scores your facial harmony out of 10 from symmetry, golden ratio, eye tilt, facial thirds, midface and eye spacing — and shows your strongest features.",
+      "Upload a selfie and the free AI attractiveness test scores your facial harmony out of 10 from six geometric measures, then shows your strongest features.",
     widget: { kind: "landmark", tool: "attractiveness" },
     stepsTitle: "How the attractiveness test works",
     steps: photoSteps(
@@ -982,7 +982,7 @@ export const freeToolPages: FreeToolPage[] = [
     eyebrow: "Free · No sign-up · Nothing is uploaded",
     h1: ["Blur face online:", "automatic face blur"],
     intro:
-      "Upload a photo and this free tool finds every face and blurs or pixelates it automatically — group photos included. Click a face to keep it sharp, then download your blurred photo.",
+      "Blur face online in seconds: upload a photo and this free tool finds every face and blurs or pixelates it automatically, group photos included. Click a face to keep it sharp, then download.",
     widget: { kind: "blur" },
     stepsTitle: "How to blur a face in a photo",
     steps: [

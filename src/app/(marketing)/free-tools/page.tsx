@@ -22,7 +22,7 @@ import {
 } from "@/config/tools";
 import { absoluteUrl } from "@/lib/site-url";
 
-const title = "Free Face Tools: Face Shape, Skin Tone & Makeup | StyleMirror";
+const title = "Free Face Tools: Shape, Skin Tone & Makeup | StyleMirror";
 const description =
   "31 free face tools that run in your browser: face shape detector, face analyzer, skin tone analyzer, makeup shade finders and body type calculators.";
 
@@ -98,7 +98,7 @@ export default function FreeToolsPage() {
       {freeCategories.map((category) => (
         <Container key={category} id={category} className="pt-16">
           <SectionHeader
-            title={`Free face tools: ${categoryLabels[category].toLowerCase()}`}
+            title={`${categoryLabels[category]} tools`}
             sub={categoryIntro[category]}
           />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

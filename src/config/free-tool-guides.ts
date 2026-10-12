@@ -15,13 +15,14 @@ export type FreeToolGuide = {
 
 export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
   "face-analyzer": {
-    title: "Getting the most from the face analyzer",
+    title: "Face analyzer tips",
     alt: "Face analyzer diagram showing measured landmarks on the eyes, nose, lips and jaw",
     caption: "Every reading starts from the same 478 points, so results stay consistent across features.",
     paragraphs: [
       "Start with the overall rating, then read the cards in order. Shape comes first because it frames everything else: a heart-shaped face with almond eyes needs different haircuts and frames than a square face with round eyes, even though both have balanced proportions.",
       "Proportion cards compare your measurements with classic ideals such as equal facial thirds or eyes spaced one eye-width apart. These ideals come from art history, not biology, so treat a lower number as a description of your features rather than a flaw. Plenty of famous faces break every rule.",
       "Color cards depend on light. Take one photo facing a window in daylight and another indoors, then compare. If the undertone changes, trust the daylight version. When a card interests you, open its dedicated tool for a deeper breakdown and more tips.",
+      "Lighting and camera position affect every card at once. Sit facing a window, hold the phone at eye level and keep your chin level. Remove glasses, push hair off your forehead and relax your mouth. If a warning appears about head turn, retake the photo before reading the details.",
     ],
     faqs: [
       {
@@ -215,13 +216,14 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
     ],
   },
   "eye-distance": {
-    title: "What eye spacing means for makeup and frames",
+    title: "Eye distance calculator results for makeup and frames",
     alt: "Eye distance calculator diagram showing eye width and the gap between the eyes",
     caption: "The rule of fifths compares the inner-corner gap with one eye width.",
     paragraphs: [
       "The rule of fifths divides a face into five equal vertical sections, each the width of one eye. When the gap between the inner corners equals one eye width, eyes read as balanced. The calculator reports that ratio directly, so you don't need a ruler or millimeters.",
       "Makeup can nudge the look either way. To bring wide-set eyes closer, darken the inner third of the lid and fill brows slightly toward the nose. To open up close-set eyes, keep the inner corners bright and focus color on the outer half.",
       "Glasses do the same job. A dark, heavy bridge visually pulls eyes together; a clear or thin bridge adds space. Lens width also matters — your pupils should sit near the horizontal center of each lens.",
+      "Spacing also changes how brows should sit. Brows that start directly above the inner corners keep wide-set eyes connected, while starting them a touch further out gives close-set eyes more breathing room. Small changes of a millimeter or two make a visible difference.",
     ],
     faqs: [
       {
@@ -242,6 +244,7 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       "The golden ratio, often written φ, is about 1.618. Renaissance artists used it in composition, and in the twentieth century some cosmetic surgeons proposed facial masks built from it. The idea became popular online as a way to score beauty.",
       "Modern research is more cautious. Faces rated attractive in studies tend to be average, symmetrical and healthy-looking, and their ratios cluster near but not exactly on 1.618. So a high score means some of your proportions happen to land near φ, not that you're objectively more attractive.",
       "For a fair result, use a photo taken from at least arm's length, straight on, with a neutral expression. Close-up selfies widen the nose and shorten the face, which shifts several ratios at once.",
+      "If you want to compare your result over time, keep the setup identical: same distance, same height, same light and a neutral face. Small changes in posture move the lower-face ratios most, while mouth and nose widths stay steadier from photo to photo. Averaging three photos gives a more stable figure than relying on one.",
     ],
     faqs: [
       {
@@ -295,13 +298,14 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
     ],
   },
   attractiveness: {
-    title: "What the attractiveness score is based on",
+    title: "How the attractiveness test scores you",
     alt: "Attractiveness test diagram combining symmetry, proportion and eye tilt measurements",
     caption: "Six geometric measures are weighted into one facial harmony score.",
     paragraphs: [
       "The score combines six measures that research and beauty tradition link to facial harmony: symmetry, golden ratio proportions, eye tilt, balance between facial thirds, midface compactness and eye spacing. Symmetry carries the most weight, since it has the strongest support in studies.",
       "What it can't measure matters just as much. Skin quality, hair, grooming, expression and confidence all change how people see you, and none of them appear in landmark geometry. A warm smile in real life outweighs a decimal point here.",
       "To see your best result, use soft front light and a camera at eye level from arm's length. Try a few photos and keep the highest — that's closest to how you look in person, not the worst angle.",
+      "People judge faces in motion, not in still frames. Expression, eye contact and how you move all shape first impressions, and familiarity makes faces look more appealing over time. Use the breakdown to learn which angles and styles flatter you, then focus on grooming, sleep and confidence, which change how you come across far more than any ratio.",
     ],
     faqs: [
       {
@@ -395,13 +399,14 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
     ],
   },
   lipstick: {
-    title: "Picking lipstick by skin tone and undertone",
+    title: "Lipstick shade finder tips by undertone",
     alt: "Lipstick shade finder swatches matched to skin tone and undertone",
     caption: "Your skin depth and undertone narrow down the shades that flatter you.",
     paragraphs: [
       "Undertone decides the direction of a shade. Cool undertones suit blue-based reds, berries and pinks; warm undertones suit orange-based reds, corals and terracottas; neutral undertones suit true reds and rosy nudes. Depth decides how intense the shade can be before it looks too heavy or too faint.",
       "Nude lipstick is the hardest to choose. It should be slightly deeper than your natural lip and never lighter than your skin, or it can look washed out. The 'my lips but better' shade the tool suggests starts from your own lip color for that reason.",
       "Finish changes the effect. Matte formulas look bold and last longer, satin is easy to wear, and gloss makes lips look fuller. Try the same shade in two finishes before deciding a color doesn't work.",
+      "Your natural lip color matters as much as your skin. Pigmented lips can make sheer shades look darker than in the tube, while pale lips show colors truer. A thin layer of concealer or lip primer neutralizes your base when you want a shade to look exactly as swatched. Reapply after eating and blot once to set the color.",
     ],
     faqs: [
       {
@@ -462,6 +467,7 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       "Frame size comes from your height divided by your wrist circumference, a standard method used in nutrition guides. A small frame pushes toward ectomorph, a large frame toward endomorph or mesomorph. BMI and waist-to-height then show how much mass that frame carries.",
       "Shoulder-to-waist ratio separates a muscular build from a heavier one with similar weight. A high ratio adds to the mesomorph score; a high waist-to-height adds to endomorph. The three scores become percentages, so you see your mix rather than a single label.",
       "Somatotypes were proposed in the 1940s and are now used loosely in fitness. They describe tendencies, not destiny. Training and nutrition move your scores over time, so recalculate every few months if you're working toward a goal.",
+      "Measure in the morning, before eating, in light clothing. Keep the tape snug but not tight and parallel to the floor. For shoulders, wrap the tape around the widest point over your arms with them relaxed at your sides. Small errors matter less than consistency, so use the same method each time you recalculate and compare trends rather than single results.",
     ],
     faqs: [
       {
@@ -482,6 +488,7 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       "Each answer adds points to one family. Dramatic answers describe length and sharpness, Natural answers describe breadth and bluntness, Classic answers describe balance, Gamine answers describe a compact mix of sharp and soft, and Romantic answers describe softness and curves.",
       "Your strongest family sets your main type. Your second family decides the variation: Dramatic with Romantic becomes Soft Dramatic, Natural with Dramatic becomes Flamboyant Natural, and so on. A clear lead with no strong second keeps you in the pure type.",
       "Answer for your bone structure and natural shape rather than your style preferences or current weight. Asking a friend to answer about you, or comparing full-length photos, often gives a more accurate result.",
+      "Full-length photos help a lot. Take one straight on and one from the side in fitted clothing, standing naturally. Look at your vertical line first — whether you read long, moderate or compact — then at bone width and softness. Those three impressions decide most results. Style preferences and favorite outfits can come later, once you know which lines your body naturally carries.",
     ],
     faqs: [
       {
@@ -522,6 +529,7 @@ export const freeToolGuides: Partial<Record<ToolId, FreeToolGuide>> = {
       "Blurring is good practice whenever someone in a photo hasn't agreed to be shared — bystanders at events, children at school activities, or people in the background of a street photo. Many platforms and workplaces also expect faces to be hidden in screenshots of chats or video calls.",
       "Choose pixelate for a clearly censored look and blur for a softer result that keeps the photo pleasant. Set the strength high when anonymity matters: light blur can sometimes be partly recognized, especially for people you know.",
       "Faces that are very small, turned sideways or covered by sunglasses and masks can be missed by detection. Check the preview before downloading, and use a higher-resolution photo if a face wasn't found.",
+      "Because the tool works offline after the first load, you can blur face online even on a slow connection: once the model is cached, nothing else needs to download. Large photos are resized to 2000 pixels on the longest side before blurring, which keeps the browser fast while staying sharp enough for social media and documents.",
     ],
     faqs: [
       {
