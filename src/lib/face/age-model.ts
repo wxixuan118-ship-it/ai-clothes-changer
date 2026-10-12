@@ -1,7 +1,5 @@
 "use client";
 
-import type { InferenceSession } from "onnxruntime-web";
-
 import {
   alignPoints,
   ALIGN_TEMPLATE,
@@ -16,9 +14,53 @@ import {
 // uses it. Stored gzipped: smaller to download, and raw weight bytes trip
 // GitHub's secret scanner.
 const MODEL_URL = "/models/fairface-age-int8.onnx.gz";
-// The wasm runtime is loaded from the CDN at the installed version, like the
-// MediaPipe runtime, so the bundler never has to handle .wasm files.
+// ONNX Runtime Web is loaded from the CDN at runtime, like the MediaPipe
+// runtime, instead of being bundled: bundling it pushed `next build` past
+// the 1.5 GB Docker build cap on AnySites.
 const ORT_VERSION = "1.30.0";
+const ORT_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
+const ORT_SCRIPT_SRI =
+  "sha384-Bw6URI+Gvoadw0do7/QrSHUC9D1vCYYK5OSqChFyhyV5mzPL4oe2rOAFljAnS8Sq";
+
+// The slice of the onnxruntime-web API this file uses.
+type OrtTensor = { data: Float32Array };
+type InferenceSession = {
+  run(feeds: Record<string, unknown>): Promise<Record<string, OrtTensor>>;
+};
+type Ort = {
+  env: { wasm: { wasmPaths: string; numThreads: number } };
+  InferenceSession: {
+    create(
+      model: Uint8Array,
+      options: { executionProviders: string[] },
+    ): Promise<InferenceSession>;
+  };
+  Tensor: new (type: "float32", data: Float32Array, dims: number[]) => unknown;
+};
+
+let ortPromise: Promise<Ort> | null = null;
+
+/** Injects the UMD build once; it defines `window.ort`. */
+function loadOrt(): Promise<Ort> {
+  ortPromise ??= new Promise<Ort>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `${ORT_BASE}ort.wasm.min.js`;
+    script.integrity = ORT_SCRIPT_SRI;
+    script.crossOrigin = "anonymous";
+    script.async = true;
+    script.onload = () => {
+      const ort = (window as unknown as { ort?: Ort }).ort;
+      if (ort) resolve(ort);
+      else reject(new Error("onnxruntime-web did not load"));
+    };
+    script.onerror = () => reject(new Error("onnxruntime-web failed to load"));
+    document.head.appendChild(script);
+  });
+  ortPromise.catch(() => {
+    ortPromise = null;
+  });
+  return ortPromise;
+}
 
 const MEAN = [0.485, 0.456, 0.406];
 const STD = [0.229, 0.224, 0.225];
@@ -30,8 +72,8 @@ export function getAgeModel(
   onProgress?: (fraction: number) => void,
 ): Promise<InferenceSession> {
   sessionPromise ??= (async () => {
-    const ort = await import("onnxruntime-web/wasm");
-    ort.env.wasm.wasmPaths = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
+    const ort = await loadOrt();
+    ort.env.wasm.wasmPaths = ORT_BASE;
     // Threads need cross-origin isolation, which the site doesn't enable.
     ort.env.wasm.numThreads = 1;
     const response = await fetch(MODEL_URL);
@@ -113,7 +155,7 @@ export async function estimateAges(
   onProgress?: (fraction: number) => void,
 ): Promise<AgeEstimate[]> {
   const session = await getAgeModel(onProgress);
-  const { Tensor } = await import("onnxruntime-web/wasm");
+  const { Tensor } = await loadOrt();
   const results: AgeEstimate[] = [];
   for (const face of faces) {
     const input = new Tensor(
@@ -122,7 +164,7 @@ export async function estimateAges(
       [1, 3, INPUT_SIZE, INPUT_SIZE],
     );
     const output = await session.run({ input });
-    results.push(estimateAge(output.age_output.data as Float32Array));
+    results.push(estimateAge(output.age_output.data));
   }
   return results;
 }
