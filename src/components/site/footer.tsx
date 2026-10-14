@@ -3,6 +3,7 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { toolOrder, tools, type ToolId } from "@/config/tools";
 import { Sparkle } from "@/components/atelier/sparkle";
+import { HomepagePartners } from "@/components/site/homepage-partners";
 
 const footerFree: ToolId[] = [
   "face-shape",
@@ -81,6 +82,7 @@ export function SiteFooter() {
           </div>
         ))}
       </div>
+      <HomepagePartners />
       <p className="mx-auto w-full max-w-[1280px] border-t border-[var(--border)] px-4 py-6 text-xs text-[var(--muted-ink)] sm:px-6">
         © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
       </p>
