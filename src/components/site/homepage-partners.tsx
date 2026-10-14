@@ -65,7 +65,6 @@ export function HomepagePartners() {
         href="https://huzzler.so/products/85YXPRuiMQ/stylemirror?utm_source=huzzler_product_website&amp;utm_medium=badge&amp;utm_campaign=free_listing"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Huzzler featured listing"
       >
         <img
           alt="Huzzler Embed Badge"
