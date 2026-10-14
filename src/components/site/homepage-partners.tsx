@@ -48,6 +48,19 @@ export function HomepagePartners() {
           height={55}
         />
       </a>
+      <a
+        href="https://huntfortools.com/tool/stylemirrorai"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Hunt for Tools"
+      >
+        <img
+          src="https://huntfortools.com/assets/images/badge.png"
+          alt="Hunt for Tools"
+          height={54}
+          loading="lazy"
+        />
+      </a>
     </div>
   );
 }
