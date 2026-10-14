@@ -35,6 +35,19 @@ export function HomepagePartners() {
           height={40}
         />
       </a>
+      <a
+        href="https://findly.tools/stylemirror-ai?utm_source=stylemirror-ai"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Featured on Findly.tools"
+      >
+        <img
+          src="https://findly.tools/badges/findly-tools-badge-light.svg"
+          alt="Featured on Findly.tools"
+          width={175}
+          height={55}
+        />
+      </a>
     </div>
   );
 }
