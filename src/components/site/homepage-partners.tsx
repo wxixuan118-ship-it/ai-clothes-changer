@@ -61,6 +61,19 @@ export function HomepagePartners() {
           loading="lazy"
         />
       </a>
+      <a
+        href="https://huzzler.so/products/85YXPRuiMQ/stylemirror?utm_source=huzzler_product_website&amp;utm_medium=badge&amp;utm_campaign=free_listing"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Huzzler featured listing"
+      >
+        <img
+          alt="Huzzler Embed Badge"
+          src="https://huzzler.so/assets/images/embeddable-badges/featured.png"
+          width={159}
+          height={55}
+        />
+      </a>
     </div>
   );
 }
