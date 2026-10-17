@@ -73,6 +73,26 @@ export function HomepagePartners() {
           height={55}
         />
       </a>
+      <a
+        href="https://devhub.best/projects/stylemirror-ai?utm_source=badge"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Featured on DevHub"
+      >
+        <img
+          src="https://r2.direasy-multi-tenant.focusapps.app/uploads/616d0b1a-3979-4b8c-94d1-b4f1fedd3ead/1783239702078/53yqmim54zv/featured-on-light.svg"
+          alt="Featured on DevHub"
+          style={{ height: 44, width: "auto" }}
+        />
+      </a>
+      <a href="https://www.freeai.run" target="_blank" rel="noopener noreferrer">
+        <img
+          src="https://www.freeai.run/badge/badge_light.svg"
+          alt="Featured on FreeAI"
+          width={200}
+          height={54}
+        />
+      </a>
     </div>
   );
 }
