@@ -93,6 +93,17 @@ export function HomepagePartners() {
           height={54}
         />
       </a>
+      <a
+        href="https://21st.tools?utm_source=badge&ref=stylemirror.com"
+        target="_blank"
+        rel="noopener"
+      >
+        <img
+          src="https://21st.tools/api/badge?theme=light&kind=listing&v=3"
+          alt="Featured on 21st Tools"
+          height={54}
+        />
+      </a>
     </div>
   );
 }
